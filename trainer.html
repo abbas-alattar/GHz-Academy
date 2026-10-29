@@ -1,0 +1,1062 @@
+<!-- aha-build-id: bmvt74pfrdqnpxn42 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trainer — GHz Academy</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./portal.css" />
+  <link rel="stylesheet" href="./PageTransition.css" />
+  <link rel="stylesheet" href="./DeliveryDays.css" />
+  <link rel="stylesheet" href="./HomeworkSubmitV2.css" />
+  <link rel="stylesheet" href="./CourseContentV1.css" />
+  <link rel="stylesheet" href="./TrainerShellV2.css" />
+  <link rel="stylesheet" href="./TrainerCoursesV2.css" />
+  <link rel="stylesheet" href="./TrainerHomeworkV2.css" />
+  <link rel="stylesheet" href="./HomeworkFormV2.css" />
+  <link rel="stylesheet" href="./AdminAnnouncementsV2.css" />
+  <link rel="stylesheet" href="./ConfirmDialog.css" />
+</head>
+<body class="trainer-portal">
+<script>
+window.__trainerBooted = false;
+window.__trainerBootErr = "";
+window.__trainerBootSrc = "";
+window.addEventListener("error", function (ev) {
+  window.__trainerBootErr = String((ev && ev.message) || ev || "error");
+  window.__trainerBootSrc = String((ev && ev.filename) || "");
+}, true);
+window.addEventListener("unhandledrejection", function (ev) {
+  var r = ev && ev.reason;
+  window.__trainerBootErr = String((r && (r.message || r)) || "unhandledrejection");
+});
+setTimeout(function () {
+  if (window.__trainerBooted) return;
+  var host = document.querySelector("[id^=view-]:not(.hidden)") || document.getElementById("tr2CoursesRoot") || document.querySelector(".content");
+  if (!host) return;
+  if (host.querySelector(".ghz-bootwatch")) return;
+  var card = document.createElement("div");
+  card.className = "ghz-bootwatch";
+  card.style.cssText = "background:#fff;border:1px solid #E5EAF1;border-radius:16px;padding:24px;max-width:520px;font-family:system-ui,sans-serif;margin:16px";
+  card.innerHTML = '<h3 style="margin:0 0 8px">This section could not load</h3><p style="color:#64748B">' + String(window.__trainerBootErr || "Try again.") + '</p><p><button type="button" id="ghzTrainerRetry" style="height:36px;padding:0 14px;border-radius:10px;border:0;background:#2563EB;color:#fff;font-weight:600;cursor:pointer">Retry</button></p>';
+  host.prepend(card);
+  document.getElementById("ghzTrainerRetry") && document.getElementById("ghzTrainerRetry").addEventListener("click", function () { try { if (window.__ghzTrainerGo) window.__ghzTrainerGo(location.hash || "#courses"); } catch (e) { console.warn("[ghz-reload]", "trainer retry", e); } });
+}, 5000);
+</script>
+  <div class="portal">
+    <aside class="side">
+      <a class="brand" href="./index.html" aria-label="GHz Academy"><svg viewBox="0 0 40 22" fill="none" aria-hidden="true"><path d="M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0" stroke="#2EC8FF" stroke-width="2.6" stroke-linecap="round"/></svg><span class="ghz">GHz</span> <span class="acad">Academy</span></a>
+      <nav>
+        <a class="on" href="#courses" data-view="courses"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 7H20v13H6.5A2.5 2.5 0 0 1 4 17.5z"/></svg>My courses</a>
+        <a href="#homework" data-view="homework"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Homework</a>
+        <a href="#quizzes" data-view="quizzes"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.7.6-1.7 1.2-1.7 2.2"/><path d="M12 17h.01"/></svg>Quizzes</a>
+        <a href="#grades" data-view="grades"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19h16"/><path d="M8 17V7h8v10"/></svg>Grades</a>
+        <a href="#attendance" data-view="attendance"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Attendance</a>
+        <a href="#announcements" data-view="announcements"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11v2h2l8 5V6L5 11H3z"/><path d="M19 8a5 5 0 0 1 0 8"/></svg>Announcements <span id="annBadge" class="ann-side-badge" hidden></span></a>
+      </nav>
+    </aside>
+    <div class="main">
+      <header class="top">
+        <h1 style="font-size:1.1rem" id="pageTitle">My courses</h1>
+        <div class="top-actions">
+          <div class="nv2-slot" id="notifySlot">
+            <button class="notify-btn nv2-bell" id="notifyBtn" type="button" aria-label="Notifications" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F2747" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+          </div>
+          <div class="who"><strong id="userName">Account</strong><span id="userRole">trainer</span></div>
+          <button class="out" id="logoutBtn" type="button">Log out</button>
+        </div>
+      </header>
+      <div class="content">
+        <p id="bootErr" class="banner" hidden style="background:#fee2e2;color:#991b1b"></p>
+        <p id="toast" class="toast" hidden></p>
+        <section id="view-courses" class="hidden">
+          <div id="tr2CoursesRoot" class="tr2"><div class="tr2-sk"></div></div>
+          <div id="courseGrid" class="hidden"></div>
+        </section>
+        <section id="view-coursecontent" class="hidden"><div id="cc1Root"></div></section>
+        <section id="view-roster" class="hidden"><div id="cr1Root"></div></section>
+        <section id="view-course" class="hidden">
+          <p><a href="#courses" data-view="courses">← My courses</a></p>
+          <div id="courseLockBanner"></div>
+          <h2 id="courseTitle">Course</h2>
+          <div class="tabs" style="max-width:640px;margin:16px 0">
+            <button type="button" class="on" id="tabStudents">Students</button>
+            <button type="button" id="tabHomework">Homework</button>
+            <button type="button" id="tabSessions">Sessions</button>
+            <a class="btn btn-sm btn-ghost" id="tabGradeSheet" href="./trainer-grade-sheet.html">Grade Sheet</a>
+          </div>
+          <div id="studentsPane"></div>
+          <div id="hwPane" class="hidden"></div>
+          <div id="sessPane" class="hidden"></div>
+        </section>
+        <section id="view-hwdetail" class="hidden">
+          <p><a href="#course" id="backToCourse">← Homework list</a></p>
+          <div id="hwLockBanner"></div>
+          <div id="hwDetailHead"></div>
+          <div class="hw-sum" id="hwSum"></div>
+          <div class="toolbar">
+            <input id="hwSearch" type="search" placeholder="Search by name" />
+            <button class="btn btn-sm btn-ghost" type="button" id="exportCsv">Export grades (CSV)</button>
+          </div>
+          <div id="hwStudents"></div>
+        </section>
+        <section id="view-homework" class="hidden"><div id="tr2HwRoot" class="tr2"></div></section>
+        <section id="view-hwavg" class="hidden"><div id="tr2HwAvgRoot" class="tr2"></div></section>
+        <section id="view-quizzes" class="hidden"><div id="tr2QuizRoot" class="tr2"></div></section>
+        <section id="view-qzavg" class="hidden"><div id="tr2QzAvgRoot" class="tr2"></div></section>
+        <section id="view-grades" class="hidden"><div id="tr2GradesRoot" class="tr2"></div></section>
+        <section id="view-announcements" class="hidden"><div id="tr2AnnRoot" class="tr2"></div></section>
+        <section id="view-notifications" class="hidden"><div id="nt2PageRoot"></div></section>
+        <section id="view-takeatt" class="hidden">
+          <p><a href="#course" id="backSess">← Sessions</a></p>
+          <h2 id="attTitle">Take attendance</h2>
+          <p id="attSum"></p>
+          <div id="attRows">Loading…</div>
+          <p><button class="btn btn-sm" id="markAllP">Mark all present</button>
+          <button class="btn btn-sm" id="saveAtt">Save attendance</button>
+          <button class="btn btn-sm btn-ghost" id="markDone">Mark session completed</button></p>
+        </section>
+        <section id="view-attendance" class="hidden">
+          <div id="tr2AttRoot" class="tr2"></div>
+          <div class="hidden" id="attClassic">
+          <h2>Attendance</h2>
+          <div id="attLockBanner"></div>
+          <div class="toolbar">
+            <select id="attCourse"></select>
+            <button class="btn btn-sm" type="button" id="newSessSheet">New session</button>
+          </div>
+          <div id="attTakePanel" class="hidden"></div>
+          <div id="attMatrix">Pick a course.</div>
+          </div>
+        </section>
+      </div>
+      <p style="padding:16px 24px;font-size:.85rem"><a href="./terms/" target="_blank" rel="noopener noreferrer">Terms & Conditions</a> · <a href="./privacy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a></p>
+    </div>
+  </div>
+  <div class="modal hidden" id="modal"></div>
+  <div class="drawer-bg hidden" id="drawerBg"></div>
+  <aside class="drawer hidden" id="gradeDrawer"></aside>
+  <script type="module">
+    import { protect } from "./auth-guard.js?v=auth9";
+    import { bootPending, bootOk, bootFail as traceFail } from "./bootTrace.js";
+    import { bootNotify } from "./portal-notify.js";
+    import { bootPageMotion } from "./PageTransition.js";
+    import { bootPageShell } from "./PageShell.js";
+    import { bootPortalShell } from "./PortalShell.js";
+    import { swapLoadingText } from "./WaveLoader.js";
+    import { auth, db } from "./firebase-config.js?v=auth8";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, setDoc, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { isCourseLocked, CompletedBanner, completedDate, lockBtn, lockWriteMsg } from "./course-lock.js";
+    import { portalStatus, statusBadgeHtml } from "./portal-status.js";
+    import { courseStatusLabel } from "./courseStatusLabel.js";
+    import { deliveryDaysHtml } from "./DeliveryDays.js";
+    const renderCourseContentV1 = async (a) => (await import("./CourseContentV1.js?v=docx2")).renderCourseContentV1(a);
+    const renderCourseRosterV1 = async (a) => (await import("./CourseRosterV1.js?v=2")).renderCourseRosterV1(a);
+    import { bootTrainerShellV2 } from "./TrainerShellV2.js?v=kpi2";
+    window.__trainerBooted = true;
+    const bootFail = (step, e) => {
+      console.error(step, e);
+      const b = document.getElementById("bootErr");
+      if (b) { b.hidden = false; b.textContent = step + ": " + (e.code||"") + " " + (e.message||e); }
+      const n1=document.getElementById("userName"); if (n1 && (n1.textContent==="…" || n1.textContent==="...")) n1.textContent = "—";
+      const g=document.getElementById("courseGrid"); if (g && (g.textContent==="Loading…" || g.textContent==="Loading...")) g.innerHTML = `<p class="banner">${step}: ${e.code||""} ${e.message||e}</p>`;
+    };
+    try { if (!bootPageShell(document.body)) bootPageMotion(document.body); swapLoadingText(document.body); bootPortalShell(); } catch (_) { try { bootPageMotion(document.body); } catch (e) {} }
+    let shellOn = false;
+    const startShell = (u, profile) => {
+      if (shellOn) return;
+      shellOn = true;
+      try { bootTrainerShellV2({ uid: u?.uid, name: profile?.name || u?.displayName || u?.email || "Account" }); } catch (e) { console.error("TrainerShellV2", e); traceFail("store ready", e); }
+    };
+    protect("trainer").then(({user:u, profile})=>{
+      import("./lastActive.js").then((m) => { try { m.startLastActiveHeartbeat(u?.uid); } catch (e) { console.error("lastActiveAt", e); } }).catch((e) => console.error(e));
+      bootNotify({ role: "trainer", uid: u?.uid });
+      user = u;
+      const shown = (profile?.name||u.displayName||u.email||"").split("@")[0];
+      const n1=document.getElementById("userName"); if (n1) n1.textContent = profile?.name||shown;
+      const n2=document.getElementById("welcomeName"); if (n2) n2.textContent = profile?.name||shown;
+      startShell(u, profile);
+    }).catch((e)=> { bootFail("profile", e); bootFail("store ready", e); });
+    const toast = (m, k="ok") => { const t=document.getElementById("toast"); t.hidden=false; t.className="toast "+k; t.textContent=m; };
+    const errText = (e) => (e?.code||"") + " " + (e?.message||e);
+    const pageFail = (id, e) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = `<p class="banner">This page could not load<br>${e&& (e.code||e.message||e)}</p>`;
+    };
+    const safePage = async (fn, id) => { try { await fn(); } catch(e){ pageFail(id, e); } };
+    const showView = (name) => {
+      document.querySelectorAll("[id^=view-]").forEach((s)=>s.classList.add("hidden"));
+      const el = document.getElementById("view-"+name); if (el) el.classList.remove("hidden");
+      document.querySelectorAll(".side a").forEach((a)=> a.classList.toggle("on", a.dataset.view===name));
+      const titles = {courses:"My courses",course:"Course",coursecontent:"Course content",roster:"Roster",homework:"Homework",hwdetail:"Homework",quizzes:"Quizzes",grades:"Grades",attendance:"Attendance",takeatt:"Attendance"};
+      document.getElementById("pageTitle").textContent = titles[name]||"Trainer";
+      if (name==="attendance") safePage(loadAttMatrix, "attMatrix");
+      /* homework owned by TrainerHomeworkV2 */
+      if (name === "grades") {
+        const g = document.getElementById("view-grades");
+        try { /* grades stay as homework grading */ } catch(e){ if (g) g.innerHTML = `<p class="banner">This page could not load<br>${e.message||e}</p>`; }
+      }
+    };
+    /* hash nav owned by TrainerShellV2 */
+    const openRoster = (cid) => {
+      history.pushState({ view: "roster" }, "", "#roster/" + cid);
+      showView("roster");
+      const host = document.getElementById("cr1Root");
+      renderCourseRosterV1({ host, loading: true });
+      renderCourseRosterV1({ host, courseId: cid, role: "trainer", uid: user?.uid, backHref: "#courses" });
+    };
+    window.addEventListener("hashchange", () => {
+      const m = (location.hash||"").match(/^#course\/([^/]+)/);
+      if (m) openCourseContent(m[1]);
+      const r = (location.hash||"").match(/^#roster\/([^/]+)/);
+      if (r) openRoster(r[1]);
+    });
+
+    let myCourses = [], enrollments = [], assignments = [], submissions = [], sessions = [], active = null, user = null, activeSess = null, attMarks = {};
+    let courseCounts = {};
+    const HW_COURSE_KEY = "ghz-trainer-hw-course";
+    let activeHw = null, hwFilter = "enrolled", hwQuery = "", gradeIndex = 0;
+    const badge = (s) => {
+      const map = { Open:"badge-open", "Coming soon":"badge-soon", Closed:"badge-closed", Completed:"badge-done", Draft:"badge-draft", Published:"badge-open", submitted:"badge-soon", graded:"badge-open" };
+      const courseMap = { Open:1, "Coming soon":1, Closed:1, Completed:1, Draft:1, Archived:1 };
+      const lab = courseMap[s] ? courseStatusLabel(s) : s;
+      return `<span class="badge ${map[s]||"badge-draft"}">${lab}</span>`;
+    };
+    const fmt = (v) => {
+      if (!v) return "—";
+      if (v.toDate) return v.toDate().toLocaleDateString();
+      return String(v);
+    };
+    const late = (sub, a) => {
+      if (!a?.dueDate || !sub.submittedAt) return false;
+      const due = new Date(a.dueDate);
+      due.setHours(23,59,59,999);
+      const at = sub.submittedAt.toDate ? sub.submittedAt.toDate() : new Date(sub.submittedAt);
+      return at > due;
+    };
+    const subFor = (uid, aid) => submissions.find(s => s.uid===uid && s.assignmentId===aid);
+    const rowKind = (en, a) => {
+      const s = subFor(en.uid, a.id);
+      if (!s || s.status==="not_submitted") return "missing";
+      if (s.status==="graded") return "graded";
+      return "needs";
+    };
+
+    const openCourseContent = (id) => {
+      history.replaceState(null, "", "#course/" + id);
+      showView("coursecontent");
+      const host = document.getElementById("cc1Root");
+      renderCourseContentV1({ host, loading: true });
+      renderCourseContentV1({ host, courseId: id, role: "trainer", uid: user?.uid, name: document.getElementById("userName")?.textContent || "" });
+    };
+    const openCourse = async (id) => {
+      openCourseContent(id);
+      return;
+      active = myCourses.find((c)=>c.id===id);
+      if (!active) return;
+      document.getElementById("courseTitle").innerHTML = `${active.title} ${statusBadgeHtml(active)}${deliveryDaysHtml(active, { emptyMode: "announce" })}`;
+      const gsTab = document.getElementById("tabGradeSheet");
+      if (gsTab) gsTab.href = "./trainer-grade-sheet.html?courseId=" + encodeURIComponent(active.id);
+      const ban = document.getElementById("courseLockBanner"); if (ban) ban.innerHTML = CompletedBanner(active);
+      showView("course");
+      showCourseTab("tabStudents");
+      document.getElementById("studentsPane").textContent = "Loading…";
+      document.getElementById("hwPane").textContent = "Loading…";
+      document.getElementById("sessPane").textContent = "Loading…";
+      await loadCourseLists();
+    };
+    const showCourseTab = (t) => {
+      ["tabStudents","tabHomework","tabSessions"].forEach(id=> document.getElementById(id).classList.toggle("on", id===t));
+      document.getElementById("studentsPane").classList.toggle("hidden", t!=="tabStudents");
+      document.getElementById("hwPane").classList.toggle("hidden", t!=="tabHomework");
+      document.getElementById("sessPane").classList.toggle("hidden", t!=="tabSessions");
+    };
+    document.getElementById("tabStudents").onclick = () => showCourseTab("tabStudents");
+    document.getElementById("tabHomework").onclick = () => showCourseTab("tabHomework");
+    document.getElementById("tabSessions").onclick = () => { showCourseTab("tabSessions"); renderSessions(); };
+
+    const loadCourseLists = async () => {
+      try {
+        const ens = await getDocs(query(collection(db,"enrollments"), where("courseId","==", active.id)));
+        enrollments = ens.docs.map(d=>({id:d.id,...d.data()}));
+        renderStudents();
+      } catch (e) {
+        console.error(e);
+        document.getElementById("studentsPane").innerHTML = `<p class="banner">enrollments: ${e.code||e.message}</p>`;
+      }
+      try {
+        const as = await getDocs(query(collection(db,"assignments"), where("courseId","==", active.id)));
+        assignments = as.docs.map(d=>({id:d.id,...d.data()}));
+        const ss = await getDocs(query(collection(db,"submissions"), where("courseId","==", active.id)));
+        submissions = ss.docs.map(d=>({id:d.id,...d.data()}));
+        renderHw();
+      } catch (e) {
+        console.error(e);
+        document.getElementById("hwPane").innerHTML = `<p class="banner">assignments: ${e.code||e.message}</p>`;
+      }
+      try {
+        const ss = await getDocs(query(collection(db,"sessions"), where("courseId","==", active.id)));
+        sessions = ss.docs.map(d=>({id:d.id,...d.data()}));
+        renderSessions();
+      } catch (e) {
+        document.getElementById("sessPane").innerHTML = `<p class="banner">sessions: ${e.code||e.message}</p>`;
+      }
+    };
+    const renderStudents = () => {
+      const rows = enrollments;
+      document.getElementById("studentsPane").innerHTML = rows.length
+        ? `<div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th></tr></thead><tbody>${rows.map(e=>`<tr><td>${e.studentName||"—"}</td><td>${e.studentEmail||"—"}</td></tr>`).join("")}</tbody></table></div>`
+        : "<p>No enrolled students yet.</p>";
+    };
+
+    const courseById = (id) => myCourses.find(c=>c.id===id);
+    const courseTag = (id) => {
+      const c = courseById(id);
+      return `<span class="badge badge-open">${c?c.title:id||"Course"}</span>`;
+    };
+    const hwForm = (a={}, courseHint) => {
+      const isEdit = !!a.id;
+      let cid = isEdit ? a.courseId : (courseHint || (active && active.id) || "");
+      const writable = myCourses.filter(c=>!isCourseLocked(c));
+      if (!isEdit && cid && isCourseLocked(courseById(cid))) cid = "";
+      if (!isEdit && !cid && writable.length === 1) cid = writable[0].id;
+      const chosen = courseById(cid);
+      if (!isEdit && chosen && isCourseLocked(chosen)) { toast("This course is completed and read-only.","err"); return; }
+      if (isEdit && isCourseLocked(courseById(a.courseId))) { toast("This course is completed and read-only.","err"); return; }
+      const modal = document.getElementById("modal");
+      modal.classList.remove("hidden");
+      const courseField = isEdit
+        ? `<label>Course</label><input value="${(courseById(a.courseId)||{}).title||a.courseId||""}" disabled />`
+        : (cid
+          ? `<label>Course</label><input value="${(chosen||{}).title||""}" disabled /><input type="hidden" id="hwCourseId" value="${cid}" />`
+          : `<label>Course</label><select id="hwCourseId" required><option value="">Choose a course</option>${writable.map(c=>`<option value="${c.id}">${c.title}</option>`).join("")}</select>`);
+      const infoBar = (id) => {
+        const c = courseById(id);
+        if (!c) return "";
+        const n = courseCounts[id] || 0;
+        return `<p class="banner" style="background:#dbeafe;color:#1e3a8a">This homework will be visible to the ${n} students enrolled in ${c.title}.</p>`;
+      };
+      modal.innerHTML = `<div class="sheet"><h2>${a.id?"Edit homework":"New homework"}</h2>
+        ${courseField}
+        <div id="hwCourseInfo">${infoBar(cid)}</div>
+        <label>Title</label><input id="htitle" value="${a.title||""}" />
+        <label>Instructions</label><textarea id="hinstr" style="width:100%;min-height:90px;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit">${a.instructions||""}</textarea>
+        <label>Due date</label><input id="hdue" type="date" value="${a.dueDate||""}" />
+        <label>Maximum points</label><input id="hmax" type="number" value="${a.maxPoints||10}" />
+        <label>Reference link (optional)</label><input id="hlink" value="${a.link||""}" />
+        <label>Status</label><select id="hstat"><option ${a.status==="Draft"?"selected":""}>Draft</option><option ${a.status==="Published"?"selected":""}>Published</option></select>
+        <p id="herr" class="err"></p>
+        <button class="btn" id="hsave">Save</button>
+        <button class="btn btn-ghost" id="hcancel">Cancel</button></div>`;
+      modal.querySelector("#hcancel").onclick=()=> modal.classList.add("hidden");
+      const cidEl = modal.querySelector("#hwCourseId");
+      if (cidEl && cidEl.tagName === "SELECT") cidEl.onchange = () => { document.getElementById("hwCourseInfo").innerHTML = infoBar(cidEl.value); };
+      modal.querySelector("#hsave").onclick=async()=>{
+        const saveCid = isEdit ? a.courseId : (document.getElementById("hwCourseId")?.value || cid);
+        const saveCourse = courseById(saveCid);
+        if (!saveCid || !saveCourse) { document.getElementById("herr").style.display="block"; document.getElementById("herr").textContent = "Choose a course first"; return; }
+        if (isCourseLocked(saveCourse)) { document.getElementById("herr").style.display="block"; document.getElementById("herr").textContent = "This course is completed and read-only."; return; }
+        const payload = {
+          courseId: saveCid, title: document.getElementById("htitle").value.trim(),
+          instructions: document.getElementById("hinstr").value.trim(),
+          dueDate: document.getElementById("hdue").value, maxPoints: Number(document.getElementById("hmax").value||0),
+          link: document.getElementById("hlink").value.trim(), status: document.getElementById("hstat").value,
+          createdBy: user.uid
+        };
+        try {
+          if (isCourseLocked(saveCourse)) { throw { code:"permission-denied", message:"This course is completed and read-only." }; }
+          if (a.id) { const { courseId, ...rest } = payload; await updateDoc(doc(db,"assignments", a.id), rest); }
+          else await addDoc(collection(db,"assignments"), { ...payload, createdAt: serverTimestamp() });
+          modal.classList.add("hidden"); toast("Homework saved."); await reloadHw();
+        } catch(e){ document.getElementById("herr").style.display="block"; document.getElementById("herr").textContent = lockWriteMsg(e); }
+      };
+    };
+
+    const hwCounts = (a) => {
+      const n = enrollments.length;
+      const mine = submissions.filter(s=>s.assignmentId===a.id);
+      const submitted = mine.filter(s=>s.status==="submitted"||s.status==="graded").length;
+      const graded = mine.filter(s=>s.status==="graded").length;
+      return { n, submitted, graded, pct: submitted ? Math.round((graded/submitted)*100) : 0 };
+    };
+    const renderHw = () => {
+      const list = assignments.filter((a)=>a.courseId===active.id).sort((a,b)=> String(a.dueDate||"").localeCompare(String(b.dueDate||"")));
+      document.getElementById("hwPane").innerHTML = `${isCourseLocked(active)?lockBtn("New homework"):`<button class="btn btn-sm" id="newHw">New homework</button>`}
+        ${list.length? list.map(a=>{
+          const c = hwCounts(a);
+          return `<article class="kpi hw-card" style="margin-top:12px" data-aid="${a.id}">
+          ${courseTag(a.courseId)}
+          <strong>${a.title}</strong> ${a.status==="Published"?badge("Published"):badge("Draft")}
+          <p>Due ${a.dueDate||"—"} · ${a.maxPoints||0} pts</p>
+          <p>Submitted ${c.submitted}/${c.n} · Graded ${c.graded}/${c.submitted||0}</p>
+          <div class="bar"><span style="width:${c.pct}%"></span></div>
+        </article>`;
+        }).join("") : "<p>No homework yet.</p>"}`;
+      const nh = document.getElementById("newHw"); if (nh) nh.onclick=()=> hwForm();
+      document.querySelectorAll("[data-aid]").forEach(art=> art.onclick=()=> openHwPage(art.dataset.aid));
+    };
+
+    const studentRows = (a) => {
+      const order = { needs:0, missing:1, graded:2 };
+      return enrollments.map(en => {
+        const s = subFor(en.uid, a.id);
+        const kind = rowKind(en, a);
+        return { en, s, kind, isLate: s ? late(s,a) : false };
+      }).sort((x,y)=> (order[x.kind]-order[y.kind]) || String(x.en.studentName||"").localeCompare(String(y.en.studentName||"")));
+    };
+    const filteredRows = (a) => {
+      let rows = studentRows(a);
+      if (hwFilter==="missing") rows = rows.filter(r=>r.kind==="missing");
+      if (hwFilter==="needs") rows = rows.filter(r=>r.kind==="needs");
+      if (hwFilter==="graded") rows = rows.filter(r=>r.kind==="graded");
+      if (hwFilter==="late") rows = rows.filter(r=>r.isLate);
+      const q = hwQuery.trim().toLowerCase();
+      if (q) rows = rows.filter(r => (r.en.studentName||"").toLowerCase().includes(q) || (r.en.studentEmail||"").toLowerCase().includes(q));
+      return rows;
+    };
+    const openHwPage = (aid) => {
+      activeHw = assignments.find(x=>x.id===aid);
+      if (!activeHw) return;
+      hwFilter = "enrolled"; hwQuery = "";
+      showView("hwdetail");
+      const backC = courseById(activeHw.courseId);
+      const backA = document.getElementById("backToCourse");
+      if (backA) backA.textContent = `← Back to ${backC?backC.title:"course"} homework`;
+      backA.onclick = (e)=>{ e.preventDefault(); showView("homework"); };
+      renderHwDetail();
+    };
+    const renderHwDetail = () => {
+      const a = activeHw; if (!a) return;
+      const all = studentRows(a);
+      const c = { enrolled: all.length, missing: all.filter(r=>r.kind==="missing").length, needs: all.filter(r=>r.kind==="needs").length, graded: all.filter(r=>r.kind==="graded").length, late: all.filter(r=>r.isLate).length };
+      const hb = document.getElementById("hwLockBanner"); if (hb) hb.innerHTML = CompletedBanner(active);
+      document.getElementById("hwDetailHead").innerHTML = `<h2>${a.title} ${courseTag(a.courseId)}</h2>
+        <p>${a.instructions||""}</p>
+        <p>Due ${a.dueDate||"—"} · ${a.maxPoints||0} pts ${a.link?`· <a href="${a.link}" target="_blank" rel="noopener">Reference</a>`:""}</p>
+        <p>${isCourseLocked(active)? lockBtn("Edit")+" "+lockBtn(a.status==="Published"?"Unpublish":"Publish") : `<button class="btn btn-sm btn-ghost" id="editHw">Edit</button>
+        <button class="btn btn-sm" id="pubHw">${a.status==="Published"?"Unpublish":"Publish"}</button>
+        <button class="btn btn-sm btn-warn" id="delHw">Delete</button>`}</p>`;
+      const eh = document.getElementById("editHw"); if (eh) eh.onclick=()=> hwForm(a);
+      const dh = document.getElementById("delHw"); if (dh) dh.onclick=async()=>{
+        if (isCourseLocked(active)) { toast("This course is completed and read-only.","err"); return; }
+        try {
+          const { homeworkHasSubs, blockedMsg, unpublishHomework, deleteHomework, showUnpublishPrompt } = await import("./trainer-delete-guard.js");
+          const has = await homeworkHasSubs(a.courseId, a.id);
+          if (has) {
+            showUnpublishPrompt(document.getElementById("hwDetailHead"), blockedMsg("hw"), async () => {
+              try { await unpublishHomework(a.id); a.status = "Draft"; toast("Unpublished."); renderHwDetail(); renderHw(); }
+              catch(er){ toast(lockWriteMsg(er),"err"); }
+            });
+            return;
+          }
+          if (!confirm("Delete this homework?")) return;
+          await deleteHomework(a.id);
+          toast("Deleted."); showView("homework"); await reloadHw();
+        } catch(er){ toast(lockWriteMsg(er),"err"); }
+      };
+      const ph = document.getElementById("pubHw"); if (ph) ph.onclick=async()=>{
+        if (isCourseLocked(active)) { toast("This course is completed and read-only.","err"); return; }
+        try { await updateDoc(doc(db,"assignments", a.id), { status: a.status==="Published"?"Draft":"Published" }); a.status = a.status==="Published"?"Draft":"Published"; toast("Updated."); renderHwDetail(); renderHw(); }
+        catch(er){ toast(lockWriteMsg(er),"err"); }
+      };
+      document.getElementById("hwSum").innerHTML = [
+        ["enrolled","Enrolled",c.enrolled,"enr"],["missing","Not submitted",c.missing,"ns"],["needs","Needs grading",c.needs,"ng"],["graded","Graded",c.graded,"gr"],["late","Late",c.late,"lt"]
+      ].map(([k,l,n,cl])=>`<button type="button" data-f="${k}" class="${hwFilter===k?"on":""}"><span class="n ${cl}">${n}</span>${l}</button>`).join("");
+      document.querySelectorAll("#hwSum [data-f]").forEach(b=> b.onclick=()=>{ hwFilter=b.dataset.f; renderHwDetail(); });
+      const search = document.getElementById("hwSearch");
+      search.value = hwQuery;
+      search.oninput = () => { hwQuery = search.value; renderHwTable(); };
+      document.getElementById("exportCsv").onclick = exportCsv;
+      renderHwTable();
+    };
+    const statusCell = (r) => {
+      if (r.kind==="missing") return `<span class="badge badge-draft">Not submitted</span>`;
+      if (r.kind==="needs") return `<span class="badge badge-need">Submitted – needs grading</span>${r.isLate?` <span class="badge badge-late">Late</span>`:""}`;
+      return `<span class="badge badge-open">Graded</span>${r.isLate?` <span class="badge badge-late">Late</span>`:""}`;
+    };
+    const actionCell = (r, a) => {
+      const view = `<button class="btn btn-sm btn-ghost" data-view="${r.en.uid}">View</button>`;
+      if (isCourseLocked(active)) {
+        if (r.kind==="missing") return `${view} ${lockBtn("No submission")}`;
+        return view;
+      }
+      if (r.kind==="needs") return `${view} <button class="btn btn-sm" data-grade="${r.en.uid}">Grade</button>`;
+      if (r.kind==="graded") return `${view} <button class="btn btn-sm btn-ghost" data-grade="${r.en.uid}">Edit grade</button> <button class="btn btn-sm btn-danger" data-ungrade="${r.en.uid}">Remove grade</button>`;
+      return `<button class="btn btn-sm" disabled>No submission</button> <button class="btn btn-sm btn-ghost" data-copy="${r.en.uid}">Copy reminder</button>`;
+    };
+    const renderHwTable = () => {
+      const a = activeHw; if (!a) return;
+      const rows = filteredRows(a);
+      const box = document.getElementById("hwStudents");
+      if (!enrollments.length) { box.innerHTML = "<p>No students enrolled yet.</p>"; return; }
+      const gradeTxt = (r) => {
+        if (r.kind!=="graded" || !(r.s.grade===0 || r.s.grade)) return "—";
+        const max = Number(a.maxPoints||0); const g = Number(r.s.grade);
+        if (!max || !Number.isFinite(g)) return "—";
+        return Math.round((g/max)*100) + "/100";
+      };
+      const tr = rows.map(r=>`<tr><td>${r.en.studentName||"—"}<br><span style="color:var(--muted);font-size:.85rem">${r.en.studentEmail||""}</span></td><td>${statusCell(r)}</td><td>${r.s?fmt(r.s.submittedAt):"—"}</td><td>${gradeTxt(r)}</td><td>${actionCell(r,a)}</td></tr>`).join("");
+      const cards = rows.map(r=>`<article class="kpi"><strong>${r.en.studentName||"—"}</strong><p>${r.en.studentEmail||""}</p><p>${statusCell(r)}</p><p>${r.s?fmt(r.s.submittedAt):"—"} · ${gradeTxt(r)}</p>${actionCell(r,a)}</article>`).join("");
+      box.innerHTML = `<div class="table-wrap desk-table"><table class="data"><thead><tr><th>Student</th><th>Status</th><th>Submitted</th><th>Grade</th><th></th></tr></thead><tbody>${tr||"<tr><td colspan=5>No matching students.</td></tr>"}</tbody></table></div><div class="mobile-cards">${cards||"<p>No matching students.</p>"}</div>`;
+      box.querySelectorAll("[data-grade]").forEach(b=> b.onclick=()=> openGrade(b.dataset.grade));
+      box.querySelectorAll("[data-view]").forEach(b=> b.onclick=()=> openView(b.dataset.view));
+      box.querySelectorAll("[data-ungrade]").forEach(b=> b.onclick=()=> removeGrade(b.dataset.ungrade));
+      box.querySelectorAll("[data-copy]").forEach(b=> b.onclick=()=>{
+        if (isCourseLocked(active)) { toast("This course is completed and read-only.","err"); return; }
+        const en = enrollments.find(e=>e.uid===b.dataset.copy);
+        const msg = `Reminder: please submit "${a.title}" by ${a.dueDate||"the due date"}.`;
+        navigator.clipboard.writeText(msg).then(()=>toast("Copied reminder.")).catch(()=>toast(msg,"ok"));
+      });
+    };
+    const exportCsv = () => {
+      const a = activeHw; if (!a) return;
+      const rows = studentRows(a);
+      const lines = ["Name,Email,Status,Submitted,Grade"].concat(rows.map(r=>{
+        const st = r.kind==="missing"?"Not submitted":(r.kind==="needs"?"Needs grading":"Graded");
+        return `"${r.en.studentName||""}","${r.en.studentEmail||""}",${st},${r.s?fmt(r.s.submittedAt):""},${r.kind==="graded"?r.s.grade:""}`;
+      }));
+      const blob = new Blob([lines.join("\n")], {type:"text/csv"});
+      const url = URL.createObjectURL(blob);
+      const el = document.createElement("a"); el.href=url; el.download="grades.csv"; el.click(); URL.revokeObjectURL(url);
+    };
+    const closeDrawer = () => { document.getElementById("gradeDrawer").classList.add("hidden"); document.getElementById("drawerBg").classList.add("hidden"); };
+    const wordCount = (t) => (String(t||"").trim().match(/\S+/g)||[]).length;
+    const wordTarget = (instr) => {
+      const m = String(instr||"").match(/(\d+)\s*(?:-|to)?\s*(\d+)?\s*words/i);
+      if (!m) return "";
+      return m[2] ? ` · target ${m[1]}–${m[2]} words` : ` · target ${m[1]} words`;
+    };
+    const fmtTime = (v) => {
+      if (!v) return "—";
+      const d = v.toDate ? v.toDate() : new Date(v);
+      return isNaN(d) ? String(v) : d.toLocaleString();
+    };
+    const allStudentList = () => studentRows(activeHw);
+    const openView = (uid) => openGrade(uid);
+    const reminder = (en) => {
+      const a = activeHw;
+      const msg = `Reminder: please submit "${a.title}" by ${a.dueDate||"the due date"}.`;
+      navigator.clipboard.writeText(msg).then(()=>toast("Copied reminder.")).catch(()=>toast(msg,"ok"));
+    };
+    const removeGrade = async (uid) => {
+      if (isCourseLocked(active)) { toast("This course is completed and read-only.","err"); return; }
+      const a = activeHw;
+      const r = studentRows(a).find(x=>x.en.uid===uid);
+      if (!r?.s) return;
+      if (!confirm("Remove this grade and feedback? The student will see this homework as submitted again and can edit their answer.")) return;
+      try {
+        await updateDoc(doc(db,"submissions", r.s.id), { status:"submitted", grade: deleteField(), feedback: deleteField(), gradedBy: deleteField(), gradedAt: deleteField() });
+        toast("Grade removed");
+        submissions = submissions.map(x=> {
+          if (x.id!==r.s.id) return x;
+          const n = {...x, status:"submitted"}; delete n.grade; delete n.feedback; delete n.gradedBy; delete n.gradedAt; return n;
+        });
+        renderHw(); renderHwDetail();
+      } catch(e){ toast(lockWriteMsg(e),"err"); }
+    };
+    const openGrade = (uid) => {
+      const a = activeHw;
+      const list = allStudentList();
+      gradeIndex = Math.max(0, list.findIndex(r=>r.en.uid===uid));
+      const draw = (i) => {
+        const r = list[i]; if (!r) return;
+        const s = r.s;
+        document.getElementById("drawerBg").classList.remove("hidden");
+        const d = document.getElementById("gradeDrawer");
+        d.classList.remove("hidden");
+        const words = wordCount(s?.text);
+        const empty = r.kind==="missing" || !s;
+        d.innerHTML = `<div class="drawer-head">
+            <div><strong>${r.en.studentName||"Student"}</strong><div style="color:var(--muted);font-size:.85rem">${r.en.studentEmail||""} · ${statusCell(r)}</div></div>
+            <div><button class="btn btn-sm btn-ghost" id="gprev">←</button> <span>${i+1} of ${list.length}</span> <button class="btn btn-sm btn-ghost" id="gnext">→</button></div>
+          </div>
+          <details style="padding:8px 20px;border-bottom:1px solid var(--line)"><summary>Assignment instructions</summary><p><strong>${a.title}</strong></p><p>${a.instructions||""}</p></details>
+          <div class="drawer-grid">
+            <div>${empty?`<p>This student has not submitted yet</p><button class="btn btn-sm btn-ghost" id="copyMiss">Copy reminder</button>`:`
+              <div class="answer-card">${s.text||""}</div>
+              <p style="margin-top:10px;color:var(--muted)">${words} word${words===1?"":"s"}${wordTarget(a.instructions)}</p>
+              ${s.link?`<p><a class="btn btn-sm" href="${s.link}" target="_blank" rel="noopener">Open link</a></p>`:""}
+              <div id="trFiles"></div>
+              <p>${fmtTime(s.submittedAt)}${late(s,a)?` <span class="badge badge-late">Late</span>`:""}</p>`}</div>
+            <div>${empty?"": (isCourseLocked(active) ? (r.kind==="graded" ? `<p>Grade ${(()=>{ const max=Number(a.maxPoints||0); const g=Number(s.grade); return max&&Number.isFinite(g)?Math.round((g/max)*100)+"/100":"—"; })()}</p><p>${s.feedback||""}</p>` : `<p>Not graded. The course is completed.</p>`) : `
+              <label>Grade</label><div style="display:flex;align-items:center;gap:8px"><input id="gval" type="number" min="0" max="${a.maxPoints||0}" value="${s.grade===0||s.grade?s.grade:""}" style="width:90px" /> / ${a.maxPoints||0}</div>
+              <label>Feedback</label><textarea id="gfb" style="width:100%;min-height:90px;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit">${s.feedback||""}</textarea>
+              <p id="herr" class="err"></p>
+              <button class="btn" id="gsave">Save grade</button>
+              <button class="btn btn-ghost" id="gnextung">Save & next ungraded</button>
+              <button class="btn btn-ghost" id="glater">Grade later</button>
+              ${r.kind==="graded"?`<button class="btn btn-sm btn-danger" id="gremove">Remove grade</button>`:""}`)}</div>
+          </div>`;
+        const tf = document.getElementById("trFiles");
+        if (tf && s && (s.files||[]).length) {
+          import("./HomeworkFilesViewer.js").then((m) => {
+            import("https://esm.sh/react@18.3.1").then((R) => {
+              import("https://esm.sh/react-dom@18.3.1/client").then((D) => {
+                D.createRoot(tf).render(R.createElement(m.HomeworkFilesViewer, { assignmentId: a.id, uid: s.uid, files: s.files }));
+              });
+            });
+          }).catch(() => {});
+        }
+        document.getElementById("gprev").onclick=()=>{ if (i>0) draw(i-1); };
+        document.getElementById("gnext").onclick=()=>{ if (i<list.length-1) draw(i+1); };
+        document.getElementById("drawerBg").onclick=closeDrawer;
+        const cm = document.getElementById("copyMiss"); if (cm) { if (isCourseLocked(active)) cm.replaceWith(document.createRange().createContextualFragment(lockBtn("Copy reminder"))); else cm.onclick=()=> reminder(r.en); }
+        const gl = document.getElementById("glater"); if (gl) gl.onclick=closeDrawer;
+        const gr = document.getElementById("gremove"); if (gr) gr.onclick=async()=>{ await removeGrade(r.en.uid); const next = allStudentList(); draw(Math.min(i, next.length-1)); };
+        const save = async (thenNext) => {
+          if (isCourseLocked(active)) { toast("This course is completed and read-only.","err"); return; }
+          const raw = document.getElementById("gval").value;
+          if (raw === "" || raw == null) {
+            document.getElementById("herr").style.display="block"; document.getElementById("herr").textContent="Enter a grade"; return;
+          }
+          const grade = Number(raw);
+          if (!Number.isFinite(grade) || grade < 0 || grade > Number(a.maxPoints||0)) {
+            document.getElementById("herr").style.display="block"; document.getElementById("herr").textContent="Enter a grade between 0 and "+(a.maxPoints||0); return;
+          }
+          try {
+            await updateDoc(doc(db,"submissions", s.id), { grade, feedback: document.getElementById("gfb").value, status:"graded", gradedBy: user.uid, gradedAt: serverTimestamp() });
+            toast("Grade saved");
+            submissions = submissions.map(x=> x.id===s.id ? {...x, grade, feedback: document.getElementById("gfb").value, status:"graded"} : x);
+            renderHw(); renderHwDetail();
+            if (thenNext) {
+              const nxt = allStudentList().filter(x=>x.kind==="needs");
+              if (nxt[0]) openGrade(nxt[0].en.uid); else closeDrawer();
+            } else closeDrawer();
+          } catch(e){ document.getElementById("herr").style.display="block"; document.getElementById("herr").textContent = lockWriteMsg(e); }
+        };
+        const gs = document.getElementById("gsave"); if (gs) gs.onclick=()=>save(false);
+        const gn = document.getElementById("gnextung"); if (gn) gn.onclick=()=>save(true);
+      };
+      draw(gradeIndex);
+    };
+
+    const reloadHw = async () => {
+      try {
+        const as = await getDocs(query(collection(db,"assignments"), where("courseId","==", active.id)));
+        assignments = as.docs.map(d=>({id:d.id,...d.data()}));
+        renderHw();
+        renderAllTrainerHw();
+      } catch (e) {
+        console.error(e);
+        document.getElementById("hwPane").innerHTML = `<p class="banner">assignments: ${e.code||e.message}</p>`;
+      }
+    };
+
+    const sessBadge = (s) => {
+      const map = { Scheduled:"badge-soon", Completed:"badge-open", Cancelled:"badge-draft" };
+      return `<span class="badge ${map[s]||"badge-draft"}">${s}</span>`;
+    };
+    const sessionForm = (s={}) => {
+      const modal = document.getElementById("modal");
+      modal.classList.remove("hidden");
+      modal.innerHTML = `<div class="sheet"><h2>${s.id?"Edit session":"New session"}</h2>
+        <label>Title</label><input id="stitle" value="${s.title||""}" />
+        <label>Date</label><input id="sdate" type="date" value="${s.date||""}" />
+        <label>Start time</label><input id="sstart" type="time" value="${s.startTime||""}" />
+        <label>End time</label><input id="send" type="time" value="${s.endTime||""}" />
+        <label>Meeting link</label><input id="slink" value="${s.meetingLink||""}" />
+        <label>Notes</label><textarea id="snotes" style="width:100%;min-height:70px;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit">${s.notes||""}</textarea>
+        <p id="herr" class="err"></p>
+        <button class="btn" id="ssave">Save</button>
+        <button class="btn btn-ghost" id="scancel">Cancel</button></div>`;
+      modal.querySelector("#scancel").onclick=()=> modal.classList.add("hidden");
+      modal.querySelector("#ssave").onclick=async()=>{
+        const payload = { courseId: active.id, title: document.getElementById("stitle").value.trim(), date: document.getElementById("sdate").value, startTime: document.getElementById("sstart").value, endTime: document.getElementById("send").value, meetingLink: document.getElementById("slink").value.trim(), notes: document.getElementById("snotes").value.trim(), status: s.status||"Scheduled", createdBy: user.uid };
+        try {
+          if (s.id) await updateDoc(doc(db,"sessions", s.id), payload);
+          else await addDoc(collection(db,"sessions"), { ...payload, createdAt: serverTimestamp() });
+          modal.classList.add("hidden"); toast("Session saved."); await loadCourseLists();
+        } catch(e){ document.getElementById("herr").style.display="block"; document.getElementById("herr").textContent = e.code||e.message; }
+      };
+    };
+    const renderSessions = () => {
+      const list = [...sessions].sort((a,b)=> String(a.date||"").localeCompare(String(b.date||"")));
+      document.getElementById("sessPane").innerHTML = `<button class="btn btn-sm" id="newSess">New session</button>` +
+        (list.length ? list.map(s=>`<article class="kpi" style="margin-top:12px"><strong>${s.title}</strong> ${sessBadge(s.status)}
+          <p>${s.date||"—"} · ${s.startTime||""}–${s.endTime||""}</p>
+          <button class="btn btn-sm" data-take="${s.id}">Take attendance</button>
+          <button class="btn btn-sm btn-ghost" data-edits="${s.id}">Edit</button>
+          <button class="btn btn-sm btn-warn" data-cancels="${s.id}">Cancel</button></article>`).join("") : "<p>No sessions yet.</p>");
+      document.getElementById("newSess").onclick=()=> sessionForm();
+      document.querySelectorAll("[data-edits]").forEach(b=> b.onclick=()=> sessionForm(sessions.find(x=>x.id===b.dataset.edits)));
+      document.querySelectorAll("[data-cancels]").forEach(b=> b.onclick=async()=>{
+        if (!confirm("Cancel this session?")) return;
+        try { await updateDoc(doc(db,"sessions", b.dataset.cancels), { status:"Cancelled" }); toast("Cancelled."); await loadCourseLists(); }
+        catch(e){ toast(e.code||e.message,"err"); }
+      });
+      document.querySelectorAll("[data-take]").forEach(b=> b.onclick=()=> openTake(b.dataset.take));
+    };
+    const attSummary = () => {
+      const vals = Object.values(attMarks);
+      const n = (st) => vals.filter(v=>v.status===st).length;
+      document.getElementById("attSum").textContent = `${n("present")} present, ${n("late")} late, ${n("absent")} absent`;
+    };
+    const openTake = async (sid) => {
+      activeSess = sessions.find(x=>x.id===sid);
+      if (!activeSess) return;
+      document.getElementById("attTitle").textContent = activeSess.title;
+      showView("takeatt");
+      document.getElementById("backSess").onclick=(e)=>{ e.preventDefault(); showView("course"); showCourseTab("tabSessions"); };
+      attMarks = {};
+      enrollments.forEach(en => attMarks[en.uid] = { status:"present", note:"" });
+      try {
+        const as = await getDocs(query(collection(db,"attendance"), where("courseId","==", active.id)));
+        as.docs.forEach(d=>{
+          const x = d.data();
+          if (x.sessionId===sid) attMarks[x.uid] = { status:x.status, note:x.note||"", id:d.id };
+        });
+      } catch(e){ document.getElementById("attRows").innerHTML = `<p class="banner">attendance: ${e.code||e.message}</p>`; return; }
+      renderTake();
+    };
+    const renderTake = () => {
+      document.getElementById("attRows").innerHTML = enrollments.length ? enrollments.map(en=>{
+        const m = attMarks[en.uid]||{status:"present",note:""};
+        return `<article class="kpi" style="margin-bottom:10px"><strong>${en.studentName||"—"}</strong>
+          <div class="toggle-att" data-uid="${en.uid}">
+            <button type="button" class="btn btn-sm btn-ghost ${m.status==="present"?"on-present":""}" data-st="present">Present</button>
+            <button type="button" class="btn btn-sm btn-ghost ${m.status==="late"?"on-late":""}" data-st="late">Late</button>
+            <button type="button" class="btn btn-sm btn-ghost ${m.status==="absent"?"on-absent":""}" data-st="absent">Absent</button>
+            <button type="button" class="btn btn-sm btn-ghost ${m.status==="excused"?"on-excused":""}" data-st="excused">Excused</button>
+          </div>
+          <input data-note="${en.uid}" placeholder="Note (optional)" value="${m.note||""}" /></article>`;
+      }).join("") : "<p>No students enrolled yet.</p>";
+      document.querySelectorAll(".toggle-att button").forEach(b=> b.onclick=()=>{ attMarks[b.parentElement.dataset.uid].status = b.dataset.st; renderTake(); });
+      document.querySelectorAll("[data-note]").forEach(i=> i.oninput=()=>{ attMarks[i.dataset.note].note = i.value; });
+      attSummary();
+    };
+    document.getElementById("markAllP").onclick=()=>{ Object.keys(attMarks).forEach(uid=> attMarks[uid].status="present"); renderTake(); };
+    document.getElementById("saveAtt").onclick=async()=>{
+      try {
+        for (const en of enrollments) {
+          const m = attMarks[en.uid];
+          const id = activeSess.id + "_" + en.uid;
+          await setDoc(doc(db,"attendance", id), { sessionId: activeSess.id, courseId: active.id, uid: en.uid, studentName: en.studentName||"", status: m.status, note: m.note||"", markedBy: user.uid, markedAt: serverTimestamp() }, { merge: true });
+        }
+        toast("Attendance saved.");
+      } catch(e){ toast("attendance: "+(e.code||e.message),"err"); }
+    };
+    document.getElementById("markDone").onclick=async()=>{
+      try { await updateDoc(doc(db,"sessions", activeSess.id), { status:"Completed" }); toast("Session completed."); activeSess.status="Completed"; }
+      catch(e){ toast("sessions: "+(e.code||e.message),"err"); }
+    };
+    const sessStatusBadge = (s) => {
+      const st = s||"Scheduled";
+      const map = { Scheduled:"badge-soon", Completed:"badge-open", Cancelled:"badge-draft" };
+      return `<span class="badge ${map[st]||"badge-draft"}">${st}</span>`;
+    };
+    const sessionSheetForm = (cid, s={}, after) => {
+      const course = myCourses.find(c=>c.id===cid);
+      if (isCourseLocked(course)) { toast("This course is completed and read-only.","err"); return; }
+      const modal = document.getElementById("modal");
+      modal.classList.remove("hidden");
+      modal.innerHTML = `<div class="sheet"><h2>${s.id?"Edit session":"New session"}</h2>
+        <label>Date</label><input id="sdate" type="date" value="${s.date||""}" />
+        <label>Start time</label><input id="sstart" type="time" value="${s.startTime||""}" />
+        <label>End time</label><input id="send" type="time" value="${s.endTime||""}" />
+        <label>Title (optional)</label><input id="stitle" value="${s.title||""}" />
+        <label>Meeting link (optional)</label><input id="slink" value="${s.meetingLink||""}" />
+        <p id="herr" class="err"></p>
+        <button class="btn" id="ssave">Save</button>
+        <button class="btn btn-ghost" id="scancel">Close</button></div>`;
+      modal.querySelector("#scancel").onclick=()=> modal.classList.add("hidden");
+      modal.querySelector("#ssave").onclick=async()=>{
+        const payload = {
+          courseId: cid,
+          title: document.getElementById("stitle").value.trim()||"Session",
+          date: document.getElementById("sdate").value,
+          startTime: document.getElementById("sstart").value,
+          endTime: document.getElementById("send").value,
+          meetingLink: document.getElementById("slink").value.trim()
+        };
+        try {
+          if (isCourseLocked(myCourses.find(c=>c.id===cid))) throw { code:"permission-denied" };
+          if (s.id) await updateDoc(doc(db,"sessions", s.id), payload);
+          else await addDoc(collection(db,"sessions"), { ...payload, status:"Scheduled", createdBy: user.uid, createdAt: serverTimestamp() });
+          modal.classList.add("hidden"); if (after) after();
+        } catch(e){ document.getElementById("herr").style.display="block"; document.getElementById("herr").textContent = lockWriteMsg(e) === "This course is completed and read-only." ? lockWriteMsg(e) : ((e.code||"")+" "+(e.message||e)); }
+      };
+    };
+    const pctAtt = (recs) => {
+      const marked = recs.filter(r=>r.status && r.status!=="excused");
+      const good = recs.filter(r=>r.status==="present"||r.status==="late").length;
+      const den = recs.filter(r=>r.status && r.status!=="excused").length;
+      if (!den) return 0;
+      return Math.round((good / den) * 100);
+    };
+    const loadAttMatrix = async () => {
+      const sel = document.getElementById("attCourse");
+      const panel = document.getElementById("attTakePanel");
+      sel.innerHTML = myCourses.map(c=>`<option value="${c.id}">${c.title}</option>`).join("") || "<option value=\"\">No courses</option>";
+      const draw = async () => {
+        const cid = sel.value;
+        const course = myCourses.find(c=>c.id===cid);
+        const locked = isCourseLocked(course);
+        const box = document.getElementById("attMatrix");
+        const ban = document.getElementById("attLockBanner");
+        if (ban) ban.innerHTML = CompletedBanner(course);
+        const nsb = document.getElementById("newSessSheet");
+        if (nsb) {
+          if (locked) { nsb.disabled = true; nsb.classList.add("lock-btn"); nsb.title = "This course is completed and read-only."; }
+          else { nsb.disabled = false; nsb.classList.remove("lock-btn"); nsb.title = ""; }
+        }
+        panel.classList.add("hidden");
+        panel.innerHTML = "";
+        if (!cid) { box.innerHTML = "<p>No courses are assigned to you yet.</p>"; return; }
+        box.textContent = "Loading…";
+        let sess = [], ens = [], atts = [];
+        try {
+          const ss = await getDocs(query(collection(db,"sessions"), where("courseId","==", cid)));
+          sess = ss.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
+        } catch(e){ box.innerHTML = `<p class="banner">sessions: ${e.code||e.message}</p>`; return; }
+        try {
+          const es = await getDocs(query(collection(db,"enrollments"), where("courseId","==", cid)));
+          ens = es.docs.map(d=>({id:d.id,...d.data()}));
+        } catch(e){ box.innerHTML = `<p class="banner">enrollments: ${e.code||e.message}</p>`; return; }
+        let attErr = "";
+        try {
+          const as = await getDocs(query(collection(db,"attendance"), where("courseId","==", cid)));
+          atts = as.docs.map(d=>({id:d.id,...d.data()}));
+        } catch(e){ attErr = "attendance: " + (e.code||e.message); }
+        const countFor = (sid) => atts.filter(a=>a.sessionId===sid).length;
+        const sessTable = sess.length ? `<div class="table-wrap"><table class="data"><thead><tr><th>Date</th><th>Time</th><th>Title</th><th>Status</th><th>Marked</th><th></th></tr></thead><tbody>` +
+          sess.map(s=>`<tr><td>${s.date||"—"}</td><td>${s.startTime||""}${s.endTime?"–"+s.endTime:""}</td><td>${s.title||""}</td><td>${sessStatusBadge(s.status)}</td><td data-marked="${s.id}">${countFor(s.id)}/${ens.length} marked</td><td><button class="btn btn-sm" data-take="${s.id}">${locked?"View attendance":"Take attendance"}</button></td></tr>`).join("") +
+          `</tbody></table></div>` : "<p>No sessions yet.</p>";
+        const dot = (st) => {
+          const c = {present:"#16a34a",late:"#d97706",absent:"#dc2626",excused:"#2563eb"}[st];
+          return c ? `<span title="${st}" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c}"></span>` : "—";
+        };
+        let matrix = "";
+        if (ens.length && sess.length) {
+          matrix = `<h3 style="margin:22px 0 10px">Attendance %</h3><div class="table-wrap"><table class="data"><thead><tr><th>Student</th>${sess.map(s=>`<th>${s.date||"—"}</th>`).join("")}<th>Attendance %</th></tr></thead><tbody>` +
+            ens.map(en=>{
+              const recs = atts.filter(a=>a.uid===en.uid);
+              return `<tr><td>${en.studentName||en.studentEmail||en.uid}</td>${sess.map(s=>`<td>${dot((atts.find(a=>a.sessionId===s.id&&a.uid===en.uid)||{}).status)}</td>`).join("")}<td>${pctAtt(recs)}%</td></tr>`;
+            }).join("") + `</tbody></table></div>`;
+        }
+        box.innerHTML = sessTable + matrix;
+        const openPanel = (sid) => {
+          const s = sess.find(x=>x.id===sid);
+          if (!s) return;
+          panel.classList.remove("hidden");
+          const stLabel = (st) => ({present:"Present",late:"Late",absent:"Absent",excused:"Excused"}[st]||"Not marked");
+          const stClass = (st) => ({present:"on-present",late:"on-late",absent:"on-absent",excused:"on-excused"}[st]||"");
+          panel.innerHTML = locked ? `<article class="kpi"><h2>View attendance — ${s.title||"Session"}</h2>
+            ${attErr?`<p class="banner">${attErr}</p>`:""}
+            <p id="attSum2"></p>
+            <div id="attRows2"></div></article>` : `<article class="kpi"><h2>Take attendance — ${s.title||"Session"}</h2>
+            ${attErr?`<p class="banner">${attErr}</p>`:""}
+            <p id="attLoadErr" class="banner" hidden></p>
+            <p><button class="btn btn-sm" type="button" id="markAllP2">Mark all present</button>
+            <button class="btn btn-sm btn-ghost" type="button" id="clearAll2">Clear all</button></p>
+            <p id="attSum2"></p>
+            <div id="attRows2"></div>
+            <p id="attSaveErr" class="banner" hidden></p>
+            <p><button class="btn" type="button" id="saveAtt2">Save attendance</button></p></article>`;
+          let marks = {};
+          ens.forEach(en => { marks[en.uid] = { status:"", note:"" }; });
+          atts.filter(a=>a.sessionId===sid).forEach(x=>{
+            marks[x.uid] = { status:x.status||"", note:x.note||"" };
+          });
+          const paint = () => {
+            const vals = Object.values(marks);
+            const n = (st) => vals.filter(v=>v.status===st).length;
+            panel.querySelector("#attSum2").textContent = `${n("present")} present, ${n("late")} late, ${n("absent")} absent, ${n("excused")} excused`;
+            panel.querySelector("#attRows2").innerHTML = ens.length ? ens.map(en=>{
+              const m = marks[en.uid]||{status:"",note:""};
+              if (locked) {
+                return `<article class="kpi" style="margin-bottom:10px"><strong>${en.studentName||en.studentEmail||en.uid}</strong>
+                  <p><span class="badge ${stClass(m.status)}">${stLabel(m.status)}</span></p>
+                  <p>${m.note||""}</p></article>`;
+              }
+              return `<article class="kpi" style="margin-bottom:10px"><strong>${en.studentName||en.studentEmail||en.uid}</strong>
+                <div class="toggle-att" data-uid="${en.uid}">
+                  <button type="button" class="btn btn-sm btn-ghost ${m.status==="present"?"on-present":""}" data-st="present">Present</button>
+                  <button type="button" class="btn btn-sm btn-ghost ${m.status==="late"?"on-late":""}" data-st="late">Late</button>
+                  <button type="button" class="btn btn-sm btn-ghost ${m.status==="absent"?"on-absent":""}" data-st="absent">Absent</button>
+                  <button type="button" class="btn btn-sm btn-ghost ${m.status==="excused"?"on-excused":""}" data-st="excused">Excused</button>
+                </div>
+                <input data-note="${en.uid}" placeholder="Note (optional)" value="${m.note||""}" /></article>`;
+            }).join("") : "<p>No students enrolled yet.</p>";
+            if (!locked) {
+            panel.querySelectorAll(".toggle-att button").forEach(b=> b.onclick=()=>{
+              const uid = b.parentElement.dataset.uid;
+              marks[uid].status = marks[uid].status===b.dataset.st ? "" : b.dataset.st;
+              paint();
+            });
+            panel.querySelectorAll("[data-note]").forEach(i=> i.oninput=()=>{ marks[i.dataset.note].note = i.value; });
+            }
+          };
+          paint();
+          const mp2 = panel.querySelector("#markAllP2"); if (mp2) mp2.onclick=()=>{ if (isCourseLocked(course)) { toast("This course is completed and read-only.","err"); return; } ens.forEach(en=> marks[en.uid].status="present"); paint(); };
+          const cl2 = panel.querySelector("#clearAll2"); if (cl2) cl2.onclick=()=>{ if (isCourseLocked(course)) { toast("This course is completed and read-only.","err"); return; } ens.forEach(en=> marks[en.uid] = { status:"", note:"" }); paint(); };
+          const sv2 = panel.querySelector("#saveAtt2"); if (sv2) sv2.onclick=async()=>{
+            if (isCourseLocked(course)) { toast("This course is completed and read-only.","err"); return; }
+            const errEl = panel.querySelector("#attSaveErr");
+            errEl.hidden = true;
+            for (const en of ens) {
+              const m = marks[en.uid]||{};
+              if (!m.status) continue;
+              const id = sid + "_" + en.uid;
+              try {
+                await setDoc(doc(db,"attendance", id), {
+                  sessionId: sid, courseId: cid, uid: en.uid, studentName: en.studentName||"",
+                  status: m.status, note: m.note||"", markedBy: user.uid, markedAt: serverTimestamp()
+                });
+              } catch(e){
+                errEl.hidden = false;
+                errEl.textContent = lockWriteMsg(e) === "This course is completed and read-only." ? lockWriteMsg(e) : ((e.code||e.message) + " — " + (en.studentName||en.uid));
+                return;
+              }
+            }
+            toast("Attendance saved");
+          };
+        };
+        box.querySelectorAll("[data-take]").forEach(b=> b.onclick=()=> openPanel(b.dataset.take));
+      };
+      document.getElementById("newSessSheet").onclick=()=>{ const cid=sel.value; if (!cid) return; sessionSheetForm(cid, {}, draw); };
+      sel.onchange = draw; draw();
+    };
+
+    const loadAllTrainerHw = async () => {
+      const box = document.getElementById("allTrainerHw");
+      const wrap = document.getElementById("hwCourseWrap");
+      const head = document.getElementById("hwCourseHead");
+      if (!box) return;
+      if (!myCourses.length) {
+        if (wrap) wrap.innerHTML = "";
+        if (head) head.innerHTML = "";
+        box.innerHTML = "<p>No courses are assigned to you yet.</p>";
+        return;
+      }
+      let stored = "";
+      try { stored = localStorage.getItem(HW_COURSE_KEY) || ""; } catch(_) {}
+      const ids = myCourses.map(c=>c.id);
+      let sel = stored;
+      if (myCourses.length === 1) sel = myCourses[0].id;
+      else if (sel && sel !== "all" && !ids.includes(sel)) sel = "all";
+      else if (!sel) sel = myCourses.length > 1 ? "all" : myCourses[0].id;
+      if (wrap) {
+        if (myCourses.length === 1) {
+          wrap.innerHTML = `<p style="font-size:1.05rem;font-weight:600;margin:0 0 12px">Course<br><span>${myCourses[0].title}</span></p>`;
+        } else {
+          wrap.innerHTML = `<label style="font-size:1.05rem;font-weight:600;display:block;margin-bottom:8px">Course</label>
+            <select id="hwPageCourse" style="font-size:1.05rem;padding:10px 12px;min-width:min(100%,420px)">${myCourses.length>1?`<option value="all">All my courses</option>`:""}${myCourses.map(c=>`<option value="${c.id}" ${c.id===sel?"selected":""}>${c.title}</option>`).join("")}</select>`;
+          const sc = document.getElementById("hwPageCourse");
+          if (sc) { sc.value = sel; sc.onchange = () => { try { localStorage.setItem(HW_COURSE_KEY, sc.value); } catch(_){} loadAllTrainerHw(); }; }
+        }
+      }
+      const selectedCourse = sel === "all" ? null : courseById(sel);
+      if (head) {
+        if (selectedCourse) {
+          head.innerHTML = `<article class="kpi" style="margin-bottom:14px"><h3>${selectedCourse.title}</h3><p>${badge(selectedCourse.status)} · ${courseCounts[selectedCourse.id]||0} students</p></article>`;
+        } else {
+          head.innerHTML = `<article class="kpi" style="margin-bottom:14px"><h3>All my courses</h3><p>${myCourses.length} courses</p></article>`;
+        }
+      }
+      box.textContent = "Loading…";
+      const all = [];
+      const targets = sel === "all" ? myCourses : (selectedCourse ? [selectedCourse] : []);
+      try {
+        for (const c of targets) {
+          const as = await getDocs(query(collection(db,"assignments"), where("courseId","==", c.id)));
+          all.push(...as.docs.map(d=>({id:d.id,...d.data(), courseTitle:c.title, courseId:c.id})));
+        }
+        assignments = all;
+        const lockedSel = selectedCourse && isCourseLocked(selectedCourse);
+        const newBtn = lockedSel
+          ? lockBtn("New homework")
+          : (sel === "all" || !selectedCourse
+            ? `<button class="btn btn-sm lock-btn" id="newHwAll" type="button" disabled title="Choose a course first">New homework</button>`
+            : `<button class="btn btn-sm" id="newHwAll" type="button">New homework</button>`);
+        const card = (a) => `<article class="kpi" style="margin-top:12px" data-aid="${a.id}">
+            ${courseTag(a.courseId)}
+            <strong>${a.title}</strong> ${badge(a.status)}
+            <p>due ${a.dueDate||"—"} · ${a.maxPoints||0} pts</p>
+          </article>`;
+        let listHtml = "";
+        if (!all.length) listHtml = "<p>No homework yet.</p>";
+        else if (sel === "all") {
+          listHtml = myCourses.map(c => {
+            const items = all.filter(a=>a.courseId===c.id).sort((a,b)=> String(a.dueDate||"").localeCompare(String(b.dueDate||"")));
+            if (!items.length) return "";
+            return `<h3 style="margin:18px 0 4px">${c.title}</h3>` + items.map(card).join("");
+          }).join("") || "<p>No homework yet.</p>";
+        } else {
+          all.sort((a,b)=> String(a.dueDate||"").localeCompare(String(b.dueDate||"")));
+          listHtml = all.map(card).join("");
+        }
+        box.innerHTML = newBtn + listHtml;
+        const nb = document.getElementById("newHwAll");
+        if (nb && !nb.disabled) {
+          if (lockedSel) {
+            nb.title = "This course is completed and read-only.";
+          } else {
+            nb.onclick = () => { active = selectedCourse; hwForm({}, selectedCourse.id); };
+          }
+        }
+        box.querySelectorAll("[data-aid]").forEach(art=> art.onclick=()=> {
+          const a = all.find(x=>x.id===art.dataset.aid);
+          if (!a) return;
+          active = courseById(a.courseId) || active;
+          if (!assignments.find(x=>x.id===a.id)) assignments.push(a);
+          openHwPage(a.id);
+        });
+      } catch (e) {
+        box.innerHTML = `<p class="banner">assignments: ${e.code||e.message}</p>`;
+      }
+    };
+    const renderAllTrainerHw = () => { loadAllTrainerHw(); };
+
+    onAuthStateChanged(auth, async (u) => {
+      if (!u) return;
+      user = u;
+      bootOk("auth restored (html)", "uid " + String(u.uid).slice(0, 8));
+      const shown = (u.displayName || "").trim() || (u.email || "").split("@")[0] || "trainer";
+      const n1=document.getElementById("userName"); if (n1 && (n1.textContent==="…" || !n1.textContent || n1.textContent==="Account")) n1.textContent = shown;
+      const n2=document.getElementById("welcomeName"); if (n2 && n2.textContent==="trainer") n2.textContent = shown;
+      startShell(u, { name: shown });
+      try {
+        const cs = await getDocs(query(collection(db,"courses"), where("trainerIds","array-contains", u.uid)));
+        myCourses = cs.docs.map(d=>({id:d.id,...d.data()}));
+        const counts = {};
+        for (const c of myCourses) {
+          try {
+            const ens = await getDocs(query(collection(db,"enrollments"), where("courseId","==", c.id)));
+            counts[c.id] = ens.size;
+          } catch(_) { counts[c.id] = 0; }
+        }
+        courseCounts = counts;
+        let trTab = "active";
+        const paintTrainerCourses = () => {
+          const activeN = myCourses.filter(c=>portalStatus(c).group==="active").length;
+          const doneN = myCourses.filter(c=>portalStatus(c).group==="completed").length;
+          const ta = document.getElementById("trTabActive"); if (ta) { ta.textContent = `Active (${activeN})`; ta.classList.toggle("on", trTab==="active"); }
+          const td = document.getElementById("trTabDone"); if (td) { td.textContent = `Completed (${doneN})`; td.classList.toggle("on", trTab==="completed"); }
+          const list = myCourses.filter(c=>portalStatus(c).group===trTab);
+          const grid = document.getElementById("courseGrid");
+          if (!list.length) {
+            grid.innerHTML = trTab==="completed" ? "<p>No completed courses yet.</p>" : "<p>No active courses assigned to you.</p>";
+            return;
+          }
+          grid.innerHTML = list.map(c=>{
+            const p = portalStatus(c);
+            return `<article class="course-card"><h3>${c.title}</h3><p>${statusBadgeHtml(c)} · ${counts[c.id]||0} enrolled</p>${deliveryDaysHtml(c, { emptyMode: "announce" })}${p.completedLine?`<p>${p.completedLine}</p>`:""}<p style="margin-top:10px"><button class="btn btn-sm" type="button" data-open="${c.id}">Open</button> <button class="btn btn-sm btn-ghost" type="button" data-roster="${c.id}">Roster</button></p></article>`;
+          }).join("");
+          grid.querySelectorAll("[data-open]").forEach(el=> el.onclick=()=> openCourse(el.dataset.open));
+          grid.querySelectorAll("[data-roster]").forEach(el=> el.onclick=()=> openRoster(el.dataset.roster));
+        };
+        const ta = document.getElementById("trTabActive"); if (ta) ta.onclick=()=>{ trTab="active"; paintTrainerCourses(); };
+        const td = document.getElementById("trTabDone"); if (td) td.onclick=()=>{ trTab="completed"; paintTrainerCourses(); };
+        paintTrainerCourses();
+      } catch (e) {
+        bootFail("courses", e);
+      }
+    });
+  </script>
+</body>
+</html>
+
+<script>/*aha-img-guard v2.1:user-relative-no-stock*/(function(){var API="https://skycastle.ai/api/img-search?q=";var bad=/images\.unsplash\.com|source\.unsplash\.com|picsum\.photos|loremflickr\.com|placekitten/;function tile(i){try{var d=document.createElement("div");d.style.cssText="width:100%;height:100%;min-height:120px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e9dfd2,#cdb89a);color:#6b5d49;font:600 14px system-ui;text-align:center;padding:10px;box-sizing:border-box";d.textContent=i.getAttribute("alt")||"";if(i.parentNode)i.parentNode.replaceChild(d,i);}catch(e){}}function real(i){var q=(i.getAttribute("alt")||"").trim();if(!q){tile(i);return;}fetch(API+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(d){if(d&&d.url){i.onerror=function(){tile(i);};i.src=d.url;}else tile(i);}).catch(function(){tile(i);});}function userRel(sa){return!!sa&&!/^https?:\/\//i.test(sa)&&!/^\/\//.test(sa)&&!/^data:/i.test(sa)&&!/^blob:/i.test(sa);}function chk(i){if(i.__ag)return;try{if(i.closest&&i.closest("nav,footer"))return;if(i.closest&&i.closest("header")&&/\b(logo|brand|icon|wordmark)\b/i.test(i.getAttribute("alt")||""))return;}catch(e){}var s=(i.currentSrc||i.src||i.getAttribute("src")||"").trim();var sa=(i.getAttribute("src")||"").trim();var alt=(i.getAttribute("alt")||"").trim();if(bad.test(s)){i.__ag=1;real(i);return;}if(/^https?:\/\//.test(s)){i.__ag=1;i.addEventListener("error",function(){real(i);});return;}if(!sa){if(alt){i.__ag=1;real(i);}return;}i.__ag=1;var fail=function(){if(userRel(sa))tile(i);else real(i);};if(i.complete&&i.naturalWidth===0){fail();return;}i.addEventListener("error",fail);}function scan(){document.querySelectorAll("img").forEach(chk);}try{new MutationObserver(scan).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["src"]});}catch(e){}document.addEventListener("DOMContentLoaded",scan);window.addEventListener("load",function(){scan();setTimeout(scan,800);setTimeout(scan,2000);});})();</script>

@@ -1,0 +1,15 @@
+.sdash-stats { grid-template-columns: repeat(4, 1fr); }
+.sdash-avg-card { display:flex; justify-content:space-between; gap:14px; align-items:center; text-decoration:none; color:inherit; border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:10px; }
+.sdash-avg-large { padding:18px; }
+.sdash-avg-title { font-weight:700; color:var(--navy); }
+.sdash-avg-based, .sdash-avg-att { font-size:.82rem; color:var(--muted); margin-top:4px; }
+.sdash-avg-ringwrap { position:relative; width:88px; height:88px; flex:0 0 88px; }
+.sdash-avg-ringwrap strong { position:absolute; inset:0; display:grid; place-items:center; font-size:.95rem; }
+.sdash-avg-green strong { color:#166534; }
+.sdash-avg-amber strong { color:#b45309; }
+.sdash-avg-red strong { color:#b91c1c; }
+.sdash-avg-gray strong { color:#64748b; }
+.sdash-avg-done { margin-top:8px; font-size:.88rem; }
+@media (max-width: 900px) {
+  .sdash-stats { grid-template-columns: 1fr 1fr; }
+}

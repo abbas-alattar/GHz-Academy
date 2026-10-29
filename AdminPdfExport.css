@@ -1,0 +1,11 @@
+.apdf-wrap { display:inline-flex; align-items:stretch; position:relative; }
+.apdf-btn { display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 14px; border:1px solid #CBD5E1; background:#fff; color:#0F2747; border-radius:10px 0 0 10px; font:inherit; font-weight:600; cursor:pointer; }
+.apdf-btn-solo { border-radius:10px; }
+.apdf-btn:disabled { color:#64748B; }
+.apdf-caret { width:32px; border:1px solid #CBD5E1; border-left:0; background:#fff; border-radius:0 10px 10px 0; cursor:pointer; color:#0F2747; }
+.apdf-menu { position:absolute; top:calc(100% + 4px); right:0; background:#fff; border:1px solid #E5EAF1; border-radius:10px; box-shadow:0 12px 32px rgba(15,39,71,.14); min-width:180px; z-index:40; overflow:hidden; }
+.apdf-menu button { display:block; width:100%; text-align:left; border:0; background:#fff; padding:10px 12px; font:inherit; cursor:pointer; }
+.apdf-menu button:hover { background:#F8FAFC; }
+.apdf-blocked { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:80; display:flex; align-items:center; gap:12px; background:#0F2747; color:#fff; padding:12px 16px; border-radius:12px; box-shadow:0 12px 32px rgba(15,39,71,.28); font:600 14px IBM Plex Sans,sans-serif; }
+.apdf-blocked[hidden] { display:none; }
+.apdf-open-fallback { border:0; background:#2EC8FF; color:#071A33; font:inherit; font-weight:700; padding:8px 12px; border-radius:8px; cursor:pointer; }

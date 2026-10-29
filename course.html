@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Course — GHz Academy</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./portal.css" />
+  <link rel="stylesheet" href="./DeliveryDays.css" />
+  <style>
+    body { background:#f6f8fb; }
+    nav.pub { position:sticky; top:14px; z-index:9; display:flex; justify-content:space-between; align-items:center; width:min(880px, calc(100% - 32px)); margin:0 auto; padding:10px 18px; background:#0e3a5d; border-radius:999px; }
+    main.pub { width:min(780px,92%); margin:40px auto 80px; background:#fff; border:1px solid var(--line); border-radius:18px; padding:28px; }
+    .meta { display:flex; gap:12px; flex-wrap:wrap; color:var(--muted); margin:12px 0 18px; }
+    ol { padding-left:20px; color:var(--muted); line-height:1.7; }
+  </style>
+</head>
+<body>
+  <nav class="pub">
+    <a class="brand" href="./index.html"><svg viewBox="0 0 40 22" fill="none" aria-hidden="true"><path d="M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0" stroke="#2EC8FF" stroke-width="2.6" stroke-linecap="round"/></svg><span class="ghz">GHz</span> <span class="acad">Academy</span></a>
+    <a class="btn btn-sm" href="./login.html">Log in</a>
+  </nav>
+  <main class="pub" id="box">Loading course…</main>
+  <script type="module">
+    import { auth, db } from "./firebase-config.js?v=auth8";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { isPublicCourse, unavailableHtml } from "./public-course.js";
+    import { deliveryDaysHtml } from "./DeliveryDays.js";
+    import { startsEndsLine } from "./courseDates.js";
+    import { canRegisterForCourse, courseStatusLabel } from "./courseStatusLabel.js";
+    const id = new URLSearchParams(location.search).get("id");
+    const box = document.getElementById("box");
+    if (!id) box.innerHTML = unavailableHtml();
+    else {
+      const snap = await getDoc(doc(db, "courses", id));
+      if (!snap.exists() || !isPublicCourse(snap.data().status)) box.innerHTML = unavailableHtml();
+      else {
+        const c = snap.data();
+        document.title = c.title + " — GHz Academy";
+        const next = encodeURIComponent("./course.html?id="+id);
+        box.innerHTML = `<div class="kicker" style="letter-spacing:.14em;font-size:.72rem;color:#0891b2">${c.status}</div>
+          <h1>${c.title}</h1>
+          <div class="meta"><span>${c.duration||""}</span><span>${c.level||""}</span><span>${c.price? c.price+" "+(c.currency||""):"Price on request"}</span>${startsEndsLine(c)?`<span>${startsEndsLine(c)}</span>`:""}</div>
+          ${deliveryDaysHtml(c, { emptyMode: "hide" })}
+          <p>${c.full||c.short||""}</p>
+          <h2 style="margin:22px 0 8px;font-size:1.1rem">Outline</h2>
+          <ol>${(c.outline||[]).map(m=>`<li><strong>${m.title||""}</strong> — ${m.description||""}</li>`).join("")}</ol>
+          <h2 style="margin:22px 0 8px;font-size:1.1rem">Prerequisites</h2>
+          <p>${c.prerequisites||"Listed on registration."}</p>
+          <div id="regArea" style="margin-top:22px"></div>`;
+        const area = document.getElementById("regArea");
+        onAuthStateChanged(auth, async (user) => {
+          if (!canRegisterForCourse(c.status)) {
+            area.innerHTML = `<button class="btn" disabled style="width:auto">${courseStatusLabel(c)}</button>`;
+            return;
+          }
+          if (!user) {
+            area.innerHTML = `<a class="btn" href="./login.html?tab=signup&next=${next}" style="width:auto;padding:12px 20px">Register</a>`;
+            return;
+          }
+          if (!user.emailVerified) {
+            area.innerHTML = `<button class="btn" disabled style="width:auto">Register</button><p class="banner" style="margin-top:10px">Verify your email to register.</p>`;
+            return;
+          }
+          const rid = user.uid + "_" + id;
+          const existing = await getDoc(doc(db, "registrations", rid));
+          if (existing.exists()) {
+            const st = existing.data().status;
+            if (st === "cancelled") {
+              if (!canRegisterForCourse(c.status)) {
+                area.innerHTML = `<button class="btn" disabled style="width:auto">Register again</button><p class="banner" style="margin-top:10px">Registration is closed</p>`;
+                return;
+              }
+              if (!user.emailVerified) {
+                area.innerHTML = `<button class="btn" disabled style="width:auto">Register again</button><p class="banner" style="margin-top:10px">Verify your email</p>`;
+                return;
+              }
+              area.innerHTML = `<button class="btn" id="regBtn" type="button" style="width:auto;padding:12px 20px">Register again</button><p id="regMsg"></p>`;
+              document.getElementById("regBtn").onclick = async () => {
+                if (!confirm("Register again for this course? You will then receive payment instructions.")) return;
+                const btn = document.getElementById("regBtn");
+                btn.disabled = true; btn.textContent = "Registering…";
+                try {
+                  await updateDoc(doc(db, "registrations", rid), { status: "pending_payment", createdAt: serverTimestamp() });
+                  location.href = "./student.html#regs";
+                } catch (e) {
+                  document.getElementById("regMsg").textContent = "Could not register. " + (e.code||"") + " " + (e.message||"");
+                  btn.disabled = false; btn.textContent = "Register again";
+                }
+              };
+              return;
+            }
+            area.innerHTML = `<span class="badge">${st}</span> <a href="./student.html#regs">View in your portal</a>`;
+            return;
+          }
+          area.innerHTML = `<button class="btn" id="regBtn" type="button" style="width:auto;padding:12px 20px">Register</button><p id="regMsg"></p>`;
+          document.getElementById("regBtn").onclick = async () => {
+            if (!confirm("Register for this course? You will then receive payment instructions.")) return;
+            const btn = document.getElementById("regBtn");
+            btn.disabled = true; btn.textContent = "Registering…";
+            try {
+              const us = await getDoc(doc(db, "users", user.uid));
+              const name = us.exists() ? us.data().name : (user.displayName || "");
+              const amount = Number(c.price);
+              await setDoc(doc(db, "registrations", rid), {
+                uid: user.uid, studentName: name, studentEmail: user.email,
+                courseId: id, courseTitle: c.title, amount: Number.isFinite(amount) ? amount : 0, currency: c.currency||"USD",
+                status: "pending_payment", createdAt: serverTimestamp()
+              });
+              location.href = "./student.html#regs";
+            } catch (e) {
+              document.getElementById("regMsg").textContent = "Could not register. " + (e.code||"") + " " + (e.message||"");
+              btn.disabled = false; btn.textContent = "Register";
+            }
+          };
+        });
+      }
+    }
+  </script>
+</body>
+</html>
+
+<script>/*aha-img-guard v2.1:user-relative-no-stock*/(function(){var API="https://skycastle.ai/api/img-search?q=";var bad=/images\.unsplash\.com|source\.unsplash\.com|picsum\.photos|loremflickr\.com|placekitten/;function tile(i){try{var d=document.createElement("div");d.style.cssText="width:100%;height:100%;min-height:120px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e9dfd2,#cdb89a);color:#6b5d49;font:600 14px system-ui;text-align:center;padding:10px;box-sizing:border-box";d.textContent=i.getAttribute("alt")||"";if(i.parentNode)i.parentNode.replaceChild(d,i);}catch(e){}}function real(i){var q=(i.getAttribute("alt")||"").trim();if(!q){tile(i);return;}fetch(API+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(d){if(d&&d.url){i.onerror=function(){tile(i);};i.src=d.url;}else tile(i);}).catch(function(){tile(i);});}function userRel(sa){return!!sa&&!/^https?:\/\//i.test(sa)&&!/^\/\//.test(sa)&&!/^data:/i.test(sa)&&!/^blob:/i.test(sa);}function chk(i){if(i.__ag)return;try{if(i.closest&&i.closest("nav,footer"))return;if(i.closest&&i.closest("header")&&/\b(logo|brand|icon|wordmark)\b/i.test(i.getAttribute("alt")||""))return;}catch(e){}var s=(i.currentSrc||i.src||i.getAttribute("src")||"").trim();var sa=(i.getAttribute("src")||"").trim();var alt=(i.getAttribute("alt")||"").trim();if(bad.test(s)){i.__ag=1;real(i);return;}if(/^https?:\/\//.test(s)){i.__ag=1;i.addEventListener("error",function(){real(i);});return;}if(!sa){if(alt){i.__ag=1;real(i);}return;}i.__ag=1;var fail=function(){if(userRel(sa))tile(i);else real(i);};if(i.complete&&i.naturalWidth===0){fail();return;}i.addEventListener("error",fail);}function scan(){document.querySelectorAll("img").forEach(chk);}try{new MutationObserver(scan).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["src"]});}catch(e){}document.addEventListener("DOMContentLoaded",scan);window.addEventListener("load",function(){scan();setTimeout(scan,800);setTimeout(scan,2000);});})();</script>

@@ -1,0 +1,65 @@
+.ghz-cd-dim {
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999;
+  background: rgba(15, 39, 71, 0.48);
+  backdrop-filter: blur(8px);
+  display: grid; place-items: center;
+  padding: 16px;
+  animation: ghzCdFade .16s ease;
+}
+.ghz-cd-card {
+  width: 100%; max-width: 440px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(15, 39, 71, 0.18);
+  padding: 24px;
+  font-family: Figtree, Inter, system-ui, sans-serif;
+  color: #0F2747;
+  animation: ghzCdIn .18s ease;
+}
+.ghz-cd-ico {
+  width: 44px; height: 44px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.ghz-cd-ico.warn { background: #FEF3C7; color: #B45309; }
+.ghz-cd-ico.danger { background: #FEE2E2; color: #DC2626; }
+.ghz-cd-ico.info { background: #DBEAFE; color: #2563EB; }
+.ghz-cd-ico.ok { background: #DCFCE7; color: #166534; }
+.ghz-cd-card.ghz-cd-sm { max-width: 360px; text-align: center; }
+.ghz-cd-card.ghz-cd-sm .ghz-cd-ico { margin-left: auto; margin-right: auto; }
+.ghz-cd-card.ghz-cd-sm .ghz-cd-acts { justify-content: center; }
+.ghz-cd-title {
+  margin: 0 0 8px;
+  font-family: "Space Grotesk", Inter, sans-serif;
+  font-size: 20px; font-weight: 700; color: #0F2747;
+}
+.ghz-cd-msg { margin: 0; font-size: 14px; line-height: 1.5; color: #64748B; }
+.ghz-cd-msg strong { color: #0F2747; font-weight: 700; }
+.ghz-cd-in {
+  width: 100%; margin-top: 14px; height: 40px;
+  border: 1px solid #CBD5E1; border-radius: 12px;
+  padding: 0 12px; font: inherit; box-sizing: border-box;
+}
+.ghz-cd-err { margin: 10px 0 0; color: #DC2626; font-size: 13px; }
+.ghz-cd-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+.ghz-cd-btn {
+  height: 40px; padding: 0 16px; border-radius: 10px;
+  font: inherit; font-weight: 700; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.ghz-cd-btn:disabled { opacity: .65; cursor: not-allowed; }
+.ghz-cd-cancel { background: #fff; color: #0F2747; border: 1px solid #CBD5E1; }
+.ghz-cd-ok { background: #2563EB; color: #fff; border: 0; }
+.ghz-cd-ok.warn { background: #D97706; color: #fff; }
+.ghz-cd-ok.danger { background: #DC2626; color: #fff; }
+.ghz-cd-spin {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+  animation: ghzCdSpin .7s linear infinite;
+}
+@keyframes ghzCdFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ghzCdIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes ghzCdSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .ghz-cd-dim, .ghz-cd-card { animation: none; }
+}

@@ -1,0 +1,39 @@
+body.trainer-portal .side nav a {
+  display:flex; align-items:center; gap:10px; height:40px; min-height:40px;
+  padding:0 12px; border-radius:12px; color:#DBE7F5; font-size:14px;
+}
+body.trainer-portal .side nav a .nav-ico { width:20px; height:20px; flex:none; stroke:currentColor; color:#DBE7F5; }
+body.trainer-portal .side nav a.on,
+body.trainer-portal .side nav a.on:hover {
+  background:#1B2F52 !important; color:#FFFFFF !important; border-radius:12px;
+}
+body.trainer-portal .side nav a.on .nav-ico { color:#2EC8FF !important; stroke:#2EC8FF !important; }
+body.trainer-portal .side nav a:hover:not(.on) { background:rgba(255,255,255,.08); color:#fff; }
+body.trainer-portal .top {
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  overflow:visible; padding:0 24px; min-width:0;
+}
+body.trainer-portal .top h1 { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+body.trainer-portal .top-actions { flex:none; flex-wrap:nowrap; min-width:0; }
+body.trainer-portal .ghz-search { width:min(220px, 22vw); flex:none; }
+body.trainer-portal .who { max-width:160px; }
+body.trainer-portal .out { flex:none; white-space:nowrap; display:inline-flex !important; margin-left:4px; position:relative; z-index:6; }
+body.trainer-portal .content { padding:24px; max-width:100%; width:100%; margin:0; box-sizing:border-box; }
+body.trainer-portal .main > p { padding:16px 24px !important; }
+.tr2 { color:#0F2747; width:100%; max-width:100%; }
+.tr2-fade { animation: tr2in .15s ease; }
+@keyframes tr2in { from { opacity:0 } to { opacity:1 } }
+@media (prefers-reduced-motion: reduce) { .tr2-fade { animation: none; } }
+.tr2-sk { height:14px; background:linear-gradient(90deg,#E5EAF1,#F8FAFC,#E5EAF1); background-size:200% 100%; animation:tr2sk 1.2s infinite; border-radius:6px; }
+@keyframes tr2sk { to { background-position:-200% 0; } }
+.tr2-err { background:#FEE2E2; color:#991B1B; padding:12px 14px; border-radius:12px; }
+.tr2-err button { margin-left:8px; }
+.tr2-placeholder { background:#fff; border:1px solid #E5EAF1; border-radius:16px; padding:24px; }
+.tr2-placeholder h2 { margin:0 0 6px; font-family:"Space Grotesk",sans-serif; }
+.tr2-placeholder p { margin:0; color:#64748B; }
+@media (max-width: 1100px) {
+  body.trainer-portal .ghz-search { width:min(200px, 22vw); }
+}
+@media (max-width: 900px) {
+  body.trainer-portal .ghz-search { display:none; }
+}

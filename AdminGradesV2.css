@@ -1,0 +1,46 @@
+.admin-grades.agv2 { background:#F4F7FB; color:#0F2747; display:grid; gap:16px; }
+.admin-grades.agv2 h2 { margin:0; font-size:26px; font-weight:700; font-family:"Space Grotesk",sans-serif; }
+.admin-grades.agv2 .sub { margin:6px 0 0; color:#64748B; font-size:14px; }
+.admin-grades .agv2-head { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start; }
+.admin-grades .agv2-act { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.admin-grades .agv2-csv { background:#fff; border:1px solid #CBD5E1; border-radius:10px; padding:9px 14px; font:inherit; font-weight:600; cursor:pointer; }
+.admin-grades .agv2-sel, .admin-grades .agv2-in { height:40px; border:1px solid #CBD5E1; border-radius:12px; padding:0 12px; font:inherit; background:#fff; }
+.admin-grades .agv2-in { min-width:200px; }
+.admin-grades .agv2-st { display:inline-block; border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; }
+.admin-grades .agv2-st.open { background:#DCFCE7; color:#166534; }
+.admin-grades .agv2-st.soon { background:#DBEAFE; color:#1D4ED8; }
+.admin-grades .agv2-st.gray { background:#E2E8F0; color:#475569; }
+.admin-grades .agv2-tr { color:#64748B; font-size:13px; }
+.admin-grades .agv2-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.admin-grades .agv2-stat { background:#fff; border:1px solid #E5EAF1; border-radius:16px; padding:14px; }
+.admin-grades .agv2-stat strong { display:block; font-size:28px; }
+.admin-grades .agv2-stat span, .admin-grades .agv2-note { color:#64748B; font-size:12px; }
+.admin-grades .agv2-pass { color:#16A34A; }
+.admin-grades .agv2-fail { color:#DC2626; }
+.admin-grades .agv2-card { background:#fff; border:1px solid #E5EAF1; border-radius:16px; overflow:auto; }
+.admin-grades .agv2-th, .admin-grades .agv2-row { display:grid; gap:8px; align-items:center; padding:12px 16px; }
+.admin-grades .agv2-th { position:sticky; top:0; background:#F8FAFC; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:#64748B; font-weight:700; z-index:1; }
+.admin-grades .agv2-th button { border:0; background:none; font:inherit; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:#64748B; font-weight:700; cursor:pointer; text-align:left; padding:0; }
+.admin-grades .agv2-row { border-top:1px solid #EEF2F7; }
+.admin-grades .agv2-row:hover { background:#F8FAFC; }
+.admin-grades .agv2-name { font-weight:600; }
+.admin-grades .agv2-sid { display:block; font-size:12px; color:#64748B; font-family:ui-monospace,Menlo,monospace; }
+.admin-grades .agv2-w { display:block; color:#94A3B8; font-size:11px; font-weight:500; text-transform:none; letter-spacing:0; }
+.admin-grades .agv2-avg { font-weight:700; }
+.admin-grades .agv2-low { color:#DC2626; }
+.admin-grades .agv2-z { color:#94A3B8; }
+.admin-grades .agv2-pills { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+.admin-grades .agv2-pill { display:inline-block; border-radius:999px; padding:3px 10px; font-size:12px; font-weight:700; }
+.admin-grades .agv2-pill.p { background:#DCFCE7; color:#166534; }
+.admin-grades .agv2-pill.f { background:#FEE2E2; color:#991B1B; }
+.admin-grades .agv2-pill.i { background:#E2E8F0; color:#475569; }
+.admin-grades .agv2-sk { height:16px; background:linear-gradient(90deg,#E5EAF1,#F8FAFC,#E5EAF1); background-size:200% 100%; animation:agv2sk 1.2s infinite; border-radius:6px; }
+@keyframes agv2sk { to { background-position:-200% 0; } }
+.admin-grades .agv2-err { color:#DC2626; font-size:13px; }
+.admin-grades .agv2-classic { margin-top:8px; background:none; border:0; color:#2563EB; cursor:pointer; font:inherit; }
+.admin-grades .agv2-empty { padding:16px; color:#64748B; }
+@media (max-width:900px) { .agv2-stats { grid-template-columns:1fr 1fr; } }
+
+.admin-grades .agv2-card { overflow-x: hidden; width: 100%; }
+.admin-grades .agv2-th, .admin-grades .agv2-row { min-width: 0; width: 100%; max-width: 100%; }
+.admin-grades .agv2-th > *, .admin-grades .agv2-row > * { min-width: 0; overflow: hidden; }

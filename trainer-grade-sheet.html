@@ -1,0 +1,46 @@
+<!-- aha-build-id: bmvh9mmeq09fqkujd -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grade Sheet — GHz Academy</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./portal.css" />
+</head>
+<body>
+  <div class="portal">
+    <aside class="side">
+      <a class="brand" href="./index.html" aria-label="GHz Academy"><svg viewBox="0 0 40 22" fill="none" aria-hidden="true"><path d="M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0" stroke="#2EC8FF" stroke-width="2.6" stroke-linecap="round"/></svg><span class="ghz">GHz</span> <span class="acad">Academy</span></a>
+      <nav>
+        <a href="./trainer.html#courses">My courses</a>
+        <a href="./trainer.html#homework">Homework</a>
+        <a href="./trainer-quizzes.html">Quizzes</a>
+        <a href="./trainer-grades.html">Grades</a>
+        <a href="./trainer.html#attendance">Attendance</a>
+        <a href="./trainer-announcements.html">Announcements</a>
+      </nav>
+    </aside>
+    <div class="main">
+      <header class="top">
+        <h1 style="font-size:1.1rem">Grade Sheet</h1>
+        <div class="top-actions">
+          <div class="nv2-slot" id="notifySlot">
+            <button class="notify-btn nv2-bell" id="notifyBtn" type="button" aria-label="Notifications"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F2747" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+          </div>
+          <div class="who"><strong id="userName">…</strong><span id="userRole">trainer</span></div>
+          <button class="out" id="logoutBtn" type="button">Log out</button>
+        </div>
+      </header>
+      <div class="content">
+        <p><a href="./trainer.html#courses">← My courses</a></p>
+        <div id="gsRoot">Loading…</div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="./trainer-grade-sheet.js"></script>
+</body>
+</html>
+
+<script>/*aha-img-guard v2.1:user-relative-no-stock*/(function(){var API="https://skycastle.ai/api/img-search?q=";var bad=/images\.unsplash\.com|source\.unsplash\.com|picsum\.photos|loremflickr\.com|placekitten/;function tile(i){try{var d=document.createElement("div");d.style.cssText="width:100%;height:100%;min-height:120px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e9dfd2,#cdb89a);color:#6b5d49;font:600 14px system-ui;text-align:center;padding:10px;box-sizing:border-box";d.textContent=i.getAttribute("alt")||"";if(i.parentNode)i.parentNode.replaceChild(d,i);}catch(e){}}function real(i){var q=(i.getAttribute("alt")||"").trim();if(!q){tile(i);return;}fetch(API+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(d){if(d&&d.url){i.onerror=function(){tile(i);};i.src=d.url;}else tile(i);}).catch(function(){tile(i);});}function userRel(sa){return!!sa&&!/^https?:\/\//i.test(sa)&&!/^\/\//.test(sa)&&!/^data:/i.test(sa)&&!/^blob:/i.test(sa);}function chk(i){if(i.__ag)return;try{if(i.closest&&i.closest("nav,footer"))return;if(i.closest&&i.closest("header")&&/\b(logo|brand|icon|wordmark)\b/i.test(i.getAttribute("alt")||""))return;}catch(e){}var s=(i.currentSrc||i.src||i.getAttribute("src")||"").trim();var sa=(i.getAttribute("src")||"").trim();var alt=(i.getAttribute("alt")||"").trim();if(bad.test(s)){i.__ag=1;real(i);return;}if(/^https?:\/\//.test(s)){i.__ag=1;i.addEventListener("error",function(){real(i);});return;}if(!sa){if(alt){i.__ag=1;real(i);}return;}i.__ag=1;var fail=function(){if(userRel(sa))tile(i);else real(i);};if(i.complete&&i.naturalWidth===0){fail();return;}i.addEventListener("error",fail);}function scan(){document.querySelectorAll("img").forEach(chk);}try{new MutationObserver(scan).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["src"]});}catch(e){}document.addEventListener("DOMContentLoaded",scan);window.addEventListener("load",function(){scan();setTimeout(scan,800);setTimeout(scan,2000);});})();</script>

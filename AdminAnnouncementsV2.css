@@ -1,0 +1,53 @@
+.aanv2 { background:#F4F7FB; color:#0F2747; display:grid; gap:16px; }
+.aanv2 h2 { margin:0; font-size:26px; font-weight:700; font-family:"Space Grotesk",sans-serif; }
+.aanv2 .sub { margin:6px 0 0; color:#64748B; font-size:14px; }
+.aanv2-head { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start; }
+.aanv2-new { height:40px; padding:0 16px; border:0; border-radius:10px; background:#2563EB; color:#fff; font:inherit; font-weight:700; cursor:pointer; }
+.aanv2-bar { display:flex; gap:8px; align-items:center; flex-wrap:nowrap; }
+.aanv2-sel { height:40px; border:1px solid #CBD5E1; border-radius:12px; padding:0 12px; font:inherit; background:#fff; color:#0F2747; flex:0 0 auto; }
+.aanv2-in { height:40px; border:1px solid #CBD5E1; border-radius:12px; padding:0 12px; font:inherit; background:#fff; flex:1 1 auto; min-width:140px; }
+.aanv2-chips { display:flex; gap:8px; flex:0 0 auto; }
+.aanv2-chip { height:32px; padding:0 12px; border:1px solid #CBD5E1; background:#fff; border-radius:999px; font:inherit; font-weight:600; cursor:pointer; color:#0F2747; }
+.aanv2-chip.on { background:#0F2747; color:#fff; border-color:#0F2747; }
+.aanv2-card { background:#fff; border:1px solid #E5EAF1; border-radius:16px; padding:18px; display:grid; grid-template-columns:1fr auto; gap:12px; }
+.aanv2-card:hover { box-shadow:0 10px 28px rgba(15,39,71,.08); }
+.aanv2-card.pin { border-left:4px solid #F59E0B; }
+.aanv2-card.aanv2-unread { background:#EFF6FF; }
+.aanv2-dot { width:8px; height:8px; border-radius:50%; background:#2563EB; display:inline-block; flex:0 0 8px; }
+.aanv2-bold { font-weight:800; }
+.aanv2-pill.trlab { background:#FEF3C7; color:#B45309; }
+.aanv2-pill.adlab { background:#E0E7FF; color:#3730A3; }
+.aanv2-ttl { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.aanv2-ttl strong { font-size:16px; }
+.aanv2-pill { display:inline-block; border-radius:999px; padding:3px 10px; font-size:12px; font-weight:700; }
+.aanv2-pill.course { background:#DCFCE7; color:#166534; }
+.aanv2-pill.all { background:#DBEAFE; color:#1D4ED8; }
+.aanv2-pill.pinlab { background:#FEF3C7; color:#B45309; }
+.aanv2-body { margin:10px 0 0; color:#334155; line-height:1.55; white-space:pre-wrap; }
+.aanv2-body.clamp { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.aanv2-more { border:0; background:none; color:#2563EB; font:inherit; font-weight:600; cursor:pointer; padding:6px 0 0; }
+.aanv2-meta { margin:10px 0 0; color:#94A3B8; font-size:13px; }
+.aanv2-ico { width:34px; height:34px; border:1px solid #E5EAF1; background:#fff; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0; color:#0F2747; }
+.aanv2-ico.edit { color:#2563EB; border-color:#BFDBFE; }
+.aanv2-ico.pinbtn.on { color:#B45309; background:#FFFBEB; border-color:#FCD34D; }
+.aanv2-ico.del { color:#DC2626; background:#FEF2F2; border-color:#FECACA; }
+.aanv2-acts { display:flex; gap:6px; }
+.aanv2-empty { text-align:center; padding:48px 16px; color:#64748B; background:#fff; border:1px solid #E5EAF1; border-radius:16px; }
+.aanv2-sk { height:72px; background:linear-gradient(90deg,#E5EAF1,#F8FAFC,#E5EAF1); background-size:200% 100%; animation:aanv2sk 1.2s infinite; border-radius:16px; }
+@keyframes aanv2sk { to { background-position:-200% 0; } }
+.aanv2-err { color:#DC2626; font-size:13px; }
+.aanv2-classic { margin-top:8px; background:none; border:0; color:#2563EB; cursor:pointer; font:inherit; }
+.aanv2-modal { position:fixed; inset:0; background:rgba(15,39,71,.4); display:grid; place-items:center; z-index:60; padding:20px; }
+.aanv2-dlg { background:#fff; border-radius:16px; padding:20px; width:min(520px,100%); display:grid; gap:10px; }
+.aanv2-dlg h3 { margin:0; }
+.aanv2-dlg label { display:grid; gap:6px; font-size:13px; font-weight:600; }
+.aanv2-dlg input, .aanv2-dlg textarea, .aanv2-dlg select { font:inherit; border:1px solid #CBD5E1; border-radius:10px; padding:10px 12px; color:#0F2747; background:#fff; }
+.aanv2-dlg select.aanv2-target { color:#0F2747; opacity:1; }
+.aanv2-pinrow { display:flex !important; flex-direction:row; align-items:center; justify-content:flex-start; gap:8px; font-size:14px; font-weight:600; }
+.aanv2-pinrow input { width:18px; height:18px; margin:0; }
+.aanv2-dlg footer { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+.aanv2-ghost { height:40px; padding:0 14px; border:1px solid #CBD5E1; background:#fff; border-radius:10px; font:inherit; cursor:pointer; }
+@media (max-width:720px) {
+  .aanv2-bar { flex-wrap:wrap; }
+  .aanv2-in { min-width:100%; flex:1 1 100%; }
+}

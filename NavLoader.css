@@ -1,0 +1,24 @@
+.ghz-navbar{position:absolute;top:0;left:0;right:0;height:3px;z-index:40;background:linear-gradient(90deg,#2563EB,#06B6D4);transform:scaleX(0);transform-origin:left;opacity:0;pointer-events:none}
+.ghz-navbar.on{opacity:1;animation:ghzbar 1.1s ease-in-out infinite}
+.ghz-wave-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.55);opacity:0;pointer-events:none;transition:opacity .15s ease;z-index:30}
+.ghz-wave-load.on{opacity:1;pointer-events:none}
+.ghz-wave-load,.ghz-wglow{display:none!important}
+.ghz-ring{position:absolute;inset:8px;border-radius:50%;border:2px solid rgba(37,99,235,.28);animation:ghzring 1.4s ease-out infinite}
+.ghz-ring.r2{inset:0;animation-delay:.35s;border-color:rgba(6,182,212,.25)}
+.ghz-wsvg{width:48px;height:22px;position:relative;z-index:1}
+.ghz-wsvg path{stroke:url(#ghzWaveGrad);stroke-width:2.6;fill:none;stroke-linecap:round;stroke-dasharray:80;stroke-dashoffset:80;animation:ghzdraw 1.4s ease-in-out infinite}
+.ghz-page-fx{transition:opacity 100ms ease}
+.ghz-page-fx.out{opacity:0;transition:opacity 100ms ease}
+.ghz-page-fx.in{opacity:1;transform:translateY(0);animation:ghzPageIn 180ms ease both}
+@keyframes ghzPageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .ghz-page-fx,.ghz-page-fx.in,.ghz-page-fx.out{animation:none;transition:none;transform:none}
+}
+@keyframes ghzbar{0%{transform:scaleX(.15)}50%{transform:scaleX(.85)}100%{transform:scaleX(.2)}}
+@keyframes ghzpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes ghzring{0%{transform:scale(.7);opacity:.55}100%{transform:scale(1.25);opacity:0}}
+@keyframes ghzdraw{0%{stroke-dashoffset:80}50%{stroke-dashoffset:0}100%{stroke-dashoffset:-80}}
+@media (prefers-reduced-motion:reduce){
+  .ghz-wglow,.ghz-ring,.ghz-wsvg path,.ghz-navbar.on{animation:none}
+  .ghz-wave-load{transition:opacity .15s ease}
+}

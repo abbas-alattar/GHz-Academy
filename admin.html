@@ -1,0 +1,1061 @@
+<!-- aha-build-id: bmvt74pfrdqnpxn42 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — GHz Academy</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./portal.css" />
+  <link rel="stylesheet" href="./PageTransition.css" />
+  <link rel="stylesheet" href="./AdminDashboardV2.css" />
+  <link rel="stylesheet" href="./AdminCoursesV2.css" />
+  <link rel="stylesheet" href="./CourseFormV2.css" />
+  <link rel="stylesheet" href="./AdminRegistrationsV2.css" />
+  <link rel="stylesheet" href="./AdminStudentsV2.css?v=3" />
+  <link rel="stylesheet" href="./AdminTrainersV2.css" />
+  <link rel="stylesheet" href="./AdminPdfExport.css" />
+  <link rel="stylesheet" href="./TrainerFormV2.css" />
+  <link rel="stylesheet" href="./AdminReportsV2.css?v=5" />
+  <link rel="stylesheet" href="./AdminBalanceV1.css" />
+  <link rel="stylesheet" href="./AdminGradesV2.css" />
+  <link rel="stylesheet" href="./AdminAnnouncementsV2.css" />
+  <link rel="stylesheet" href="./AdminCertificatesV2.css" />
+  <link rel="stylesheet" href="./AdminMessagesV2.css" />
+  <link rel="stylesheet" href="./AdminSettingsV2.css" />
+  <link rel="stylesheet" href="./CourseContentV1.css" />
+</head>
+<body class="admin-portal">
+  <div class="portal">
+    <aside class="side">
+      <a class="brand" href="./index.html" aria-label="GHz Academy"><svg viewBox="0 0 40 22" fill="none" aria-hidden="true"><path d="M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0" stroke="#2EC8FF" stroke-width="2.6" stroke-linecap="round"/></svg><span class="ghz">GHz</span> <span class="acad">Academy</span></a>
+      <nav>
+        <a class="on" href="#dash" data-view="dash"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+        <a href="#courses" data-view="courses"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 7H20v13H6.5A2.5 2.5 0 0 1 4 17.5z"/></svg>Courses</a>
+        <a href="#registrations" data-view="regs"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Registrations</a>
+        <a href="#students" data-view="students"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Students</a>
+        <a href="#trainers" data-view="trainers"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Trainers</a>
+        <a href="#reports" data-view="reports"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>Reports</a>
+        <a href="#balance" data-view="balance"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="14" r="1.4"/></svg>Balance</a>
+        <a href="#grades" data-view="grades"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19h16"/><path d="M8 17V7h8v10"/></svg>Grades</a>
+        <a href="#announcements" data-view="announcements"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11v2h2l8 5V6L5 11H3z"/><path d="M19 8a5 5 0 0 1 0 8"/></svg>Announcements <span id="annBadge" class="ann-side-badge" hidden></span></a>
+        <a href="#certificates" data-view="certificates"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.5L7 22l5-2 5 2-1.5-8.5"/></svg>Certificates</a>
+        <a href="#messages" data-view="messages"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages <span id="msgBadge" class="ann-side-badge" hidden></span></a>
+        <a href="#settings" data-view="settings"><svg class="nav-ico icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.3.6.9 1 1.5 1.1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</a>
+      </nav>
+    </aside>
+    <div class="main">
+      <header class="top">
+        <h1 style="font-size:1.1rem" id="pageTitle">Dashboard</h1>
+        <div class="top-actions">
+          <div class="nv2-slot" id="notifySlot">
+            <button class="notify-btn nv2-bell" id="notifyBtn" type="button" aria-label="Notifications" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F2747" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+          </div>
+          <div class="who"><strong id="userName">Account</strong><span id="userRole">Admin</span></div>
+          <button class="out" id="logoutBtn" type="button">Log out</button>
+        </div>
+      </header>
+      <div class="content">
+        <div id="toast" class="toast" hidden></div>
+        <section id="view-dash" class="hidden">
+          <div id="adminDashV2Root"></div>
+          <div id="adminDashClassic" class="hidden">
+          <div class="kpis">
+            <a class="kpi" href="#students" data-view="students"><span>Students</span><strong id="kpiStudents">…</strong></a>
+            <a class="kpi" href="#trainers" data-view="trainers"><span>Trainers</span><strong id="kpiTrainers">…</strong></a>
+            <a class="kpi" href="#courses" data-view="courses"><span>Courses</span><strong id="kpiCourses">…</strong></a>
+            <a class="kpi" href="#registrations" data-view="regs"><span>Pending registrations</span><strong id="kpiPending">0</strong></a>
+            <a class="kpi" href="#messages" data-view="messages"><span>New messages</span><strong id="kpiMessages">0</strong></a>
+          </div>
+          </div>
+        </section>
+        <section id="view-courses" class="hidden">
+          <div id="adminCoursesV2Root"></div>
+          <div id="adminCoursesClassic" class="hidden">
+          <div class="toolbar">
+            <input id="courseSearch" placeholder="Search courses" />
+            <select id="courseStatus"><option value="">All statuses</option><option value="Draft">Draft</option><option value="Open">On going</option><option value="Coming soon">Scheduled</option><option value="Closed">On going · Registration closed</option><option value="Completed">Completed</option><option value="Archived">Archived</option></select>
+            <button class="btn btn-sm" id="addCourse" type="button">Add</button>
+          </div>
+          <div class="table-wrap"><table class="data"><thead><tr><th>Title</th><th>Trainer</th><th>Duration</th><th>Level</th><th>Status</th><th>Start</th><th>Delivery</th><th></th></tr></thead><tbody id="courseRows"><tr><td colspan="8">Loading…</td></tr></tbody></table></div>
+          </div>
+        </section>
+        <section id="view-coursecontent" class="hidden"><div id="cc1Root"></div></section>
+        <section id="view-roster" class="hidden"><div id="cr1Root"></div></section>
+        <section id="view-trainers" class="hidden">
+          <div id="adminTrainersV2Root"></div>
+          <div id="adminTrainersClassic" class="hidden">
+          <div class="toolbar"><span id="trainerPdf"></span><button class="btn btn-sm" id="addTrainer" type="button">Add trainer</button></div>
+          <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Specialty</th><th>Active</th><th></th></tr></thead><tbody id="trainerRows"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
+          </div>
+        </section>
+        <section id="view-students" class="hidden">
+          <div id="adminStudentsV2Root"></div>
+          <div id="adminStudentsClassic" class="hidden">
+          <div class="toolbar"><input id="studentSearch" placeholder="Search name or email" /></div>
+          <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Verified</th><th>Joined</th><th>Enrollments</th></tr></thead><tbody id="studentRows"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
+          </div>
+        </section>
+        <section id="view-regs" class="hidden">
+          <div id="adminRegsV2Root"></div>
+          <div id="adminRegsClassic" class="hidden">
+          <div class="toolbar">
+            <input id="regSearch" placeholder="Search student or course" />
+            <select id="regStatus"><option value="">All</option><option value="payment_submitted">Payment submitted – review</option><option value="pending_payment">Awaiting payment</option><option value="enrolled">Confirmed</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option></select>
+            <select id="regCourse"><option value="">All courses</option></select>
+          </div>
+          <div class="table-wrap"><table class="data"><thead><tr><th>Student</th><th>Course</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="regRows"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
+          </div>
+        </section>
+        <section id="view-balance" class="hidden">
+          <div id="adminBalanceV1Root" class="bl1"><div class="bl1-sk"></div></div>
+        </section>
+        <section id="view-reports" class="hidden">
+          <div id="adminReportsV2Root" class="arv2"><div class="arv2-sk"></div></div>
+          <div id="adminReportsClassic" class="hidden">
+          <div class="toolbar"><h2 style="margin:0;flex:1">Reports</h2><span id="reportsPdf"></span></div>
+          <div class="tabs" style="max-width:280px;margin:16px 0"><button type="button" class="on" id="repAttTab">Attendance</button></div>
+          <div id="repAtt">Loading…</div>
+          </div>
+        </section>
+        <section id="view-grades" class="hidden"><div id="adminGradesV2Root" class="agv2"><div class="agv2-sk"></div></div></section>
+        <section id="view-announcements" class="hidden"><div id="adminAnnouncementsV2Root" class="aanv2"><div class="aanv2-sk"></div></div></section>
+        <section id="view-notifications" class="hidden"><div id="nt2PageRoot"></div></section>
+        <section id="view-certificates" class="hidden"><div id="adminCertificatesV2Root" class="acv2"><div class="acv2-sk"></div></div></section>
+        <section id="view-messages" class="hidden"><div id="adminMessagesV2Root" class="amv2"><div class="amv2-sk"></div></div></section>
+        <section id="view-settings" class="hidden">
+          <div id="adminSettingsV2Root" class="asv2"></div>
+          <div id="adminSettingsClassic" class="hidden">
+            <h2>Payment instructions</h2>
+            <textarea id="payText" style="width:100%;min-height:160px"></textarea>
+            <button class="btn btn-sm" id="savePayText" type="button">Save</button>
+          </div>
+        </section>
+      </div>
+      <p style="padding:16px 24px;font-size:.85rem"><a href="./terms/" target="_blank" rel="noopener noreferrer">Terms & Conditions</a> · <a href="./privacy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a></p>
+    </div>
+  </div>
+  <div class="modal hidden" id="modal"></div>
+  <div id="courseFormV2Host"></div>
+  <div id="trainerFormV2Host"></div>
+  <script type="module">
+    import { protect } from "./auth-guard.js?v=auth9";
+    import { bootPortalSpa } from "./portal-spa.js";
+    bootPortalSpa();
+    import { bootNotify } from "./portal-notify.js";
+    import { bootPageMotion } from "./PageTransition.js";
+    import { bootPageShell } from "./PageShell.js";
+    import { bootPortalShell } from "./PortalShell.js";
+    import { swapLoadingText } from "./WaveLoader.js";
+    import { auth, db, firebaseConfig } from "./firebase-config.js?v=auth8";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut as so } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, deleteField, writeBatch, query, where, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { backfillMissingIds, adminChangeStudentId } from "./studentId.js";
+    import { confirmComplete, confirmReopen } from "./admin-complete-course.js";
+    import { deleteCourseIfEmpty } from "./admin-delete-course.js";
+    import { openGradeDistribution } from "./admin-grade-distribution.js";
+    import { bootAdminDashboardV2 } from "./AdminDashboardV2.js?v=opt2";
+    import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+    const LA = (p) => import(p);
+    const renderAdminCoursesV2 = async (host, opts) => (await LA("./AdminCoursesV2.js?v=opt2")).renderAdminCoursesV2(host, opts);
+    const renderCourseContentV1 = async (a) => (await LA("./CourseContentV1.js?v=docx2")).renderCourseContentV1(a);
+    const renderCourseRosterV1 = async (a) => (await LA("./CourseRosterV1.js?v=2")).renderCourseRosterV1(a);
+    const bootCourseFormV2 = async (host, opts) => (await LA("./CourseFormV2.js?v=opt3")).bootCourseFormV2(host, opts || {});
+    const unmountCourseFormV2 = async () => { try { (await LA("./CourseFormV2.js?v=opt3")).unmountCourseFormV2(); } catch (_) {} };
+    const bootTrainerFormV2 = async (a) => (await LA("./TrainerFormV2.js?v=opt2")).bootTrainerFormV2(a);
+    const unmountTrainerFormV2 = async () => { try { (await LA("./TrainerFormV2.js?v=opt2")).unmountTrainerFormV2(); } catch (_) {} };
+    const renderAdminRegistrationsV2 = async (host, opts) => (await LA("./AdminRegistrationsV2.js?v=opt2")).renderAdminRegistrationsV2(host, opts);
+    const renderAdminStudentsV2 = async (host, opts) => (await LA("./AdminStudentsV2.js?v=opt2")).renderAdminStudentsV2(host, opts);
+    const renderAdminTrainersV2 = async (host, opts) => (await LA("./AdminTrainersV2.js?v=opt2")).renderAdminTrainersV2(host, opts);
+    const loadTrainerExtras = async (a) => (await LA("./AdminTrainersV2.js?v=opt2")).loadTrainerExtras(a);
+    const mountPdfButton = async (a) => (await LA("./AdminPdfExport.js")).mountPdfButton(a);
+    const fmtPdfDate = async (a) => (await LA("./AdminPdfExport.js")).fmtPdfDate(a);
+    const renderAdminReportsV2 = async (a) => (await LA("./AdminReportsV2.js?v=opt2")).renderAdminReportsV2(a);
+    const renderAdminBalanceV1 = async (a) => (await LA("./AdminBalanceV1.js?v=opt2")).renderAdminBalanceV1(a);
+    const renderAdminGradesV2 = async (a) => (await LA("./AdminGradesV2.js?v=opt2")).renderAdminGradesV2(a);
+    const renderAdminAnnouncementsV2 = async (a) => (await LA("./AdminAnnouncementsV2.js?v=opt2")).renderAdminAnnouncementsV2(a);
+    const renderAdminCertificatesV2 = async (a) => (await LA("./AdminCertificatesV2.js?v=opt2")).renderAdminCertificatesV2(a);
+    const renderAdminMessagesV2 = async (a) => (await LA("./AdminMessagesV2.js?v=opt2")).renderAdminMessagesV2(a);
+    const renderAdminSettingsV2 = async (a) => (await LA("./AdminSettingsV2.js?v=opt2")).renderAdminSettingsV2(a);
+    const syncTrainerNamesOnce = async (a) => (await LA("./trainerNamesSync.js")).syncTrainerNamesOnce(a);
+    try { if (!bootPageShell(document.body)) bootPageMotion(document.body); swapLoadingText(document.body); bootPortalShell(); } catch (_) { try { bootPageMotion(document.body); } catch (e) {} }
+    protect("admin").then(({ user }) => {
+      import("./lastActive.js").then((m) => { try { m.startLastActiveHeartbeat(user?.uid); } catch (e) { console.error("lastActiveAt", e); } }).catch((e) => console.error(e));
+      try { bootNotify({ role: "admin", uid: user?.uid }); } catch (e) { console.error("bootNotify", e?.code || e?.message || e); }
+      import("./announcementReads.js").then((m) => { try { m.loadAnnouncementReads(user?.uid); } catch (e) { console.error("announcementReads", e?.code || e?.message || e); } }).catch((e) => console.error("announcementReads", e?.code || e?.message || e));
+      window.__ghzAdminUid = user?.uid || "admin";
+      setTimeout(() => { try { syncTrainerNamesOnce(toast).catch((e) => console.error(e?.code || e?.message || e)); } catch (e) { console.error(e); } }, 400);
+      const v2 = document.getElementById("adminDashV2Root");
+      try { bootAdminDashboardV2(v2, { displayName: user?.displayName || user?.email || "" }); } catch (e) { console.error("AdminDashboardV2", e); }
+      window.__ghzAdminReady = true;
+      if (typeof window.__ghzAdminLoad === "function") window.__ghzAdminLoad();
+    }).catch((e) => { console.error("protect admin", e); });
+
+    let toastTimer;
+    const hideToast = () => { const t=document.getElementById("toast"); if (t) { t.hidden=true; t.textContent=""; } };
+    const toast = (msg, kind="ok") => {
+      const t=document.getElementById("toast"); if (!t) return;
+      t.hidden=false; t.className="toast "+kind;
+      t.innerHTML = "<button type=\"button\" class=\"arv2-toast-x\" aria-label=\"Close\">×</button>" + String(msg||"");
+      t.querySelector(".arv2-toast-x").onclick = hideToast;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(hideToast, 4000);
+    };
+    const modal = document.getElementById("modal");
+    const closeModal = () => { modal.classList.add("hidden"); modal.innerHTML=""; };
+    const titles = {dash:"Dashboard",courses:"Courses",coursecontent:"Course content",roster:"Roster",trainers:"Trainers",students:"Students",regs:"Registrations",reports:"Reports",balance:"Balance",grades:"Grades",announcements:"Announcements",notifications:"Notifications",certificates:"Certificates",messages:"Messages",settings:"Settings"};
+    const hashOf = { dash:"dash", courses:"courses", trainers:"trainers", students:"students", regs:"registrations", reports:"reports", balance:"balance", grades:"grades", announcements:"announcements", notifications:"notifications", certificates:"certificates", messages:"messages", settings:"settings" };
+    const viewOfHash = { dash:"dash", courses:"courses", trainers:"trainers", students:"students", registrations:"regs", reports:"reports", balance:"balance", grades:"grades", announcements:"announcements", notifications:"notifications", certificates:"certificates", messages:"messages", settings:"settings" };
+    const parseHash = () => {
+      const raw = (location.hash || "#dash").replace(/^#/, "");
+      const qi = raw.indexOf("?");
+      const path = (qi >= 0 ? raw.slice(0, qi) : raw) || "dash";
+      const params = new URLSearchParams(qi >= 0 ? raw.slice(qi + 1) : "");
+      if (path.indexOf("course/") === 0) {
+        const parts = path.split("/");
+        return { path, params, view: "coursecontent", courseId: parts[1] };
+      }
+      if (path.indexOf("roster/") === 0) {
+        const parts = path.split("/");
+        return { path, params, view: "roster", courseId: parts[1] };
+      }
+      return { path, params, view: viewOfHash[path] || "dash" };
+    };
+    window.__ghzOpenStudent = (uid, course) => {
+      if (!uid) return;
+      const q = new URLSearchParams();
+      q.set("open", uid);
+      if (course) q.set("course", course);
+      history.pushState({ view: "students" }, "", "#students?" + q.toString());
+      showView("students", { push: false });
+      window.dispatchEvent(new CustomEvent("ghz-open-student", { detail: { uid, course: course || "" } }));
+    };
+    const extraPainted = {};
+    const paintExtra = (name) => {
+      const classic = (file) => () => { location.href = file + "?classic=1"; };
+      const always = name === "reports" || name === "balance" || name === "grades" || name === "announcements" || name === "certificates" || name === "messages" || name === "settings";
+      if (!always && extraPainted[name]) return;
+      extraPainted[name] = true;
+      try {
+        if (name === "reports") renderAdminReportsV2(document.getElementById("adminReportsV2Root"), {});
+        if (name === "balance") renderAdminBalanceV1(document.getElementById("adminBalanceV1Root"), {});
+        if (name === "grades") renderAdminGradesV2(document.getElementById("adminGradesV2Root"), {});
+        if (name === "announcements") renderAdminAnnouncementsV2(document.getElementById("adminAnnouncementsV2Root"), {});
+        if (name === "certificates") renderAdminCertificatesV2(document.getElementById("adminCertificatesV2Root"), {});
+        if (name === "messages") renderAdminMessagesV2(document.getElementById("adminMessagesV2Root"), {});
+        if (name === "settings") {
+          const v2s = document.getElementById("adminSettingsV2Root");
+          renderAdminSettingsV2(v2s, { user: auth.currentUser });
+        }
+      } catch (err) { extraPainted[name] = false; console.error(name, err); }
+    };
+    const showView = (name, { push } = { push: true }) => {
+      if (!document.getElementById("view-"+name)) name = "dash";
+      hideToast();
+      document.querySelectorAll("[id^=view-]").forEach((s) => s.classList.add("hidden"));
+      document.getElementById("view-"+name).classList.remove("hidden");
+      document.querySelectorAll(".side a").forEach((a) => a.classList.toggle("on", a.dataset.view===name));
+      document.getElementById("pageTitle").textContent = titles[name]||"Admin";
+      paintExtra(name);
+      if (name === "dash" || name === "courses" || name === "trainers") {
+        syncTrainerNamesOnce(toast).catch((e) => console.error(e?.code || e?.message || e));
+      }
+      if (name === "coursecontent") {
+        const cid = parseHash().courseId;
+        const host = document.getElementById("cc1Root");
+        if (cid) {
+          renderCourseContentV1({ host, loading: true });
+          renderCourseContentV1({ host, courseId: cid, role: "admin", uid: auth.currentUser?.uid, name: document.getElementById("userName")?.textContent || "" });
+        }
+      }
+      if (name === "roster") {
+        const cid = parseHash().courseId;
+        const host = document.getElementById("cr1Root");
+        if (cid) {
+          renderCourseRosterV1({ host, loading: true });
+          renderCourseRosterV1({ host, courseId: cid, role: "admin", uid: auth.currentUser?.uid, backHref: "#courses" });
+        }
+      }
+      if (name==="reports" && document.getElementById("adminReportsClassic") && !document.getElementById("adminReportsClassic").classList.contains("hidden")) loadAttReport();
+      const h = hashOf[name] || name;
+      const cur = parseHash();
+      if (push && cur.path !== h) history.pushState({ view: name }, "", "#" + h);
+    };
+    window.__ghzShowView = showView;
+    window.__ghzOpenAddCourse = () => { showView("courses"); document.getElementById("addCourse")?.click(); };
+    document.querySelectorAll("[data-view]").forEach((a) => a.onclick = (e) => {
+      e.preventDefault();
+      if (a.dataset.view === "courses") {
+        try { sessionStorage.setItem("ghz-courses-tab", "Active"); } catch (_) {}
+        try { window.dispatchEvent(new CustomEvent("ghz-highlight-course", { detail: { id: "" } })); } catch (_) {}
+      }
+      showView(a.dataset.view);
+    });
+    window.addEventListener("popstate", () => {
+      showView(parseHash().view, { push: false });
+    });
+    {
+      showView(parseHash().view, { push: false });
+    }
+
+    const seed = [
+      { id:"5g-network-engineering", title:"5G Network Engineering: From Evolution to End-to-End Deployment", short:"How 5G evolved, how radio and core fit together, and how to take a network from design to live deployment.", full:"Walk the full 5G path — how the standard evolved, how radio and core fit together, and how to take a network from design to live deployment.", outline:[{title:"From 4G to 5G", description:"Why the architecture changed."},{title:"Spectrum and radio", description:"Bands and radio fundamentals."},{title:"RAN and coverage", description:"Cells and coverage planning."},{title:"5G Core", description:"End-to-end signaling."},{title:"Live network", description:"KPIs and bringing a site live."},{title:"Capstone", description:"Lab and examination."}], duration:"8 weeks, 3 sessions a week", prerequisites:"Basic wireless background.", level:"Intermediate", price:0, currency:"USD", startDate:"2026-11-02", status:"Open", trainerIds:[] },
+      { id:"rf-engineering-fundamentals", title:"RF Engineering Fundamentals", short:"Spectrum, propagation, and measurement for working engineers.", full:"Spectrum, propagation, and measurement for working engineers.", outline:[{title:"Spectrum", description:"Bands and allocation."}], duration:"To be announced", prerequisites:"To be listed.", level:"Foundation", price:0, currency:"USD", startDate:"", status:"Coming soon", trainerIds:[] },
+      { id:"5g-radio-network-planning", title:"5G Radio Network Planning & Optimization", short:"Coverage, capacity, and KPI work on live radio networks.", full:"Coverage, capacity, and KPI work on live radio networks.", outline:[{title:"Planning", description:"Coverage and capacity."}], duration:"To be announced", prerequisites:"To be listed.", level:"Advanced", price:0, currency:"USD", startDate:"", status:"Coming soon", trainerIds:[] },
+      { id:"antenna-design-and-measurement", title:"Antenna Design and Measurement", short:"Patterns, gain, and lab measurement of real antennas.", full:"Patterns, gain, and lab measurement of real antennas.", outline:[{title:"Patterns", description:"Gain and measurement."}], duration:"To be announced", prerequisites:"To be listed.", level:"Intermediate", price:0, currency:"USD", startDate:"", status:"Coming soon", trainerIds:[] },
+      { id:"fiber-optic-communications", title:"Fiber Optic Communications", short:"Links, loss budgets, and field practice for optical transport.", full:"Links, loss budgets, and field practice for optical transport.", outline:[{title:"Links", description:"Loss budgets."}], duration:"To be announced", prerequisites:"To be listed.", level:"Foundation", price:0, currency:"USD", startDate:"", status:"Coming soon", trainerIds:[] },
+      { id:"microwave-link-engineering", title:"Microwave Link Engineering", short:"Path planning, fade, and bringing a hop live.", full:"Path planning, fade, and bringing a hop live.", outline:[{title:"Path planning", description:"Fade and commissioning."}], duration:"To be announced", prerequisites:"To be listed.", level:"Intermediate", price:0, currency:"USD", startDate:"", status:"Coming soon", trainerIds:[] }
+    ];
+
+    let courses = [], users = [], regs = [];
+    const load = async () => {
+      if (!auth.currentUser) throw Object.assign(new Error("Not signed in"), { code: "unauthenticated", path: "courses" });
+      const cs = await getDocs(collection(db, "courses"));
+      const cs2 = cs.empty ? await getDocs(collection(db, "courses")) : cs;
+      courses = cs2.docs.map((d) => ({ id:d.id, ...d.data() }));
+      paintCoursesV2({ early: true });
+      const us = await getDocs(collection(db, "users"));
+      users = us.docs.map((d) => ({ id:d.id, ...d.data() }));
+      document.getElementById("kpiStudents").textContent = users.filter((u)=>u.role==="student").length;
+      document.getElementById("kpiTrainers").textContent = users.filter((u)=>u.role==="trainer").length;
+      document.getElementById("kpiCourses").textContent = courses.filter((c)=>c.status!=="Archived").length;
+      const rs = await getDocs(collection(db, "registrations"));
+      regs = rs.docs.map((d)=>({id:d.id,...d.data()}));
+      document.getElementById("kpiPending").textContent = regs.filter((r)=>r.status==="payment_submitted").length;
+      try {
+        const nq = await getDocs(query(collection(db, "inquiries"), where("status", "==", "new")));
+        const n = nq.size;
+        const km = document.getElementById("kpiMessages"); if (km) km.textContent = n;
+        const mb = document.getElementById("msgBadge"); if (mb) { mb.className = "ann-side-badge"; mb.hidden = n < 1; mb.textContent = n > 99 ? "99+" : String(n); mb.style.display = n < 1 ? "none" : "inline-flex"; mb.style.color = "#FFFFFF"; }
+      } catch (e) {
+        const km = document.getElementById("kpiMessages"); if (km) km.textContent = "—";
+      }
+      try {
+        const en = await getDocs(collection(db, "enrollments"));
+        for (const d of en.docs) {
+          const e = d.data();
+          if (e.studentName && e.studentEmail) continue;
+          const r = regs.find((x)=>x.uid===e.uid && x.courseId===e.courseId) || {};
+          const u = users.find((x)=>x.uid===e.uid || x.id===e.uid) || {};
+          await updateDoc(d.ref, {
+            studentName: e.studentName || r.studentName || u.name || "",
+            studentEmail: e.studentEmail || r.studentEmail || u.email || ""
+          });
+        }
+      } catch (e) { console.error(e); }
+      const sel = document.getElementById("regCourse");
+      sel.innerHTML = `<option value="">All courses</option>` + courses.map(c=>`<option value="${c.id}">${c.title}</option>`).join("");
+      const pay = await getDoc(doc(db,"settings","payment"));
+      if (pay.exists()) document.getElementById("payText").value = pay.data().text||"";
+      renderCourses(); renderTrainers(); paintTrainersV2(); renderStudents(); renderRegs();
+      paintCoursesV2();
+      paintRegsV2();
+      paintStudentsV2();
+    };
+    let enrollCounts = {};
+    let coursesV2Classic = false;
+    const paintCoursesV2 = (opts) => {
+      const host = document.getElementById("adminCoursesV2Root");
+      if (!host || coursesV2Classic) return;
+      const early = !!(opts && opts.early);
+      const loadError = opts && opts.loadError;
+      const actions = {
+        edit: (c) => openCourse(c),
+        gd: (c) => openGradeDistribution(c, toast),
+        content: (c) => { history.pushState({ view: "coursecontent" }, "", "#course/" + c.id); showView("coursecontent", { push: false }); },
+        roster: (c) => { history.pushState({ view: "roster" }, "", "#roster/" + c.id); showView("roster", { push: false }); },
+        complete: (c) => confirmComplete(c, toast, load),
+        reopen: (c) => confirmReopen(c, toast, load),
+        archive: (c) => archiveCourse(c.id),
+        del: (c) => deleteCourseIfEmpty(c.id, toast, load),
+        publish: async (c) => {
+          try {
+            const patch = { status: "Open" };
+            if (String(c.status) === "Completed") { patch.reopenedAt = serverTimestamp(); patch.reopenCount = increment(1); }
+            await updateDoc(doc(db, "courses", c.id), patch); toast("Course published."); await load();
+          }
+          catch (e) { toast("Could not publish. " + (e.code || e.message), "err"); }
+        },
+        restore: async (c) => {
+          try { await updateDoc(doc(db, "courses", c.id), { status: "Coming soon" }); toast("Course restored."); await load(); }
+          catch (e) { toast("Could not restore. " + (e.code || e.message), "err"); }
+        },
+        setReg: async (c, next) => {
+          try {
+            if (String(c.status) === "Coming soon") return;
+            const st = next === "Closed" ? "Closed" : "Open";
+            await updateDoc(doc(db, "courses", c.id), { status: st });
+            toast(st === "Closed" ? "Registration closed. Enrolled students are not affected." : "Registration open.");
+            await load();
+          } catch (e) { toast("Could not update registration. " + (e.code || e.message), "err"); }
+        }
+      };
+      renderAdminCoursesV2(host, {
+        courses, users, counts: enrollCounts,
+        error: loadError ? ((loadError.code || loadError.message || String(loadError)) + " · courses") : null,
+        loading: early && !courses.length && !loadError,
+        onRetry: load, onAdd: () => openCourse(), actions
+      });
+      if (early) return;
+      getDocs(collection(db, "enrollments")).then((snap) => {
+        const m = {};
+        snap.docs.forEach((d) => { const cid = d.data().courseId; if (cid) m[cid] = (m[cid] || 0) + 1; });
+        enrollCounts = m;
+        renderAdminCoursesV2(host, {
+          courses, users, counts: enrollCounts, error: null, loading: false,
+          onRetry: load, onAdd: () => openCourse(), actions
+        });
+      }).catch((e) => {
+        renderAdminCoursesV2(host, {
+          courses, users, counts: enrollCounts, error: e.code || e.message, loading: false,
+          onRetry: load, onAdd: () => openCourse(), actions
+        });
+      });
+    };
+
+    const renderCourses = () => {
+      const q = (document.getElementById("courseSearch").value||"").toLowerCase();
+      const st = document.getElementById("courseStatus").value;
+      const rows = courses.filter((c)=> (!q || c.title.toLowerCase().includes(q)) && (!st || c.status===st));
+      const badge = (c) => {
+        const s = c && c.status;
+        const map = { Open:"badge-open", "Coming soon":"badge-soon", Draft:"badge-draft", Closed:"badge-closed", Completed:"badge-done", Archived:"badge-arch" };
+        return `<span class="badge ${map[s]||"badge-draft"}">${(typeof statusChipShort==="function"?statusChipShort(c):courseStatusLabel(c))}</span>`;
+      };
+      const trainerName = (c) => {
+        const ids = c.trainerIds || [];
+        const names = ids.map((id) => (users.find((u)=>u.id===id)||{}).name).filter(Boolean);
+        return names.join(", ") || "—";
+      };
+      const deliverySummary = (c) => {
+        const days = Array.isArray(c.days) ? c.days.filter(Boolean) : [];
+        const t = String(c.sessionTime || "").trim();
+        if (!days.length) return "Not set";
+        return days.join(" · ") + (t ? " · " + t : "");
+      };
+      document.getElementById("courseRows").innerHTML = rows.length ? rows.map((c)=>`<tr data-row="${c.id}"><td>${c.title}</td><td>${trainerName(c)}</td><td>${c.duration||"—"}</td><td>${c.level||"—"}</td><td>${badge(c)}</td><td>${c.startDate||"—"}</td><td>${deliverySummary(c)}</td><td><button class="btn btn-sm btn-ghost" data-edit="${c.id}">Edit</button> <button class="btn btn-sm btn-ghost" data-gd="${c.id}">Grade Distribution</button> ${(c.status==="Open"||c.status==="Closed")?`<button class="btn btn-sm" data-complete="${c.id}">Complete course</button>`:""} ${c.status==="Completed"?`<button class="btn btn-sm" data-reopen="${c.id}">Reopen</button>`:""} <button class="btn btn-sm btn-warn" data-arch="${c.id}">Archive</button> <button class="btn btn-sm btn-ghost" data-del="${c.id}">Delete</button></td></tr>`).join("") : `<tr><td colspan="8">No courses match.</td></tr>`;
+      document.querySelectorAll("[data-edit]").forEach((b)=> b.onclick=(e)=> { e.stopPropagation(); openCourse(courses.find(c=>c.id===b.dataset.edit)); });
+      document.querySelectorAll("[data-gd]").forEach((b)=> b.onclick=(e)=> { e.stopPropagation(); openGradeDistribution(courses.find(c=>c.id===b.dataset.gd), toast); });
+      document.querySelectorAll("[data-complete]").forEach((b)=> b.onclick=(e)=> { e.stopPropagation(); confirmComplete(courses.find(c=>c.id===b.dataset.complete), toast, load); });
+      document.querySelectorAll("[data-reopen]").forEach((b)=> b.onclick=(e)=> { e.stopPropagation(); confirmReopen(courses.find(c=>c.id===b.dataset.reopen), toast, load); });
+      document.querySelectorAll("[data-arch]").forEach((b)=> b.onclick=(e)=> { e.stopPropagation(); archiveCourse(b.dataset.arch); });
+      document.querySelectorAll("[data-del]").forEach((b)=> b.onclick=(e)=> { e.stopPropagation(); deleteCourseIfEmpty(b.dataset.del, toast, load); });
+      document.querySelectorAll("[data-row]").forEach((r)=> r.onclick=()=> openCourse(courses.find(c=>c.id===r.dataset.row)));
+    };
+    document.getElementById("courseSearch").oninput = renderCourses;
+    document.getElementById("courseStatus").onchange = renderCourses;
+
+    const modsHtml = (mods=[]) => mods.map((m,i)=>`<div class="mod" data-i="${i}"><div><input value="${m.title||""}" placeholder="Module title" data-mt /><input value="${m.description||""}" placeholder="Short description" data-md /></div><div><button type="button" data-up>↑</button><button type="button" data-dn>↓</button><button type="button" data-rm>Remove</button></div></div>`).join("");
+    const readMods = () => [...modal.querySelectorAll(".mod")].map((el)=>({ title: el.querySelector("[data-mt]").value, description: el.querySelector("[data-md]").value }));
+    const bindMods = () => {
+      modal.querySelectorAll("[data-rm]").forEach((b)=> b.onclick=()=>{ const list=readMods(); list.splice(+b.closest(".mod").dataset.i,1); modal.querySelector(".mods").innerHTML=modsHtml(list); bindMods(); });
+      modal.querySelectorAll("[data-up]").forEach((b)=> b.onclick=()=>{ const list=readMods(); const i=+b.closest(".mod").dataset.i; if(i){[list[i-1],list[i]]=[list[i],list[i-1]];} modal.querySelector(".mods").innerHTML=modsHtml(list); bindMods(); });
+      modal.querySelectorAll("[data-dn]").forEach((b)=> b.onclick=()=>{ const list=readMods(); const i=+b.closest(".mod").dataset.i; if(i<list.length-1){[list[i+1],list[i]]=[list[i],list[i+1]];} modal.querySelector(".mods").innerHTML=modsHtml(list); bindMods(); });
+    };
+
+    let courseFormClassic = false;
+    const namesForIds = (ids, extra) => (ids || []).map((id) => {
+      if (extra && extra[id]) return String(extra[id]).trim();
+      const u = users.find((x) => x.id === id || x.uid === id);
+      return (u?.name || "").trim();
+    });
+    const openCourseClassic = (c={ outline:[], trainerIds:[], status:"Draft", currency:"USD" }) => {
+      const trainers = users.filter((u)=>u.role==="trainer");
+      modal.classList.remove("hidden");
+      modal.innerHTML = `<div class="sheet"><h2>${c.id?"Edit course":"Add course"}</h2>
+        <label>Title</label><input id="ctitle" value="${c.title||""}" />
+        <label>Short description</label><input id="cshort" value="${c.short||""}" />
+        <label>Full description</label><textarea id="cfull" style="width:100%;min-height:80px">${c.full||""}</textarea>
+        <label>Outline</label><div class="mods">${modsHtml(c.outline||[])}</div><button class="btn btn-sm btn-ghost" id="addMod" type="button">Add module</button>
+        <label>Duration</label><input id="cdur" value="${c.duration||""}" />
+        <label>Delivery days</label>
+        <div id="cdays" class="tabs" style="max-width:none;margin:6px 0 10px">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d)=>`<button type="button" class="day-chip${(c.days||[]).includes(d)?" on":""}" data-day="${d}">${d}</button>`).join("")}</div>
+        <label>Session time</label><input id="ctime" value="${c.sessionTime||""}" placeholder="e.g. 6:00 PM - 8:00 PM, Beirut time" />
+        <label>Prerequisites</label><input id="cpre" value="${c.prerequisites||""}" />
+        <label>Level</label><input id="clev" value="${c.level||""}" />
+        <label>Price</label><input id="cprice" type="number" value="${c.price||0}" />
+        <label>Currency</label><input id="ccur" value="${c.currency||"USD"}" />
+        <label>Start date</label><input id="cstart" type="date" value="${c.startDate||""}" />
+        <label>End date</label><input id="cend" type="date" value="${c.endDate||""}" />
+        <label>Status</label><select id="cstat"><option value="Draft">Draft</option><option value="Open">On going</option><option value="Coming soon">Scheduled</option><option value="Closed">On going · Registration closed</option><option value="Completed">Completed</option><option value="Archived">Archived</option></select>
+        <label>Assigned trainers</label><select id="ctrain" multiple style="height:90px">${trainers.map(t=>`<option value="${t.id}" ${(c.trainerIds||[]).includes(t.id)?"selected":""}>${t.name}</option>`).join("")}</select>
+        <button class="btn" id="saveCourse" type="button">Save</button>
+        <button class="btn btn-ghost" type="button" id="cancelM">Cancel</button></div>`;
+      modal.querySelector("#cstat").value = c.status||"Draft";
+      bindMods();
+      modal.querySelectorAll("[data-day]").forEach((b)=> b.onclick = () => b.classList.toggle("on"));
+      modal.querySelector("#addMod").onclick = () => { const list=readMods(); list.push({title:"",description:""}); modal.querySelector(".mods").innerHTML=modsHtml(list); bindMods(); };
+      modal.querySelector("#cancelM").onclick = closeModal;
+      modal.querySelector("#saveCourse").onclick = async () => {
+        const id = c.id || (document.getElementById("ctitle").value.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "course-"+Date.now());
+        const trainerIds = [...modal.querySelector("#ctrain").selectedOptions].map(o=>o.value);
+        const days = [...modal.querySelectorAll("[data-day].on")].map((b)=>b.dataset.day);
+        const sessionTime = (document.getElementById("ctime").value || "").trim();
+        const endVal = (document.getElementById("cend")?.value || "").trim();
+        const startVal = document.getElementById("cstart").value;
+        if (endVal && startVal && endVal < startVal) { toast("End date must be on or after the start date", "err"); return; }
+        const payload = { title: document.getElementById("ctitle").value, short: document.getElementById("cshort").value, full: document.getElementById("cfull").value, outline: readMods(), duration: document.getElementById("cdur").value, days, sessionTime, prerequisites: document.getElementById("cpre").value, level: document.getElementById("clev").value, price: Number(document.getElementById("cprice").value||0), currency: document.getElementById("ccur").value, startDate: startVal, endDate: endVal || deleteField(), status: document.getElementById("cstat").value, trainerIds, trainerNames: namesForIds(trainerIds), trainerName: namesForIds(trainerIds)[0] || "" };
+        try {
+          const existing = await getDoc(doc(db,"courses",id));
+          const prevIds = existing.exists() ? (existing.data().trainerIds || []) : [];
+          const trainerAssigned = existing.exists() ? (existing.data().trainerAssigned || {}) : {};
+          trainerIds.forEach(tid => {
+            if (!prevIds.includes(tid)) trainerAssigned[tid] = serverTimestamp();
+          });
+          prevIds.forEach(tid => {
+            if (!trainerIds.includes(tid)) trainerAssigned[tid] = deleteField();
+          });
+          payload.trainerAssigned = trainerAssigned;
+          const prevSt = existing.exists() ? String(existing.data().status || "") : "";
+          const wasDone = prevSt === "Completed";
+          if (wasDone && payload.status !== "Completed") { payload.reopenedAt = serverTimestamp(); payload.reopenCount = increment(1); }
+          if (payload.status === "Completed" && prevSt !== "Completed") {
+            payload.completedAt = serverTimestamp();
+            payload.completedCount = increment(1);
+            payload.previousStatus = prevSt || "Closed";
+          }
+          await setDoc(doc(db,"courses",id), payload, { merge:true });
+          toast("Course saved."); closeModal(); await load();
+        }
+        catch(e){ toast("Could not save the course. "+(e?.code||"error")+": "+(e?.message||e),"err"); }
+      };
+    };
+    const saveCoursePayload = async (c, data) => {
+      const id = c.id || (String(data.title||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "course-"+Date.now());
+      const trainerIds = data.trainerIds || [];
+      const endVal = String(data.endDate || "").trim();
+      const payload = { title: data.title, short: data.short, full: data.full, outline: data.outline, duration: data.duration, days: data.days, sessionTime: data.sessionTime, prerequisites: data.prerequisites, level: data.level, price: Number(data.price||0), currency: data.currency, startDate: data.startDate, endDate: endVal || deleteField(), status: data.status, trainerIds, trainerNames: namesForIds(trainerIds), trainerName: namesForIds(trainerIds)[0] || "", coverImage: data.coverImage || "" };
+      const existing = await getDoc(doc(db,"courses",id));
+      const prevIds = existing.exists() ? (existing.data().trainerIds || []) : [];
+      const trainerAssigned = existing.exists() ? (existing.data().trainerAssigned || {}) : {};
+      trainerIds.forEach(tid => {
+        if (!prevIds.includes(tid)) trainerAssigned[tid] = serverTimestamp();
+      });
+      prevIds.forEach(tid => {
+        if (!trainerIds.includes(tid)) trainerAssigned[tid] = deleteField();
+      });
+      payload.trainerAssigned = trainerAssigned;
+      const prevSt = existing.exists() ? String(existing.data().status || "") : "";
+      const wasDone = prevSt === "Completed";
+      if (wasDone && payload.status !== "Completed") { payload.reopenedAt = serverTimestamp(); payload.reopenCount = increment(1); }
+      if (payload.status === "Completed" && prevSt !== "Completed") {
+        payload.completedAt = serverTimestamp();
+        payload.completedCount = increment(1);
+        payload.previousStatus = prevSt || "Closed";
+      }
+      await setDoc(doc(db,"courses",id), payload, { merge:true });
+      toast("Course saved.");
+      unmountCourseFormV2();
+      closeModal();
+      await load();
+    };
+    const openCourse = (c={ outline:[], trainerIds:[], status:"Draft", currency:"USD" }) => {
+      if (!c) return;
+      if (courseFormClassic) return openCourseClassic(c);
+      const host = document.getElementById("courseFormV2Host");
+      const trainers = users.filter((u)=>u.role==="trainer");
+      const onClassic = () => { courseFormClassic = true; unmountCourseFormV2(); openCourseClassic(c); };
+      try {
+        const ok = bootCourseFormV2(host, {
+          course: c, trainers,
+          onClose: () => { unmountCourseFormV2(); },
+          onSave: (data) => saveCoursePayload(c, data)
+        });
+        if (!ok) onClassic();
+      } catch (e) { onClassic(); }
+    };
+    document.getElementById("addCourse").onclick = () => openCourse();
+    const archiveCourse = async (id) => {
+      if (!confirm("Archive this course? Students will no longer see it as open.")) return;
+      try { await updateDoc(doc(db,"courses",id), { status:"Archived" }); toast("Course archived."); await load(); }
+      catch(e){ toast("Could not archive.","err"); }
+    };
+
+    const errText = (e) => (e?.code || "error") + ": " + (e?.message || String(e));
+    const loginUrl = new URL("./login.html", location.href).href.split("?")[0];
+    const resetUrl = loginUrl + (loginUrl.includes("?") ? "&" : "?") + "welcome=trainer";
+    const sendReset = async (email) => {
+      const secondary = initializeApp(firebaseConfig, "reset"+Date.now());
+      const a2 = getAuth(secondary);
+      await sendPasswordResetEmail(a2, email, { url: resetUrl, handleCodeInApp: false });
+      await so(a2);
+    };
+    const welcomeText = (trainerName, email) => {
+      const adminName = document.getElementById("userName")?.textContent || "GHz Academy";
+      return `Hello ${trainerName},\nWelcome to GHz Academy! Your trainer account has been created.\nTo activate it:\n1. Open the email titled "Reset your password for ghz-academy" (please check your spam folder).\n2. Click the link and choose your password.\n3. Log in here: ${loginUrl}?welcome=trainer\nIf you need any help, just reply to this message.\nBest regards,\n${adminName}\nGHz Academy`;
+    };
+    const showWelcome = (trainerName, email) => {
+      const msg = welcomeText(trainerName, email);
+      const mail = `mailto:${encodeURIComponent(email||"")}?subject=${encodeURIComponent("Welcome to GHz Academy, your trainer account")}&body=${encodeURIComponent(msg)}`;
+      const wa = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+      modal.classList.remove("hidden");
+      modal.innerHTML = `<div class="sheet"><h2>Trainer created</h2><pre id="wmsg" style="white-space:pre-wrap;background:#f8fafc;padding:12px;border-radius:12px;font:inherit">${msg.replace(/</g,"")}</pre>
+        <button class="btn" id="copyW" type="button">Copy message</button>
+        <a class="btn" href="${mail}">Send by email</a>
+        <a class="btn btn-ghost" href="${wa}" target="_blank" rel="noopener">Send by WhatsApp</a>
+        <button class="btn btn-ghost" type="button" id="cancelM">Close</button></div>`;
+      modal.querySelector("#cancelM").onclick = closeModal;
+      modal.querySelector("#copyW").onclick = async () => { await navigator.clipboard.writeText(msg); toast("Message copied."); };
+    };
+    const renderTrainers = () => {
+      const list = users.filter((u)=>u.role==="trainer");
+      document.getElementById("trainerRows").innerHTML = list.length ? list.map((t)=>`<tr><td>${t.name||""}</td><td>${t.email||""}</td><td>${t.specialty||""}</td><td>${t.active===false?"No":"Yes"}</td><td><button class="btn btn-sm btn-ghost" data-tedit="${t.id}">Edit</button> <button class="btn btn-sm btn-ghost" data-resend="${t.email||""}">Resend password email</button> <button class="btn btn-sm btn-ghost" data-welcome="${t.id}">Show welcome message</button> ${t.active===false?"":`<button class="btn btn-sm btn-warn" data-toff="${t.id}">Deactivate</button>`}</td></tr>`).join("") : `<tr><td colspan="5">No trainers yet.</td></tr>`;
+      document.querySelectorAll("[data-tedit]").forEach((b)=> b.onclick=()=> openTrainer(users.find(u=>u.id===b.dataset.tedit)));
+      document.querySelectorAll("[data-toff]").forEach((b)=> b.onclick=()=> deactivate(b.dataset.toff));
+      document.querySelectorAll("[data-resend]").forEach((b)=> b.onclick=async ()=> {
+        try { await sendReset(b.dataset.resend); toast("Password setup email sent."); }
+        catch(e){ console.error(e); toast("Could not send email. "+errText(e),"err"); }
+      });
+      mountPdfButton(document.getElementById("trainerPdf"), () => {
+        const list = users.filter((u)=>u.role==="trainer");
+        return {
+          page: "Trainers",
+          filters: "All trainers",
+          summary: "Total " + list.length,
+          columns: [{ key: "name", label: "Name" }, { key: "email", label: "Email" }, { key: "courses", label: "Courses" }, { key: "status", label: "Status" }],
+          rows: list.map((t) => ({
+            name: t.name || "Trainer", email: t.email || "—",
+            courses: courses.filter((c) => (c.trainerIds || []).includes(t.id) || c.trainerId === t.id).map((c) => c.title).join(", ") || "—",
+            status: t.active === false ? "Inactive" : "Active"
+          }))
+        };
+      }, "Trainers");
+      document.querySelectorAll("[data-welcome]").forEach((b)=> b.onclick=()=> {
+        const t = users.find(u=>u.id===b.dataset.welcome);
+        if (t) showWelcome(t.name||"Trainer", t.email||"");
+      });
+    };
+    let trainersV2Classic = false;
+    const paintTrainersV2 = () => {
+      const host = document.getElementById("adminTrainersV2Root");
+      if (!host || trainersV2Classic) return;
+      const onClassic = () => { trainersV2Classic = true; host.hidden = true; document.getElementById("adminTrainersClassic")?.classList.remove("hidden"); renderTrainers(); };
+      const trainers = users.filter((u)=>u.role==="trainer");
+      const pack = {
+        trainers, courses, enrollments: null, enErr: null, extra: null, extraErr: null, extraLoading: true,
+        error: null, onRetry: load,
+        onAdd: () => openTrainer(),
+        onEdit: (t) => openTrainer(t),
+        onResend: async (t) => {
+          try { await sendReset(t.email||""); toast("Password setup email sent."); }
+          catch(e){ toast("Could not send email. "+errText(e),"err"); }
+        },
+        onWelcome: (t) => showWelcome(t.name||"Trainer", t.email||""),
+        onToggle: (t) => setTrainerActive(t.id, t.active===false),
+        onRetryActivity: () => {
+          paint({ extraLoading: true });
+          loadTrainerExtras(trainers, courses).then(({ extra }) => paint({ extra, extraLoading: false }));
+        }
+      };
+      let live = { ...pack };
+      const paint = (more) => { live = { ...live, ...more }; renderAdminTrainersV2(host, live); };
+      paint({});
+      getDocs(collection(db, "enrollments")).then((snap) => {
+        paint({ enrollments: snap.docs.map((d)=>({id:d.id,...d.data()})), enErr: null });
+      }).catch((e) => {
+        paint({ enrollments: null, enErr: e.code || e.message });
+      });
+      loadTrainerExtras(trainers, courses).then(({ extra }) => {
+        paint({ extra, extraLoading: false });
+      }).catch((e) => {
+        paint({ extraLoading: false });
+      });
+    };
+    const openTrainerClassic = (t={}) => {
+      modal.classList.remove("hidden");
+      modal.innerHTML = `<div class="sheet"><h2>${t.id?"Edit trainer":"Add trainer"}</h2>
+        <label>Full name</label><input id="tname" value="${t.name||""}" />
+        <label>Email</label><input id="temail" type="email" value="${t.email||""}" ${t.id?"disabled":""} />
+        <label>Specialty</label><input id="tspec" value="${t.specialty||""}" />
+        <label>Short bio</label><textarea id="tbio" style="width:100%;min-height:70px">${t.bio||""}</textarea>
+        <label>Courses to assign</label><select id="tcourses" multiple style="height:100px">${courses.map(c=>`<option value="${c.id}" ${(c.trainerIds||[]).includes(t.id)?"selected":""}>${c.title}</option>`).join("")}</select>
+        <button class="btn" id="saveT" type="button">${t.id?"Save":"Create trainer"}</button>
+        <button class="btn btn-ghost hidden" type="button" id="resendExist">Resend password setup email</button>
+        <button class="btn btn-ghost" type="button" id="cancelM">Cancel</button>
+        <div id="tfail" class="err" style="display:none"></div></div>`;
+      modal.querySelector("#cancelM").onclick = closeModal;
+      const showFail = (step, e) => {
+        console.error("Trainer save failed at", step, e);
+        const box = modal.querySelector("#tfail");
+        box.style.display = "block";
+        box.textContent = "Could not save the trainer. Failed at " + step + ". " + errText(e);
+        toast("Could not save the trainer. Failed at " + step + ". " + errText(e), "err");
+      };
+      modal.querySelector("#resendExist").onclick = async () => {
+        try { await sendReset(document.getElementById("temail").value.trim()); toast("Password setup email sent."); }
+        catch(e){ showFail("d) Send the password setup email", e); }
+      };
+      modal.querySelector("#saveT").onclick = async () => {
+        const name=document.getElementById("tname").value.trim();
+        const email=document.getElementById("temail").value.trim();
+        const specialty=document.getElementById("tspec").value.trim();
+        const bio=document.getElementById("tbio").value.trim();
+        const assigned=[...modal.querySelector("#tcourses").selectedOptions].map(o=>o.value);
+        let uid = t.id;
+        let existed = false;
+        if (!uid) {
+          try {
+            const secondary = initializeApp(firebaseConfig, "trainerFactory"+Date.now());
+            const a2 = getAuth(secondary);
+            const temp = "Tmp-"+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)+"9!";
+            const cred = await createUserWithEmailAndPassword(a2, email, temp);
+            uid = cred.user.uid;
+            await so(a2);
+          } catch (e) {
+            if (e?.code === "auth/email-already-in-use") {
+              existed = true;
+              const found = users.find((u)=> (u.email||"").toLowerCase()===email.toLowerCase());
+              uid = found?.id;
+              modal.querySelector("#resendExist").classList.remove("hidden");
+              const box = modal.querySelector("#tfail");
+              box.style.display = "block";
+              box.textContent = "This trainer already exists. You can resend the password setup email.";
+              toast("This trainer already exists.","err");
+              if (!uid) return;
+            } else { showFail("a) Create the login", e); return; }
+          }
+        }
+        try {
+          await setDoc(doc(db,"users",uid), { uid, name, email, specialty, bio, role:"trainer", active:true, createdBy: auth.currentUser?.uid||"", createdAt: t.createdAt||serverTimestamp() }, { merge:true });
+        } catch (e) { showFail("b) Save the trainer profile in users", e); return; }
+        try {
+          for (const c of courses) {
+            const ids = new Set(c.trainerIds||[]);
+            const was = ids.has(uid);
+            const now = assigned.includes(c.id);
+            if (now) ids.add(uid); else ids.delete(uid);
+            const arr = [...ids];
+            const patch = { trainerIds: arr, trainerNames: namesForIds(arr, { [uid]: name }), trainerName: namesForIds(arr, { [uid]: name })[0] || "" };
+            if (now && !was) patch["trainerAssigned." + uid] = serverTimestamp();
+            if (was && !now) patch["trainerAssigned." + uid] = deleteField();
+            await updateDoc(doc(db,"courses",c.id), patch);
+          }
+        } catch (e) { showFail("c) Assign the selected courses", e); return; }
+        if (existed) return;
+        if (!t.id) {
+          try { await sendReset(email); }
+          catch (e) {
+            showFail("d) Send the password setup email", e);
+            toast("Trainer saved, but the email was not sent. Click Resend.","err");
+            modal.querySelector("#resendExist").classList.remove("hidden");
+            await load();
+            return;
+          }
+          await load();
+          showWelcome(name, email);
+          return;
+        } else toast("Trainer updated.");
+        closeModal(); await load();
+      };
+    };
+    const saveTrainerCore = async ({ trainer: t = {}, name, email, specialty, bio, assigned, phone, phoneCountry, phoneDial, silentWelcome }) => {
+      let uid = t.id;
+      let existed = false;
+      if (!uid) {
+        try {
+          const secondary = initializeApp(firebaseConfig, "trainerFactory"+Date.now());
+          const a2 = getAuth(secondary);
+          const temp = "Tmp-"+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)+"9!";
+          const cred = await createUserWithEmailAndPassword(a2, email, temp);
+          uid = cred.user.uid;
+          await so(a2);
+        } catch (e) {
+          if (e?.code === "auth/email-already-in-use") {
+            existed = true;
+            const found = users.find((u)=> (u.email||"").toLowerCase()===email.toLowerCase());
+            uid = found?.id;
+            if (!uid) return { ok:false, duplicate:true, error: errText(e) };
+            return { ok:false, duplicate:true, error: "This email is already registered" };
+          }
+          return { ok:false, error: "Could not save the trainer. Failed at a) Create the login. " + errText(e) };
+        }
+      }
+      const profile = { uid, name, email, specialty, bio, role:"trainer", active:true, createdBy: auth.currentUser?.uid||"", createdAt: t.createdAt||serverTimestamp() };
+      if (phone) { profile.phone = phone; profile.phoneCountry = phoneCountry||""; profile.phoneDial = phoneDial||""; }
+      try {
+        await setDoc(doc(db,"users",uid), profile, { merge:true });
+      } catch (e) { return { ok:false, error: "Could not save the trainer. Failed at b) Save the trainer profile in users. " + errText(e) }; }
+      try {
+        for (const c of courses) {
+          const ids = new Set(c.trainerIds||[]);
+          const was = ids.has(uid);
+          const now = assigned.includes(c.id);
+          if (now) ids.add(uid); else ids.delete(uid);
+          const arr = [...ids];
+          const patch = { trainerIds: arr, trainerNames: namesForIds(arr, { [uid]: name }), trainerName: namesForIds(arr, { [uid]: name })[0] || "" };
+          if (now && !was) patch["trainerAssigned." + uid] = serverTimestamp();
+          if (was && !now) patch["trainerAssigned." + uid] = deleteField();
+          await updateDoc(doc(db,"courses",c.id), patch);
+        }
+      } catch (e) { return { ok:false, error: "Could not save the trainer. Failed at c) Assign the selected courses. " + errText(e) }; }
+      if (existed) return { ok:false, duplicate:true, error: "This email is already registered" };
+      if (!t.id) {
+        try { await sendReset(email); }
+        catch (e) {
+          toast("Trainer saved, but the email was not sent. Click Resend.","err");
+          await load();
+          return { ok:false, error: "Could not save the trainer. Failed at d) Send the password setup email. " + errText(e), saved:true };
+        }
+        await load();
+        if (!silentWelcome) showWelcome(name, email);
+        return { ok:true, name, email, welcome: welcomeText(name, email) };
+      }
+      toast("Trainer updated.");
+      await load();
+      return { ok:true };
+    };
+    let trainerFormClassic = false;
+    const openTrainer = (t={}) => {
+      if (trainerFormClassic) return openTrainerClassic(t);
+      const host = document.getElementById("trainerFormV2Host");
+      const onClassic = () => { trainerFormClassic = true; unmountTrainerFormV2(); openTrainerClassic(t); };
+      try {
+        const ok = bootTrainerFormV2(host, {
+          trainer: t, courses, users,
+          onClose: () => { unmountTrainerFormV2(); },
+          onSave: (data) => saveTrainerCore({ ...data, silentWelcome: true })
+        });
+        if (!ok) onClassic();
+      } catch (e) { onClassic(); }
+    };
+    document.getElementById("addTrainer").onclick = () => openTrainer();
+    const setTrainerActive = async (id, next) => {
+      if (next) {
+        if (!confirm("Activate this trainer? They will be able to log in again.")) return;
+      } else {
+        if (!confirm("Deactivate this trainer? They will not be able to log in.")) return;
+      }
+      try { await updateDoc(doc(db,"users",id), { active: next }); toast(next ? "Trainer activated." : "Trainer deactivated."); await load(); }
+      catch(e){ toast("Could not update trainer. "+(e.code||e.message),"err"); }
+    };
+    const deactivate = async (id) => setTrainerActive(id, false);
+
+    const renderStudents = () => {
+      const q = (document.getElementById("studentSearch").value||"").toLowerCase();
+      const list = users.filter((u)=>u.role==="student" && (!q || (u.name||"").toLowerCase().includes(q) || (u.email||"").toLowerCase().includes(q)));
+      document.getElementById("studentRows").innerHTML = list.length ? list.map((s)=>`<tr data-sid="${s.id}"><td>${s.name||""}</td><td>${s.email||""}</td><td>—</td><td>${s.createdAt?.toDate?s.createdAt.toDate().toLocaleDateString():"—"}</td><td>0</td></tr>`).join("") : `<tr><td colspan="5">No students yet.</td></tr>`;
+      document.querySelectorAll("[data-sid]").forEach((r)=> r.onclick=()=>{
+        const s = users.find(u=>u.id===r.dataset.sid);
+        modal.classList.remove("hidden");
+        modal.innerHTML = `<div class="sheet"><h2>${s.name||"Student"}</h2><p>${s.email||""}</p><p>Role: student</p><p>Enrollments: 0</p><button class="btn btn-ghost" id="cancelM">Close</button></div>`;
+        modal.querySelector("#cancelM").onclick=closeModal;
+      });
+    };
+    document.getElementById("studentSearch").oninput = renderStudents;
+    let studentsV2Classic = false;
+    const paintStudentsV2 = () => {
+      const host = document.getElementById("adminStudentsV2Root");
+      if (!host || studentsV2Classic) return;
+      const onClassic = () => { studentsV2Classic = true; host.hidden = true; document.getElementById("adminStudentsClassic")?.classList.remove("hidden"); };
+      const students = users.filter((u)=>u.role==="student");
+      const onToggle = async (s) => {
+        const next = s.active === false;
+        try { await updateDoc(doc(db,"users", s.id), { active: next }); toast(next ? "Activated." : "Deactivated."); await load(); }
+        catch(e){ toast("Could not update. "+(e.code||e.message),"err"); }
+      };
+      const onBackfill = async (setProg) => {
+        const res = await backfillMissingIds(students, { onProgress: (a, t, id) => setProg?.(a + " / " + t + " · " + id) });
+        toast(res.assigned + " IDs assigned" + (res.errors.length ? ". " + res.errors[0] : ""));
+        await load();
+        return res;
+      };
+      const onEditId = async (s, newId) => {
+        const res = await adminChangeStudentId({ uid: s.id || s.uid, oldId: s.studentId, newId, adminUid: window.__ghzAdminUid || "admin" });
+        if (res.ok) { toast("Student ID updated to " + res.id); await load(); }
+        else toast(res.error, "err");
+        return res;
+      };
+      const pack = { students, courses, enrollments: null, enErr: null, loading: false, error: null, onRetry: load, onRefresh: load, onToggle, onBackfill, onEditId };
+      renderAdminStudentsV2(host, pack);
+      getDocs(collection(db, "enrollments")).then((snap) => {
+        const enrollments = snap.docs.map((d)=>({id:d.id,...d.data()}));
+        renderAdminStudentsV2(host, { ...pack, enrollments, enErr: null });
+      }).catch((e) => {
+        renderAdminStudentsV2(host, { ...pack, enrollments: null, enErr: e.code || e.message });
+      });
+    };
+    const renderRegs = () => {
+      const q = (document.getElementById("regSearch").value||"").toLowerCase();
+      const st = document.getElementById("regStatus").value;
+      const cid = document.getElementById("regCourse").value;
+      const rows = regs.filter((r)=> (!st || r.status===st) && (!cid || r.courseId===cid) && (!q || (r.studentName||"").toLowerCase().includes(q) || (r.courseTitle||"").toLowerCase().includes(q) || (r.studentEmail||"").toLowerCase().includes(q)));
+      document.getElementById("regRows").innerHTML = rows.length ? rows.map((r)=>`<tr data-rid="${r.id}"><td>${r.studentName||r.studentEmail||""}</td><td>${r.courseTitle||""}</td><td>${r.amount||0} ${r.currency||""}</td><td>${r.status}</td><td>${r.createdAt?.toDate?r.createdAt.toDate().toLocaleDateString():"—"}</td></tr>`).join("") : `<tr><td colspan="5">No registrations match.</td></tr>`;
+      document.querySelectorAll("[data-rid]").forEach((tr)=> tr.onclick=()=> openReg(regs.find(x=>x.id===tr.dataset.rid)));
+    };
+    document.getElementById("regSearch").oninput = renderRegs;
+    document.getElementById("regStatus").onchange = renderRegs;
+    document.getElementById("regCourse").onchange = renderRegs;
+    let regsV2Classic = false;
+    const paintRegsV2 = () => {
+      const host = document.getElementById("adminRegsV2Root");
+      if (!host || regsV2Classic) return;
+      const onClassic = () => { regsV2Classic = true; host.hidden = true; document.getElementById("adminRegsClassic")?.classList.remove("hidden"); };
+      renderAdminRegistrationsV2(host, {
+        regs, courses, error: null, loading: false, onRetry: load,
+        onRefresh: load,
+        onConfirm: (r) => confirmEnrollment(r),
+        onReject: (r) => rejectRegistration(r),
+        onCancel: (r) => cancelRegistration(r),
+        onAudit: auditEnrollments,
+        onFix: fixEnrollmentIssues
+      });
+    };
+    const enId = (r) => (r.uid || "") + "_" + (r.courseId || "");
+    const confirmEnrollment = async (r) => {
+      if (!r) return;
+      if (!confirm("Confirm this enrollment?")) return;
+      try {
+        const batch = writeBatch(db);
+        batch.update(doc(db,"registrations", r.id), { status:"enrolled", confirmedBy: auth.currentUser.uid, confirmedAt: serverTimestamp() });
+        batch.set(doc(db,"enrollments", enId(r)), { uid:r.uid, courseId:r.courseId, studentName:r.studentName||"", studentEmail:r.studentEmail||"", studentId:r.studentId||"", enrolledAt: serverTimestamp() });
+        await batch.commit();
+        toast("Enrollment confirmed."); await load();
+      } catch(e){ toast("Could not confirm. "+(e.code||e.message||""),"err"); }
+    };
+    const dropEnrollmentBatch = async (r, status) => {
+      const batch = writeBatch(db);
+      const patch = status === "rejected"
+        ? { status:"rejected", cancelledBy: auth.currentUser.uid, cancelledAt: serverTimestamp() }
+        : { status:"cancelled", cancelledBy: auth.currentUser.uid, cancelledAt: serverTimestamp() };
+      batch.update(doc(db,"registrations", r.id), patch);
+      batch.delete(doc(db,"enrollments", enId(r)));
+      try {
+        const extra = await getDocs(query(collection(db,"enrollments"), where("uid","==", r.uid), where("courseId","==", r.courseId)));
+        extra.docs.forEach((d) => batch.delete(d.ref));
+      } catch (_) {}
+      await batch.commit();
+    };
+    const rejectRegistration = async (r) => {
+      if (!r) return;
+      const note = prompt("Rejection note for the student:");
+      if (note === null) return;
+      if (!confirm("Reject this registration?")) return;
+      try {
+        const batch = writeBatch(db);
+        batch.update(doc(db,"registrations", r.id), { status:"rejected", rejectNote: note || "", cancelledBy: auth.currentUser.uid, cancelledAt: serverTimestamp() });
+        batch.delete(doc(db,"enrollments", enId(r)));
+        await batch.commit();
+        toast("Rejected."); await load();
+      } catch(e){ toast("Could not reject. "+(e.code||e.message||""),"err"); }
+    };
+    const cancelRegistration = async (r) => {
+      if (!r) return;
+      try {
+        await dropEnrollmentBatch(r, "cancelled");
+        toast("Registration cancelled."); await load();
+      } catch(e){ toast("Could not cancel. "+(e.code||e.message||""),"err"); }
+    };
+    const auditEnrollments = async () => {
+      try {
+        const enSnap = await getDocs(collection(db, "enrollments"));
+        const issues = [];
+        const byPair = {};
+        regs.forEach((r) => { byPair[(r.uid||"")+"_"+(r.courseId||"")] = r; });
+        enSnap.docs.forEach((d) => {
+          const e = { id: d.id, ...d.data() };
+          const r = byPair[e.id] || regs.find((x) => x.uid === e.uid && x.courseId === e.courseId);
+          const st = r ? String(r.status||"") : "";
+          if (!r) issues.push({ kind:"stale", enrollmentId: e.id, uid: e.uid, courseId: e.courseId, studentName: e.studentName||"", courseTitle: e.courseTitle||"", problem: "Enrollment with no registration" });
+          else if (st === "cancelled" || st === "rejected") issues.push({ kind:"stale", enrollmentId: e.id, uid: e.uid, courseId: e.courseId, studentName: r.studentName||e.studentName||"", courseTitle: r.courseTitle||"", problem: "Enrollment still active after " + st, regId: r.id });
+        });
+        regs.filter((r) => r.status === "enrolled" || r.status === "confirmed").forEach((r) => {
+          const id = enId(r);
+          if (!enSnap.docs.some((d) => d.id === id || (d.data().uid === r.uid && d.data().courseId === r.courseId))) {
+            issues.push({ kind:"missing", uid: r.uid, courseId: r.courseId, studentName: r.studentName||"", courseTitle: r.courseTitle||"", problem: "Confirmed registration with no enrollment", regId: r.id });
+          }
+        });
+        return issues;
+      } catch (e) {
+        toast("Could not check enrollments. "+(e.code||e.message||""),"err");
+        return [];
+      }
+    };
+    const fixEnrollmentIssues = async (issues) => {
+      try {
+        for (const it of issues) {
+          const batch = writeBatch(db);
+          if (it.kind === "stale") batch.delete(doc(db, "enrollments", it.enrollmentId));
+          else if (it.kind === "missing" && it.regId) {
+            const r = regs.find((x) => x.id === it.regId);
+            if (r) batch.set(doc(db,"enrollments", enId(r)), { uid:r.uid, courseId:r.courseId, studentName:r.studentName||"", studentEmail:r.studentEmail||"", studentId:r.studentId||"", enrolledAt: serverTimestamp() });
+          }
+          await batch.commit();
+        }
+        toast("Selected issues fixed."); await load();
+      } catch (e) { toast("Could not fix. "+(e.code||e.message||""),"err"); }
+    };
+    const openReg = (r) => {
+      if (!r) return;
+      const st = String(r.status||"");
+      const confirmed = st === "enrolled" || st === "confirmed";
+      const closed = st === "cancelled" || st === "rejected";
+      const review = st === "payment_submitted";
+      modal.classList.remove("hidden");
+      modal.innerHTML = `<div class="sheet"><h2>${r.studentName||"Student"}</h2>
+        <p>${r.studentEmail||""}</p><p>${r.courseTitle}</p><p>${r.amount||0} ${r.currency||""} · ${r.status}</p>
+        <p>Method: ${r.paymentMethod||"—"}<br>Reference: ${r.paymentRef||"—"}<br>Date: ${r.paymentDate||"—"}</p>
+        ${review ? `<button class="btn" id="confirmR">Confirm enrollment</button><button class="btn btn-warn" id="rejectR">Reject</button>` : ""}
+        ${confirmed ? `<button class="btn btn-warn" id="cancelR">Cancel registration</button>` : ""}
+        ${closed ? `<button class="btn" id="confirmR">Re-confirm</button>` : ""}
+        <button class="btn btn-ghost" id="closeR">Close</button></div>`;
+      modal.querySelector("#closeR").onclick = closeModal;
+      const cBtn = modal.querySelector("#confirmR");
+      if (cBtn) cBtn.onclick = async () => { await confirmEnrollment(r); closeModal(); };
+      const rj = modal.querySelector("#rejectR");
+      if (rj) rj.onclick = async () => { await rejectRegistration(r); closeModal(); };
+      const cj = modal.querySelector("#cancelR");
+      if (cj) cj.onclick = async () => { await cancelRegistration(r); closeModal(); };
+    };
+    const loadAttReport = async () => {
+      const box = document.getElementById("repAtt");
+      box.textContent = "Loading…";
+      try {
+        const html = [];
+        for (const c of courses.filter(x=>x.status!=="Archived")) {
+          const ens = await getDocs(query(collection(db,"enrollments"), where("courseId","==", c.id)));
+          const stus = ens.docs.map(d=>({id:d.id,...d.data()}));
+          const ss = await getDocs(query(collection(db,"sessions"), where("courseId","==", c.id)));
+          const sess = ss.docs.map(d=>({id:d.id,...d.data()}));
+          const at = await getDocs(query(collection(db,"attendance"), where("courseId","==", c.id)));
+          const rec = {}; at.docs.forEach(d=>{ const x=d.data(); rec[x.uid+"_"+x.sessionId]=x.status; });
+          const pct = (uid) => {
+            let good=0, den=0;
+            sess.forEach(s=>{ const st=rec[uid+"_"+s.id]; if (!st || st==="excused") return; den++; if (st==="present"||st==="late") good++; });
+            return den? Math.round((good/den)*100):0;
+          };
+          let tot=0;
+          const lows = [];
+          stus.forEach(en=>{ const p=pct(en.uid); tot+=p; if (p<70) lows.push(`${en.studentName||en.uid} (${p}%)`); });
+          const avg = stus.length? Math.round(tot/stus.length):0;
+          html.push(`<article class="kpi" style="margin-bottom:12px"><strong>${c.title}</strong><p>Attendance ${avg}%</p><p>${lows.length? "Below 70%: "+lows.join(", ") : "No students below 70%."}</p></article>`);
+        }
+        box.innerHTML = html.join("") || "<p>No courses yet.</p>";
+        mountPdfButton(document.getElementById("reportsPdf"), () => ({
+          page: "Reports",
+          filters: "Attendance",
+          columns: [{ key: "course", label: "Course" }, { key: "avg", label: "Attendance %" }, { key: "low", label: "Below 70%" }],
+          rows: [...box.querySelectorAll("article")].map((a) => {
+            const t = a.innerText || "";
+            const m = t.match(/Attendance (\d+)%/);
+            return { course: a.querySelector("strong")?.textContent || "Course", avg: m ? m[1] + "%" : "—", low: /No students below/.test(t) ? "None" : (t.split("Below 70%:")[1] || "—").trim() };
+          })
+        }), "Reports");
+      } catch(e){ box.innerHTML = `<p class="banner">attendance: ${e.code||e.message}</p>`; }
+    };
+    document.getElementById("savePayText").onclick = async () => {
+      try { await setDoc(doc(db,"settings","payment"), { text: document.getElementById("payText").value }); toast("Payment instructions saved."); }
+      catch(e){ toast("Could not save settings.","err"); }
+    };
+    window.__ghzAdminLoad = () => load().catch((err) => {
+      toast("Could not load admin data.", "err");
+      paintCoursesV2({ loadError: err });
+    });
+    if (window.__ghzAdminReady) window.__ghzAdminLoad();
+
+  </script>
+</body>
+</html>
+
+<script>/*aha-img-guard v2.1:user-relative-no-stock*/(function(){var API="https://skycastle.ai/api/img-search?q=";var bad=/images\.unsplash\.com|source\.unsplash\.com|picsum\.photos|loremflickr\.com|placekitten/;function tile(i){try{var d=document.createElement("div");d.style.cssText="width:100%;height:100%;min-height:120px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e9dfd2,#cdb89a);color:#6b5d49;font:600 14px system-ui;text-align:center;padding:10px;box-sizing:border-box";d.textContent=i.getAttribute("alt")||"";if(i.parentNode)i.parentNode.replaceChild(d,i);}catch(e){}}function real(i){var q=(i.getAttribute("alt")||"").trim();if(!q){tile(i);return;}fetch(API+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(d){if(d&&d.url){i.onerror=function(){tile(i);};i.src=d.url;}else tile(i);}).catch(function(){tile(i);});}function userRel(sa){return!!sa&&!/^https?:\/\//i.test(sa)&&!/^\/\//.test(sa)&&!/^data:/i.test(sa)&&!/^blob:/i.test(sa);}function chk(i){if(i.__ag)return;try{if(i.closest&&i.closest("nav,footer"))return;if(i.closest&&i.closest("header")&&/\b(logo|brand|icon|wordmark)\b/i.test(i.getAttribute("alt")||""))return;}catch(e){}var s=(i.currentSrc||i.src||i.getAttribute("src")||"").trim();var sa=(i.getAttribute("src")||"").trim();var alt=(i.getAttribute("alt")||"").trim();if(bad.test(s)){i.__ag=1;real(i);return;}if(/^https?:\/\//.test(s)){i.__ag=1;i.addEventListener("error",function(){real(i);});return;}if(!sa){if(alt){i.__ag=1;real(i);}return;}i.__ag=1;var fail=function(){if(userRel(sa))tile(i);else real(i);};if(i.complete&&i.naturalWidth===0){fail();return;}i.addEventListener("error",fail);}function scan(){document.querySelectorAll("img").forEach(chk);}try{new MutationObserver(scan).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["src"]});}catch(e){}document.addEventListener("DOMContentLoaded",scan);window.addEventListener("load",function(){scan();setTimeout(scan,800);setTimeout(scan,2000);});})();</script>

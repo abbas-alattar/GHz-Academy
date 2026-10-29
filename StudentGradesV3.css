@@ -1,0 +1,65 @@
+.sg3-wrap{max-width:1440px;margin:0 auto;padding:8px 0 40px;background:#FFFFFF;font-family:"IBM Plex Sans",system-ui,sans-serif;color:#0F2747}
+.sg3-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px}
+.sg3-head h2{margin:0;font-size:28px;font-weight:700;letter-spacing:-0.02em;color:#0F2747}
+.sg3-sub{margin:6px 0 0;color:#64748B;font-size:14px}
+.sg3-print{border:0;background:#0F2747;color:#FFFFFF;border-radius:12px;padding:10px 16px;font-weight:600;font-size:14px;cursor:pointer}
+.sg3-print:hover{background:#16365F}
+.sg3-classic{margin:8px 0 0;background:none;border:0;color:#64748B;font-size:12px;cursor:pointer;text-decoration:underline}
+.sg3-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:20px}
+.sg3-card{border-radius:16px;padding:20px 22px;min-height:96px}
+.sg3-card .n{font-size:32px;font-weight:700;line-height:1.1}
+.sg3-card .l{margin-top:8px;font-size:14px;font-weight:500}
+.sg3-avg{background:#E8F4FF;color:#1D4ED8}
+.sg3-avg .l{color:#3B82F6}
+.sg3-ok{background:#E8F8EE;color:#15803D}
+.sg3-ok .l{color:#16A34A}
+.sg3-no{background:#FDECEC;color:#B91C1C}
+.sg3-no .l{color:#DC2626}
+.sg3-all{background:#FFFFFF;border:1px solid #E8EEF5;border-radius:18px;padding:8px 8px 12px;box-shadow:0 8px 24px rgba(15,39,71,0.04)}
+.sg3-all h3{margin:12px 16px 8px;font-size:16px;font-weight:700;color:#0F2747}
+.sg3-row{border-radius:14px;margin:6px 8px;background:#FFFFFF}
+.sg3-btn{width:100%;display:grid;grid-template-columns:44px 1fr auto auto 36px 28px;align-items:center;gap:12px;border:0;background:transparent;text-align:left;padding:12px 10px;cursor:pointer;border-radius:14px}
+.sg3-print-one{width:36px;height:36px;border:1px solid #E5EAF1;background:#fff;border-radius:10px;display:inline-grid;place-items:center;cursor:pointer;color:#0F2747}
+.sg3-print-one.is-off{opacity:.4;cursor:not-allowed;color:#94A3B8}
+.sg3-print{display:inline-flex;align-items:center;gap:8px}
+.sg3-btn:disabled{cursor:default}
+.sg3-tile{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700}
+.sg3-tile.ok{background:#DCFCE7;color:#16A34A}
+.sg3-tile.bad{background:#FEE2E2;color:#DC2626}
+.sg3-tile.lock{background:#F1F5F9;color:#94A3B8}
+.sg3-cname{font-weight:650;font-size:15px;color:#0F2747;margin:0}
+.sg3-cmeta{margin:2px 0 0;font-size:12px;color:#64748B}
+.sg3-avgnum{font-weight:700;font-size:16px;color:#0F2747;min-width:48px;text-align:right}
+.sg3-pill{display:inline-flex;align-items:center;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:650}
+.sg3-pill.ok{background:#DCFCE7;color:#15803D}
+.sg3-pill.bad{background:#FEE2E2;color:#B91C1C}
+.sg3-pill.gray{background:#F1F5F9;color:#64748B}
+.sg3-chev{color:#94A3B8;transition:transform .15s ease}
+.sg3-chev.open{transform:rotate(180deg)}
+.sg3-break{padding:0 12px 14px}
+.sg3-scroll{overflow-x:auto}
+.sg3-table{width:100%;min-width:520px;border-collapse:separate;border-spacing:0;font-size:13px}
+.sg3-table th{text-align:left;color:#64748B;font-weight:600;padding:8px 10px;border-bottom:1px solid #E8EEF5}
+.sg3-table td{padding:10px;border-bottom:1px solid #F1F5F9;color:#0F2747}
+.sg3-table .num{text-align:right;font-variant-numeric:tabular-nums}
+.sg3-w{display:inline-block;background:#DBEAFE;color:#1D4ED8;border-radius:999px;padding:3px 8px;font-weight:650;font-size:12px}
+.sg3-sc{display:inline-block;border-radius:999px;padding:3px 8px;font-weight:650;font-size:12px}
+.sg3-sc.hi{background:#DCFCE7;color:#15803D}
+.sg3-sc.mid{background:#FEF3C7;color:#B45309}
+.sg3-sc.lo{background:#FEE2E2;color:#B91C1C}
+.sg3-final.ok td{background:#E8F8EE;font-weight:700}
+.sg3-final.bad td{background:#FDECEC;font-weight:700}
+.sg3-locknote{margin:0 12px 12px;font-size:13px;color:#94A3B8}
+.sg3-sk{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.sg3-sk-b{height:96px;border-radius:16px;background:#F1F5F9;animation:sg3pulse 1.2s ease-in-out infinite}
+.sg3-sk-l{height:220px;border-radius:18px;background:#F8FAFC;animation:sg3pulse 1.2s ease-in-out infinite}
+@keyframes sg3pulse{0%,100%{opacity:.55}50%{opacity:1}}
+.sg3-fail{padding:24px}
+.sg3-notes{color:#6B7280;font-size:12px;margin:0 0 8px}
+.sg3-popup{color:#B91C1C;font-size:13px}
+@media (max-width:800px){
+  .sg3-cards,.sg3-sk{grid-template-columns:1fr}
+  .sg3-btn{grid-template-columns:36px 1fr auto;grid-template-rows:auto auto}
+  .sg3-avgnum{grid-column:2}
+  .sg3-chev{grid-column:3;grid-row:1}
+}

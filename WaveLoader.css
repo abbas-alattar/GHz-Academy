@@ -1,0 +1,19 @@
+.wl { position:relative; display:grid; place-items:center; margin:24px auto; gap:12px; }
+.wl-page { min-height:180px; width:100%; }
+.wl-inline { width:40px; height:24px; margin:8px auto; }
+.wl-button { width:28px; height:16px; margin:0 auto; display:inline-grid; vertical-align:middle; }
+.wl-wave { width:56px; height:24px; overflow:visible; }
+.wl-inline .wl-wave { width:40px; height:18px; }
+.wl-button .wl-wave { width:28px; height:12px; }
+.wl-path {
+  stroke-dasharray: 18 64;
+  animation: wlTravel 1.1s ease-in-out infinite;
+}
+.wl-cap { display:block; margin:0; font-size:.82rem; color:#64748B; }
+@keyframes wlTravel {
+  0% { stroke-dashoffset: 82; }
+  100% { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wl-path { animation: none; stroke-dasharray: none; }
+}

@@ -1,0 +1,230 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function userRole() { return userDoc().role; }
+    function isActive() { return isSignedIn() && userDoc().active != false; }
+    function isAdmin() { return isSignedIn() && isActive() && userRole() == 'admin'; }
+    function isTrainer() { return isSignedIn() && isActive() && userRole() == 'trainer'; }
+    function courseOpen(courseId) {
+      return get(/databases/$(database)/documents/courses/$(courseId)).data.status == 'Open';
+    }
+    function trains(courseId) {
+      return isTrainer() && request.auth.uid in get(/databases/$(database)/documents/courses/$(courseId)).data.trainerIds;
+    }
+    function enrolled(courseId) {
+      return exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + courseId));
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if (isOwner(uid)
+          && request.resource.data.role == 'student'
+          && request.resource.data.email == request.auth.token.email)
+        || (isAdmin() && request.resource.data.role in ['trainer', 'student', 'admin']);
+      allow update: if isAdmin()
+        || (isOwner(uid)
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.email == resource.data.email
+          && !('role' in request.resource.data.diff(resource.data).affectedKeys())
+          && !('email' in request.resource.data.diff(resource.data).affectedKeys()));
+      allow delete: if isAdmin();
+    }
+
+    match /courses/{id} {
+      allow read: if resource.data.status != 'Draft'
+        || isAdmin()
+        || (isSignedIn() && isActive() && userRole() == 'trainer'
+            && request.auth.uid in resource.data.trainerIds);
+      allow write: if isAdmin();
+    }
+
+    match /settings/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /registrations/{id} {
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn()
+        && isActive()
+        && request.auth.token.email_verified == true
+        && request.resource.data.uid == request.auth.uid
+        && id == request.auth.uid + '_' + request.resource.data.courseId
+        && request.resource.data.status == 'pending_payment'
+        && courseOpen(request.resource.data.courseId);
+      allow update: if isAdmin()
+        || (isSignedIn()
+          && isActive()
+          && resource.data.uid == request.auth.uid
+          && resource.data.status == 'pending_payment'
+          && (
+            (request.resource.data.status == 'payment_submitted'
+              && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['status', 'paymentMethod', 'paymentRef', 'paymentDate']))
+            || (request.resource.data.status == 'cancelled'
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
+          )
+          && request.resource.data.status != 'enrolled')
+        || (isSignedIn()
+          && isActive()
+          && request.auth.token.email_verified == true
+          && resource.data.uid == request.auth.uid
+          && resource.data.status == 'cancelled'
+          && request.resource.data.status == 'pending_payment'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'createdAt'])
+          && courseOpen(resource.data.courseId));
+      allow delete: if isAdmin();
+    }
+
+    match /enrollments/{id} {
+      allow read: if isSignedIn() && (
+        resource.data.uid == request.auth.uid
+        || isAdmin()
+        || trains(resource.data.courseId)
+      );
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /assignments/{id} {
+      allow read: if isAdmin()
+        || trains(resource.data.courseId)
+        || (resource.data.status == 'Published' && enrolled(resource.data.courseId));
+      allow create: if isAdmin() || trains(request.resource.data.courseId);
+      allow update, delete: if isAdmin() || trains(resource.data.courseId);
+    }
+
+    match /submissions/{id} {
+      allow read: if isAdmin()
+        || trains(resource.data.courseId)
+        || (isOwner(resource.data.uid) && enrolled(resource.data.courseId));
+      allow create: if isSignedIn()
+        && isActive()
+        && request.auth.token.email_verified == true
+        && request.resource.data.uid == request.auth.uid
+        && id == request.resource.data.assignmentId + '_' + request.auth.uid
+        && enrolled(request.resource.data.courseId)
+        && request.resource.data.status == 'submitted'
+        && !('grade' in request.resource.data)
+        && !('feedback' in request.resource.data)
+        && !('gradedBy' in request.resource.data)
+        && !('gradedAt' in request.resource.data);
+      allow update: if isAdmin()
+        || (isOwner(resource.data.uid)
+          && isActive()
+          && resource.data.status == 'submitted'
+          && request.resource.data.status == 'submitted'
+          && enrolled(resource.data.courseId)
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['text', 'link', 'note', 'files', 'fileCount', 'submittedAt', 'studentName'])
+          && !('grade' in request.resource.data.diff(resource.data).affectedKeys())
+          && !('feedback' in request.resource.data.diff(resource.data).affectedKeys())
+          && !('gradedBy' in request.resource.data.diff(resource.data).affectedKeys())
+          && !('gradedAt' in request.resource.data.diff(resource.data).affectedKeys()))
+        || (trains(resource.data.courseId)
+          && request.resource.data.status == 'graded'
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['grade', 'feedback', 'status', 'gradedBy', 'gradedAt']))
+        || (trains(resource.data.courseId)
+          && resource.data.status == 'graded'
+          && request.resource.data.status == 'submitted'
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['grade', 'feedback', 'status', 'gradedBy', 'gradedAt']));
+      allow delete: if isAdmin();
+    }
+
+    match /submissionFiles/{id} {
+      allow get: if isSignedIn() && (
+        isAdmin()
+        || resource.data.uid == request.auth.uid
+        || trains(resource.data.courseId)
+      );
+      allow create: if isSignedIn()
+        && isActive()
+        && request.auth.token.email_verified == true
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid','assignmentId','courseId','index','fileName','mimeType','size','data','createdAt'])
+        && request.resource.data.index is number
+        && request.resource.data.index >= 0
+        && request.resource.data.index <= 2
+        && id == request.resource.data.assignmentId + '_' + request.auth.uid + '_' + request.resource.data.index
+        && enrolled(request.resource.data.courseId);
+      allow update: if isOwner(resource.data.uid) && isActive()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['fileName','mimeType','size','data','createdAt','index']);
+      allow delete: if isAdmin() || isOwner(resource.data.uid);
+      allow list: if false;
+    }
+
+    match /sessions/{id} {
+      allow read: if isAdmin()
+        || trains(resource.data.courseId)
+        || enrolled(resource.data.courseId);
+      allow create: if isAdmin() || trains(request.resource.data.courseId);
+      allow update: if (isAdmin() || trains(resource.data.courseId))
+        && request.resource.data.courseId == resource.data.courseId;
+      allow delete: if isAdmin() || trains(resource.data.courseId);
+    }
+
+    match /inquiries/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['name','email','courseId','courseTitle','message','status','createdAt','source'])
+        && request.resource.data.status == 'new'
+        && request.resource.data.source == 'landing'
+        && request.resource.data.name is string
+        && request.resource.data.email is string
+        && request.resource.data.message is string;
+      allow read: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','adminNote','handledBy','handledAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /gradeSchemes/{courseId} {
+      allow get: if isAdmin() || trains(courseId) || enrolled(courseId);
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /gradeScores/{id} {
+      allow get: if isAdmin()
+        || (resource != null && trains(resource.data.courseId))
+        || (resource != null && isOwner(resource.data.uid) && enrolled(resource.data.courseId))
+        || (resource == null && isSignedIn() && id.matches(request.auth.uid + '_.*'));
+      allow list: if isAdmin()
+        || trains(resource.data.courseId)
+        || (isOwner(resource.data.uid) && enrolled(resource.data.courseId));
+      allow create, update: if isAdmin()
+        || (trains(request.resource.data.courseId)
+          && request.resource.data.uid is string
+          && id == request.resource.data.uid + '_' + request.resource.data.courseId);
+      allow delete: if isAdmin();
+    }
+
+    match /profileFiles/{id} {
+      allow read: if isSignedIn() && (
+        isAdmin()
+        || (resource != null && isOwner(resource.data.uid))
+        || (resource == null && isOwner(id.split('_')[0]))
+      );
+      allow create, update: if isSignedIn() && isActive() && isOwner(request.resource.data.uid)
+        && id == request.auth.uid + '_' + request.resource.data.type
+        && request.resource.data.type in ['cv', 'id']
+        && request.resource.data.keys().hasOnly(['uid','type','fileName','mimeType','size','data','updatedAt']);
+      allow delete: if isSignedIn() && isActive() && (
+        isAdmin() || (resource != null && isOwner(resource.data.uid))
+      );
+    }
+
+    match /attendance/{id} {
+      allow read: if isAdmin()
+        || trains(resource.data.courseId)
+        || isOwner(resource.data.uid);
+      allow create, update: if isAdmin() || trains(request.resource.data.courseId);
+      allow delete: if isAdmin() || trains(resource.data.courseId);
+    }
+  }
+}

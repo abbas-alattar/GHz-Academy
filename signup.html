@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create an account — GHz Academy</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --navy:#0e3a5d; --blue:#2563eb; --ink:#0f172a; --muted:#475569; --line:#e2e8f0; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:"IBM Plex Sans",sans-serif; background:#f6f8fb; color:var(--ink); min-height:100vh; }
+    h1 { font-family:"Space Grotesk",sans-serif; font-size:1.8rem; color:var(--navy); margin-bottom:8px; }
+    nav {
+      position:sticky; top:14px; z-index:90; display:flex; justify-content:space-between; align-items:center;
+      width:min(560px, calc(100% - 32px)); margin:0 auto; padding:10px 18px;
+      background:#fff; border:1px solid #e8eef5; border-radius:999px; box-shadow:0 12px 40px rgba(15,23,42,.1);
+    }
+    .brand { display:flex; align-items:center; gap:8px; text-decoration:none; font-weight:700; font-family:"Space Grotesk",sans-serif; }
+    .brand svg { width:28px; height:18px; }
+    .brand .ghz { color:var(--navy); }
+    .brand .acad { color:#0284c7; }
+    .back { color:var(--navy); text-decoration:none; font-weight:600; font-size:.9rem; }
+    main { width:min(480px, 92%); margin:48px auto 80px; background:#fff; border:1px solid var(--line); border-radius:18px; padding:28px; }
+    p { color:var(--muted); margin-bottom:22px; line-height:1.6; }
+    form { display:grid; gap:10px; }
+    label { font-size:.82rem; }
+    input { width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:#f8fafc; font-family:inherit; }
+    .btn { display:inline-flex; justify-content:center; margin-top:8px; background:var(--blue); color:#fff; border:0; border-radius:8px; padding:12px 22px; font-weight:600; cursor:pointer; font-family:inherit; }
+    .ok { display:none; color:#166534; background:#ecfdf3; border-radius:12px; padding:16px; }
+    .note { font-size:.82rem; color:#b45309; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="brand" href="./index.html" aria-label="GHz Academy"><svg viewBox="0 0 40 22" fill="none" aria-hidden="true"><path d="M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0" stroke="#0284c7" stroke-width="2.6" stroke-linecap="round"/></svg><span class="ghz">GHz</span> <span class="acad">Academy</span></a>
+    <a class="back" href="./index.html">Home</a>
+  </nav>
+  <main>
+    <h1>Create an account</h1>
+    <p>Sign up with your name and email. This is a demo form — we save it on this device only until a live account system is connected.</p>
+    <form id="signupForm">
+      <label for="name">Full name</label>
+      <input id="name" name="name" required autocomplete="name" />
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required autocomplete="email" />
+      <label style="display:flex;gap:8px;align-items:flex-start">
+        <input id="agree" type="checkbox" required style="width:auto;margin-top:3px" />
+        <span>I agree to the <a href="./terms/" target="_blank" rel="noopener noreferrer">Terms & Conditions</a> and <a href="./privacy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a></span>
+      </label>
+      <button class="btn" type="submit">Create account</button>
+      <p class="note">No live account is created yet. You will see a confirmation here.</p>
+    </form>
+    <div class="ok" id="ok">Account request saved on this device. Next, register for your course from Explore Courses.</div>
+  </main>
+  <script>
+    document.getElementById("signupForm").onsubmit = (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      localStorage.setItem("ghz-signup", JSON.stringify(data));
+      e.target.style.display = "none";
+      document.getElementById("ok").style.display = "block";
+    };
+  </script>
+</body>
+</html>
+
+<script>/*aha-img-guard v2.1:user-relative-no-stock*/(function(){var API="https://skycastle.ai/api/img-search?q=";var bad=/images\.unsplash\.com|source\.unsplash\.com|picsum\.photos|loremflickr\.com|placekitten/;function tile(i){try{var d=document.createElement("div");d.style.cssText="width:100%;height:100%;min-height:120px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e9dfd2,#cdb89a);color:#6b5d49;font:600 14px system-ui;text-align:center;padding:10px;box-sizing:border-box";d.textContent=i.getAttribute("alt")||"";if(i.parentNode)i.parentNode.replaceChild(d,i);}catch(e){}}function real(i){var q=(i.getAttribute("alt")||"").trim();if(!q){tile(i);return;}fetch(API+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(d){if(d&&d.url){i.onerror=function(){tile(i);};i.src=d.url;}else tile(i);}).catch(function(){tile(i);});}function userRel(sa){return!!sa&&!/^https?:\/\//i.test(sa)&&!/^\/\//.test(sa)&&!/^data:/i.test(sa)&&!/^blob:/i.test(sa);}function chk(i){if(i.__ag)return;try{if(i.closest&&i.closest("nav,footer"))return;if(i.closest&&i.closest("header")&&/\b(logo|brand|icon|wordmark)\b/i.test(i.getAttribute("alt")||""))return;}catch(e){}var s=(i.currentSrc||i.src||i.getAttribute("src")||"").trim();var sa=(i.getAttribute("src")||"").trim();var alt=(i.getAttribute("alt")||"").trim();if(bad.test(s)){i.__ag=1;real(i);return;}if(/^https?:\/\//.test(s)){i.__ag=1;i.addEventListener("error",function(){real(i);});return;}if(!sa){if(alt){i.__ag=1;real(i);}return;}i.__ag=1;var fail=function(){if(userRel(sa))tile(i);else real(i);};if(i.complete&&i.naturalWidth===0){fail();return;}i.addEventListener("error",fail);}function scan(){document.querySelectorAll("img").forEach(chk);}try{new MutationObserver(scan).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["src"]});}catch(e){}document.addEventListener("DOMContentLoaded",scan);window.addEventListener("load",function(){scan();setTimeout(scan,800);setTimeout(scan,2000);});})();</script>

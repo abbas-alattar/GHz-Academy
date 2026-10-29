@@ -1,0 +1,91 @@
+.admin-reports.arv2 { background:#F4F7FB; color:#0F2747; display:grid; gap:16px; animation:arv2in .35s ease both; }
+.admin-reports .arv2-sec-err { padding:8px 0; }
+.admin-reports .arv2-err { color:#DC2626; font-size:13px; }
+@media (prefers-reduced-motion: reduce) { .arv2,.arv2 * { animation:none !important; } }
+@keyframes arv2in { from { opacity:0; transform:translateY(8px);} to { opacity:1; transform:none;} }
+.admin-reports.arv2 h2 { margin:0; font-size:26px; font-weight:700; font-family:"Space Grotesk",sans-serif; }
+.admin-reports.arv2 .sub { margin:6px 0 0; color:#64748B; font-size:14px; }
+.admin-reports .arv2-head { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start; }
+.admin-reports .arv2-act { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.admin-reports .arv2-csv { background:#fff; border:1px solid #CBD5E1; border-radius:10px; padding:9px 14px; font:inherit; font-weight:600; cursor:pointer; }
+.admin-reports .arv2-sel { height:40px; border:1px solid #CBD5E1; border-radius:12px; padding:0 12px; font:inherit; background:#fff; }
+.admin-reports .arv2-pills { display:flex; gap:8px; flex-wrap:wrap; }
+.admin-reports .arv2-pill { border:1px solid #E5EAF1; background:#fff; border-radius:999px; padding:8px 12px; font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.admin-reports .arv2-pill.on { background:#0F2747; color:#fff; }
+.admin-reports .arv2-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.admin-reports .arv2-stat { background:#fff; border:1px solid #E5EAF1; border-radius:16px; padding:14px; display:flex; gap:12px; align-items:center; }
+.admin-reports .arv2-ic { width:36px; height:36px; border-radius:10px; display:grid; place-items:center; flex-shrink:0; }
+.admin-reports .arv2-ic svg { display:block; }
+.admin-reports .arv2-stat strong { display:block; font-size:28px; }
+.admin-reports .arv2-stat span, .admin-reports .arv2-note { color:#64748B; font-size:12px; }
+.admin-reports .arv2-card { background:#fff; border:1px solid #E5EAF1; border-radius:16px; overflow:hidden; }
+.admin-reports .arv2-card-h { display:flex; align-items:center; gap:8px; padding:14px 16px 0; }
+.admin-reports .arv2-card-h h3 { margin:0; font-size:16px; }
+.admin-reports .arv2-badge { background:#0F2747; color:#fff; border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; }
+.admin-reports .arv2-empty { padding:16px; color:#64748B; }
+.admin-reports .arv2-tot { font-weight:700; background:#F8FAFC; cursor:default; }
+.admin-reports .arv2-th, .admin-reports .arv2-row { display:grid; gap:8px; align-items:center; }
+.admin-reports .arv2-th-a { grid-template-columns:1.5fr .9fr .55fr .7fr .7fr .55fr .7fr; }
+.admin-reports .arv2-th-c { grid-template-columns:1.3fr .8fr .5fr .65fr .65fr .5fr .7fr .65fr .7fr; }
+.admin-reports .arv2-th { padding:12px 16px; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:#64748B; font-weight:700; border-bottom:1px solid #EEF2F7; }
+.admin-reports .arv2-row { padding:12px 16px; border-bottom:1px solid #EEF2F7; cursor:pointer; }
+.admin-reports .arv2-row:hover { background:#F8FAFC; }
+.admin-reports .arv2-ct { display:flex; gap:10px; align-items:center; min-width:0; }
+.admin-reports .arv2-edge { width:4px; height:36px; border-radius:4px; flex-shrink:0; }
+.admin-reports .arv2-ct p { margin:0; font-weight:600; }
+.admin-reports .arv2-st { display:inline-block; border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; }
+.admin-reports .arv2-st.open { background:#DCFCE7; color:#166534; }
+.admin-reports .arv2-st.soon { background:#DBEAFE; color:#1D4ED8; }
+.admin-reports .arv2-st.gray { background:#E2E8F0; color:#475569; }
+.admin-reports .arv2-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+.admin-reports .arv2-g { color:#16A34A; } .arv2-a { color:#D97706; } .arv2-r { color:#DC2626; } .arv2-z { color:#94A3B8; }
+.admin-reports .arv2-risk { background:#fff; border:1px solid #FDE68A; border-radius:16px; padding:16px; }
+.admin-reports .arv2-risk h3 { margin:0 0 4px; display:flex; gap:8px; align-items:center; }
+.admin-reports .arv2-ok { color:#166534; background:#DCFCE7; border-radius:12px; padding:16px; }
+.admin-reports .arv2-rr { display:flex; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid #FEF3C7; flex-wrap:wrap; }
+.admin-reports .arv2-av { width:32px; height:32px; border-radius:50%; display:grid; place-items:center; color:#fff; font-size:11px; font-weight:700; }
+.admin-reports .arv2-rp { border-radius:999px; padding:3px 8px; font-size:11px; font-weight:700; }
+.admin-reports .arv2-rp.a { background:#FEF3C7; color:#B45309; }
+.admin-reports .arv2-rp.r { background:#FEE2E2; color:#DC2626; }
+.admin-reports .arv2-view { background:#fff; border:1px solid #E5EAF1; border-radius:8px; padding:7px 10px; font:inherit; cursor:pointer; margin-left:auto; }
+.admin-reports .arv2-classic { background:none; border:0; color:#64748B; text-decoration:underline; cursor:pointer; font:inherit; font-size:12px; }
+.admin-reports .arv2-sk { height:16px; background:linear-gradient(90deg,#E5EAF1,#F8FAFC,#E5EAF1); background-size:200% 100%; animation:arv2sk 1.2s infinite; border-radius:6px; }
+@keyframes arv2sk { to { background-position:-200% 0; } }
+.admin-reports .arv2-err { color:#DC2626; font-size:13px; }
+.admin-reports .arv2-dim { position:fixed; inset:0; background:rgba(7,26,51,.35); z-index:54; }
+.admin-reports .arv2-draw { position:fixed; inset:0 0 0 auto; width:min(480px,100%); background:#fff; z-index:55; padding:20px; overflow:auto; box-shadow:-12px 0 40px rgba(15,39,71,.16); }
+@media (max-width: 1100px) {
+  .admin-reports .arv2-stats { grid-template-columns:1fr 1fr; }
+  .admin-reports .arv2-th { display:none; }
+  .admin-reports .arv2-row { grid-template-columns:1fr; }
+}
+
+.admin-reports .arv2-card { overflow-x: auto; }
+.admin-reports .arv2-th-a, .admin-reports .arv2-th.arv2-th-a, .admin-reports .arv2-row.arv2-th-a { min-width: 1000px; }
+.admin-reports .arv2-th-c, .admin-reports .arv2-th.arv2-th-c, .admin-reports .arv2-row.arv2-th-c { min-width: 1100px; }
+.rp5-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width: 900px) { .rp5-grid { grid-template-columns:1fr; } }
+.rp5-card { background:#fff; border:1px solid #E5EAF1; border-radius:16px; padding:16px; box-shadow:0 8px 24px rgba(15,39,71,.06); transition:transform .18s ease, box-shadow .18s ease; }
+.rp5-card:hover { transform:translateY(-3px); box-shadow:0 12px 28px rgba(15,39,71,.1); }
+.rp5-head { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+.rp5-title { margin:0; font-weight:700; color:#0F2747; }
+.rp5-note { margin:2px 0 0; font-size:12px; color:#64748B; }
+.rp5-ringwrap { position:relative; width:140px; height:140px; margin:4px auto 8px; }
+.rp5-center { position:absolute; inset:0; display:grid; place-items:center; text-align:center; }
+.rp5-center strong { font-size:28px; color:#0F2747; }
+.rp5-center small { font-size:14px; font-weight:600; color:#64748B; }
+.rp5-nodata { font-size:12px; color:#94A3B8; }
+.rp5-arc { animation:rp5draw .8s ease both; }
+.rp5-donut { animation:rp5off .8s ease both; }
+@keyframes rp5draw { from { opacity:.4;} to { opacity:1;} }
+@keyframes rp5off { from { stroke-dashoffset: 260; } to { } }
+@media (prefers-reduced-motion: reduce) { .rp5-arc, .rp5-card { animation:none !important; transition:none !important; } .rp5-card:hover { transform:none; } }
+.rp5-by { display:grid; gap:6px; }
+.rp5-bylab { margin:8px 0 0; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#94A3B8; }
+.rp5-barrow { display:grid; grid-template-columns:1fr 90px 42px; gap:8px; align-items:center; }
+.rp5-bt { font-size:12px; color:#0F2747; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rp5-btrack { height:6px; background:#EEF2F7; border-radius:99px; overflow:hidden; }
+.rp5-bfill { height:100%; border-radius:99px; }
+.rp5-bv { font-size:11px; font-weight:700; color:#475569; text-align:right; }
+.rp5-more { background:none; border:0; color:#2563EB; font:inherit; font-size:12px; font-weight:700; cursor:pointer; text-align:left; padding:4px 0; }
+@media print { .rp5-card { box-shadow:none; transform:none; } .rp5-arc { animation:none; } }

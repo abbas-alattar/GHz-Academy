@@ -1,0 +1,162 @@
+/* Student portal visual theme — no data/query changes */
+body.stu-v3 {
+  background: #F4F7FB;
+}
+body.stu-v3 .content {
+  max-width: 1440px;
+  margin: 0;
+  width: 100%;
+  padding: 28px 32px;
+}
+body.stu-v3 .uni-dash,
+body.stu-v3 .content > section,
+body.stu-v3 #studentDashRoot,
+body.stu-v3 #browseV2Root,
+body.stu-v3 #myCoursesV2Root,
+body.stu-v3 #regsV2Root,
+body.stu-v3 #hwV2Root,
+body.stu-v3 #attV2Root,
+body.stu-v3 #schedV2Root,
+body.stu-v3 #profileV2Root {
+  max-width: 1440px;
+  width: 100%;
+}
+body.stu-v3 .content {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 24px;
+}
+body.stu-v3 .content > * { grid-column: 1 / -1; }
+body.stu-v3 h1, body.stu-v3 .top h1 { font-size: 28px; font-weight: 700; color: #0F2747; }
+body.stu-v3 h2, body.stu-v3 .uni-card h3, body.stu-v3 .sdash-card h3 { font-size: 18px; font-weight: 600; color: #0F2747; }
+body.stu-v3, body.stu-v3 p, body.stu-v3 .uni-stat strong { font-size: 15px; }
+body.stu-v3 .uni-stat span, body.stu-v3 .uni-empty, body.stu-v3 .caption { font-size: 13px; color: #64748B; }
+body.stu-v3 .uni-stat strong { font-size: 28px; font-weight: 700; }
+body.stu-v3 .uni-card, body.stu-v3 .sdash-card, body.stu-v3 .uni-stat, body.stu-v3 .kpi, body.stu-v3 .cv2-rev, body.stu-v3 .gv2-card {
+  border-radius: 16px;
+  border: 1px solid #E5EAF1;
+  box-shadow: 0 1px 2px rgba(15,39,71,.06), 0 8px 24px rgba(15,39,71,.06);
+  background: #FFFFFF;
+}
+body.stu-v3 .btn, body.stu-v3 input, body.stu-v3 select, body.stu-v3 textarea {
+  border-radius: 10px;
+}
+body.stu-v3 .uni-card, body.stu-v3 .sdash-card, body.stu-v3 .uni-stat, body.stu-v3 .kpi, body.stu-v3 .course-card, body.stu-v3 .mc2-card {
+  animation: none;
+}
+body.stu-v3 .uni-stats .uni-stat:nth-child(1), body.stu-v3 .sdash-stats a:nth-child(1) { animation-delay: 0ms; }
+body.stu-v3 .uni-stats .uni-stat:nth-child(2), body.stu-v3 .sdash-stats a:nth-child(2) { animation-delay: 60ms; }
+body.stu-v3 .uni-stats .uni-stat:nth-child(3), body.stu-v3 .sdash-stats a:nth-child(3) { animation-delay: 120ms; }
+body.stu-v3 .uni-stats .uni-stat:nth-child(4), body.stu-v3 .sdash-stats a:nth-child(4) { animation-delay: 180ms; }
+@keyframes stuFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+body.stu-v3 .uni-stat, body.stu-v3 .uni-card, body.stu-v3 .sdash-card, body.stu-v3 .kpi {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+body.stu-v3 .uni-stat:hover, body.stu-v3 .uni-card:hover, body.stu-v3 a.kpi:hover, body.stu-v3 a.uni-stat:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(15,39,71,.14);
+}
+body.stu-v3 a.uni-stat, body.stu-v3 a.kpi, body.stu-v3 a.sdash-tile { cursor: pointer; }
+body.stu-v3 .btn, body.stu-v3 .out {
+  position: relative; overflow: hidden; transition: transform .12s ease;
+}
+body.stu-v3 .btn:active, body.stu-v3 .out:active { transform: scale(0.97); }
+body.stu-v3 .btn::after {
+  content: ""; position: absolute; inset: 0; background: radial-gradient(circle at var(--rx,50%) var(--ry,50%), rgba(255,255,255,.35), transparent 55%);
+  opacity: 0; transition: opacity .3s ease; pointer-events: none;
+}
+body.stu-v3 .btn:active::after { opacity: 1; }
+body.stu-v3 .uni-hero::after { animation-duration: 12s; }
+body.stu-v3 .uni-hero .stu-orb { display: none !important; }
+body.stu-v3 .stu-orb-a { width: 140px; height: 140px; left: 12%; top: 18%; }
+body.stu-v3 .stu-orb-b { width: 90px; height: 90px; right: 22%; bottom: 12%; animation-delay: -4s; background: rgba(255,255,255,.12); }
+body.stu-v3 .stu-orb-c { width: 70px; height: 70px; right: 8%; top: 28%; animation-delay: -7s; background: rgba(56,189,248,.16); }
+@keyframes stuFloat {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+body.stu-v3 .uni-emptycard, body.stu-v3 .sdash-card:has(> p:only-of-type) {
+  min-height: 72px; height: 72px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+}
+body.stu-v3 .uni-emptycard .uni-soonico, body.stu-v3 .uni-emptycard .uni-calpulse {
+  width: 44px; height: 44px; margin: 0; flex: 0 0 44px;
+}
+body.stu-v3 .side nav {
+  display: grid; gap: 4px; margin-top: 20px; flex: 0 0 auto;
+}
+body.stu-v3 .side nav a {
+  display: flex; align-items: center; gap: 10px; position: relative; padding: 0 12px; height: 40px; min-height: 40px;
+  margin: 0; line-height: 1; font-size: 14px;
+  transition: color .16s ease, background .16s ease;
+}
+body.stu-v3 .side nav a::before {
+  content: ""; width: 20px; height: 20px; flex: 0 0 20px;
+  background: #8FA3BF;
+  -webkit-mask: var(--ico) center / 20px 20px no-repeat;
+  mask: var(--ico) center / 20px 20px no-repeat;
+}
+body.stu-v3 .side nav a:nth-child(1) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='7' height='7' rx='1'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1'/%3E%3Crect x='14' y='14' width='7' height='7' rx='1'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:nth-child(2) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpolygon points='12,6 14,12 12,18 10,12'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:nth-child(3) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Cpath d='M4 19V5h7v14H4zM13 19V8h7v11h-7z'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:nth-child(4) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Crect x='6' y='3' width='12' height='18' rx='2'/%3E%3Cpath d='M9 8h6M9 12h6M9 16h4'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:nth-child(5) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Cpath d='M14 3H6v18h12V8l-4-5z'/%3E%3Cpath d='M14 3v5h5M9 13l2 2 4-4'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:nth-child(6) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 16h.01M9.1 9a3 3 0 115.8 1c0 2-3 2-3 4'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:nth-child(7) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M8 21h8M12 12v9'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:nth-child(8) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:nth-child(9) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M8 12l3 3 5-6'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:nth-child(10) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Cpath d='M3 11v2h2l8 5V6L5 11H3zM18 8a4 4 0 010 8'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:nth-child(11) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:nth-child(12) { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='1.8' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='8' r='3.5'/%3E%3Cpath d='M5 20c1.5-4 4-6 7-6s5.5 2 7 6'/%3E%3C/svg%3E"); }
+body.stu-v3 .side nav a:hover { transform: none; color: #F8FAFC; }
+body.stu-v3 .side nav a.on {
+  color: #FFFFFF; background: #1E3A5F; border-radius: 10px;
+}
+body.stu-v3 .side nav a.on::before { background: #38BDF8; }
+body.stu-v3 .side nav a.on::after {
+  content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 4px;
+  background: #38BDF8; border-radius: 0 4px 4px 0;
+}
+body.stu-v3 .side {
+  display: flex; flex-direction: column;
+  background: linear-gradient(180deg, #0B1B33, #0F2747);
+}
+body.stu-v3 .side nav { flex: 0 0 auto; }
+body.stu-v3.stu-collapsed .portal { grid-template-columns: 72px minmax(0, 1fr); }
+body.stu-v3.stu-collapsed .side .ghz, body.stu-v3.stu-collapsed .side .acad,
+body.stu-v3.stu-collapsed .side nav a { font-size: 0; gap: 0; justify-content: center; padding-left: 8px; padding-right: 8px; }
+body.stu-v3.stu-collapsed .side nav a::before { margin: 0; }
+body.stu-v3.stu-collapsed .stu-usercard span, body.stu-v3.stu-collapsed .stu-usercard strong { display: none; }
+body.stu-v3 .stu-collapse {
+  position: absolute; top: 22px; right: 12px; width: 24px; height: 24px; border-radius: 50%;
+  border: 1px solid #1E3A5F; background: #0F2747; color: #94A3B8; cursor: pointer; font: inherit; font-size: 14px;
+  z-index: 6; padding: 0; line-height: 22px; text-align: center;
+}
+body.stu-v3 .side { position: sticky; }
+body.stu-v3 .stu-usercard {
+  display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px;
+  border-radius: 12px; background: #0F2747; color: #fff;
+}
+body.stu-v3 .stu-usercard i {
+  width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  background: #2563EB; font-style: normal; font-weight: 700; font-size: 12px;
+}
+body.stu-v3 .stu-usercard strong { display: block; font-size: 13px; }
+body.stu-v3 .stu-usercard span { font-size: 11px; color: #94A3B8; }
+body.stu-v3 .stu-shimmer {
+  background: linear-gradient(90deg, #EEF2F7 0%, #F8FAFC 45%, #EEF2F7 90%);
+  background-size: 200% 100%; animation: stuShimmer 1.2s linear infinite; border-radius: 16px; min-height: 72px;
+}
+@keyframes stuShimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+body.stu-v3 .uni-stat::after {
+  transition: transform .9s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.stu-v3 .uni-card, body.stu-v3 .uni-stat, body.stu-v3 .stu-orb, body.stu-v3 .uni-hero::after,
+  body.stu-v3 .btn, body.stu-v3 .stu-shimmer {
+    animation: none !important; transition: none !important;
+  }
+}
+@media (max-width: 900px) {
+  body.stu-v3 .portal { grid-template-columns: 1fr; }
+  body.stu-v3.stu-collapsed .portal { grid-template-columns: 1fr; }
+}

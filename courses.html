@@ -1,0 +1,65 @@
+<!-- aha-build-id: bmvt74pfrdqnpxn42 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Courses — GHz Academy</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <meta name="description" content="Explore GHz Academy telecom courses — RF, 5G, antennas, fiber, and microwave. Open, coming soon, and closed registrations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./DeliveryDays.css" />
+  <link rel="stylesheet" href="./PublicCoursesV1.css" />
+  <link rel="stylesheet" href="./CourseCard.css" />
+  <style>
+    .land-auth-login { color:#fff; text-decoration:none; font-weight:600; margin-right:10px; }
+    .btn-blue { background:#2563EB; color:#fff; text-decoration:none; border-radius:999px; padding:8px 14px; font-weight:600; }
+    .btn-blue:hover { background:#1D4ED8; }
+    .btn-blue:active { background:#1E40AF; }
+    .btn-blue:focus-visible { outline:2px solid #93C5FD; outline-offset:2px; }
+    .land-chip { display:inline-flex; align-items:center; gap:8px; color:#fff; text-decoration:none; }
+    .land-av { width:32px; height:32px; border-radius:50%; background:#1d4ed8; display:grid; place-items:center; font-size:.75rem; font-weight:700; }
+    .land-out { background:transparent; border:0; color:#fff; cursor:pointer; }
+    .land-auth-ph { width:88px; height:32px; }
+    .nav-right { display:flex; align-items:center; gap:8px; }
+  </style>
+</head>
+<body class="pc1-page">
+  <nav class="pc1-nav">
+    <a class="pc1-brand" href="./index.html"><svg viewBox="0 0 40 22" fill="none" aria-hidden="true"><path d="M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0" stroke="#2EC8FF" stroke-width="2.6" stroke-linecap="round"/></svg><span>GHz</span> <span class="pc1-acad">Academy</span></a>
+    <div class="nav-right" id="landAuthSlot" data-login-label="Student login"><div class="land-auth-ph" aria-hidden="true"></div></div>
+  </nav>
+  <header class="pc1-cathero">
+    <div class="pc1-wrap">
+      <div class="pc1-kicker">PUBLIC CATALOG</div>
+      <h1>Explore our courses</h1>
+      <p class="pc1-sub">Live listings from the academy — On going and Scheduled. Draft and completed courses stay off this page.</p>
+    </div>
+  </header>
+  <div class="pc1-tools">
+    <input class="pc1-search" id="pc1Search" type="search" placeholder="Search title, trainer, or topic" aria-label="Search courses" />
+    <div class="pc1-chips" role="group" aria-label="Level">
+      <button type="button" class="pc1-chip lv on" data-v="All">All</button>
+      <button type="button" class="pc1-chip lv" data-v="Foundation">Foundation</button>
+      <button type="button" class="pc1-chip lv" data-v="Intermediate">Intermediate</button>
+      <button type="button" class="pc1-chip lv" data-v="Advanced">Advanced</button>
+    </div>
+    <div class="pc1-chips" role="group" aria-label="Status">
+      <button type="button" class="pc1-chip st" data-v="Open">On going</button>
+      <button type="button" class="pc1-chip st" data-v="Coming soon">Scheduled</button>
+    </div>
+    <select class="pc1-sort" id="pc1Sort" aria-label="Sort courses">
+      <option value="soon">Scheduled first</option>
+      <option value="price">Price</option>
+      <option value="title">Title</option>
+    </select>
+  </div>
+  <div class="pc1-grid" id="pc1Grid"></div>
+  <div class="pc1-modal" id="pc1Modal" hidden></div>
+  <div id="pc1Root"></div>
+  <script type="module" src="./landing-header-auth.js?v=auth8"></script>
+  <script type="module" src="./PublicCoursesV1.js?v=10"></script>
+</body>
+</html>
