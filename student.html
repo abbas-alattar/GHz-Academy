@@ -127,6 +127,7 @@
     import { deliveryDaysHtml } from "./DeliveryDays.js?v=stu7";
     import { startsEndsLine, formatCourseDate } from "./courseDates.js?v=stu7";
     import { maybeShowCourseResult } from "./CourseResultBox.js?v=stu7";
+    import { sessionStatus } from "./sessionStatus.js?v=stu7";
     import { loadStudentDash as loadStore, whenStudentStore, getStudentStore } from "./student-dash-data.js?v=stu7";
     import { healOwnNameOnce, liveStudentName } from "./nameSync.js?v=stu7";
     import { computeAverage, computeStatus, mergedSectionValues, autoValuesForStudent, parseScore } from "./gradeCalc.js?v=stu7";
@@ -1395,8 +1396,8 @@
         } catch(e) { document.getElementById("schedList").innerHTML = `<p class="banner">sessions: ${e.code||e.message}</p>`; }
         const today = new Date().toISOString().slice(0,10);
         const activeIds = new Set(myCourseDocs.filter(c=>portalStatus(c).group==="active").map(c=>c.id));
-        const up = sessAll.filter(s=>s.status!=="Cancelled" && String(s.date||"")>=today && activeIds.has(s.courseId)).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
-        const past = sessAll.filter(s=>String(s.date||"")<today).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+        const up = sessAll.filter(s=>{ const st=sessionStatus(s); return (st==="Upcoming"||st==="In progress") && activeIds.has(s.courseId); }).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+        const past = sessAll.filter(s=>sessionStatus(s)==="Completed").sort((a,b)=>String(b.date).localeCompare(String(a.date)));
         const card = (s) => `<article class="kpi" style="margin-bottom:10px"><strong>${s.title}</strong><p>${s.courseTitle} · ${s.date} · ${s.startTime||""}–${s.endTime||""}</p>${s.meetingLink?`<a class="btn btn-sm" href="${s.meetingLink}" target="_blank" rel="noopener">Join</a>`:""}</article>`;
         document.getElementById("schedList").innerHTML = up.length ? up.map(card).join("") : "<p>No upcoming sessions.</p>";
         document.getElementById("pastList").innerHTML = past.length ? past.map(card).join("") : "<p>No past sessions.</p>";

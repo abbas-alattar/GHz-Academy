@@ -5,7 +5,7 @@ import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, where
 import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTrainerStore, setTrainerCourseId, resolveTrainerCourseId } from "./TrainerStore.js";
 import { CourseSelect, StatusBadge } from "./TrainerHomeworkV2.js";
 import { isCourseLocked } from "./course-lock.js";
-import { parseScore, homeworkFinal, quizFinal, attendancePct, fmt1, bestNTip, publishedHomework, homeworkBestN, publishedQuizzes, quizBestN, gradeCalc } from "./gradeCalc.js";
+import { parseScore, homeworkFinal, quizFinal, attendancePct, fmt1, bestNTip, publishedHomework, homeworkBestN, publishedQuizzes, quizBestN, gradeCalc, averageTip, computeAverage } from "./gradeCalc.js";
 import { exportAdminPdf, nameWithId } from "./AdminPdfExport.js";
 import { showConfirmDialog, showNoticeDialog, showLeaveGradesDialog } from "./ConfirmDialog.js";
 
@@ -28,6 +28,13 @@ function isLockedAuto(c) {
   const s = String(c?.source || "").toLowerCase();
   return s === "attendance" || s === "homework" || s === "quiz";
 }
+function manualsOnly(scores, comps) {
+  const o = {};
+  (comps || []).forEach((c) => {
+    if (!isLockedAuto(c)) o[c.id] = scores?.[c.id];
+  });
+  return o;
+}
 function isProjected(c) { return !isLockedAuto(c) && kindFrom(c) !== "manual"; }
 function srcOf(c) { return kindFrom(c); }
 function passMarkOf(scheme) { return Number(scheme?.passMark) || 60; }
@@ -43,16 +50,50 @@ function autoPackFor(pack, courseId, scheme) {
     quizzes: of(p.quizzes),
     quizAttempts: of(p.quizAttempts),
     attendance: of(p.attendance),
-    sessions: of(p.sessions)
+    sessions: of(p.sessions),
+    errors: p.errors || {}
   };
+}
+function docsOf(snap) {
+  return (snap?.docs || []).map((d) => ({ id: d.id, ...d.data() }));
+}
+/** Live projected values: same math as Attendance / Homework averages / Quiz averages. */
+export function projectedValues(courseId, pack, scheme, en) {
+  const p = autoPackFor(pack, courseId, scheme);
+  const err = p.errors || {};
+  const out = { attendance: { value: null, tip: "" }, homework: { value: null, tip: "" }, quiz: { value: null, tip: "" } };
+  if (err.attendance || err.sessions) {
+    out.attendance = { value: null, tip: "Could not load", failed: true };
+  } else {
+    const r = attendancePct(courseId, en?.uid, p);
+    out.attendance = !r.marked ? { value: null, tip: "No attendance marked yet" } : { value: r.pct, tip: r.tip || "" };
+  }
+  if (err.assignments || err.submissions || err.homework) {
+    out.homework = { value: null, tip: "Could not load", failed: true };
+  } else {
+    const assigns = publishedHomework(p.assignments, courseId);
+    const graded = assigns.some((a) => (p.submissions || []).some((s) => s.uid === en?.uid && s.assignmentId === a.id && s.status === "graded"));
+    if (!assigns.length || !graded) out.homework = { value: null, tip: "No graded homework yet" };
+    else out.homework = { value: homeworkFinal({ id: courseId, assignments: p.assignments, submissions: p.submissions, scheme }, en), tip: calcTip("homework", p, scheme, courseId, en, null) };
+  }
+  if (err.quizzes || err.quizAttempts || err.quiz) {
+    out.quiz = { value: null, tip: "Could not load", failed: true };
+  } else {
+    const quizzes = publishedQuizzes(p.quizzes, courseId);
+    const graded = quizzes.some((q) => (p.quizAttempts || []).some((a) => a.uid === en?.uid && a.quizId === q.id && (a.status === "graded" || a.status === "partial")));
+    if (!quizzes.length || !graded) out.quiz = { value: null, tip: "No graded quizzes yet" };
+    else out.quiz = { value: quizFinal({ id: courseId, quizzes: p.quizzes, quizAttempts: p.quizAttempts, scheme }, en), tip: calcTip("quiz", p, scheme, courseId, en, null) };
+  }
+  return out;
 }
 function statusOf(scheme, vals, completed, pack, en) {
   const g = gradeCalc({ id: pack?.courseId, pack }, scheme, { uid: en?.uid, scores: vals, pack });
-  if (g.failed) return { avg: null, ip: false, result: "—", csv: "—" };
+  if (g.failed) return { avg: null, ip: false, result: "—", csv: "—", tip: "", values: {} };
   const avg = g.average;
   const pass = !!g.passed;
-  if (completed) return { avg, ip: false, result: pass ? "Passed" : "Failed", csv: pass ? "Passed" : "Failed" };
-  return { avg, ip: true, result: pass ? "Passed" : "Failed", csv: "IP · " + (pass ? "Passed" : "Failed") };
+  const base = { avg, values: g.values || {}, tip: g.tip || averageTip(scheme, g.values || vals) };
+  if (completed) return { ...base, ip: false, result: pass ? "Passed" : "Failed", csv: pass ? "Passed" : "Failed" };
+  return { ...base, ip: true, result: pass ? "Passed" : "Failed", csv: "IP · " + (pass ? "Passed" : "Failed") };
 }
 const DOT = ["#2563EB", "#7C3AED", "#10B981", "#F59E0B", "#EF4444", "#0EA5E9", "#EC4899"];
 
@@ -140,44 +181,74 @@ function CourseSheet({ pack, course, uid, go }) {
   const [q, setQ] = useState("");
   const [saving, setSaving] = useState(false);
   const [invalid, setInvalid] = useState({});
+  const [liveExtra, setLiveExtra] = useState({ assignments: [], submissions: [], quizzes: [], quizAttempts: [], attendance: [], sessions: [], errors: {} });
 
   const ens = (pack.enrollments || []).filter((en) => en.courseId === courseId && String(en.status || "").toLowerCase() !== "cancelled");
   const comps = Array.isArray(scheme?.components) ? scheme.components : [];
   const projComps = comps.filter(isProjected);
 
-  const autoFor = (en) => ({
-    homework: homeworkFinal({ id: courseId, assignments: pack.assignments, submissions: pack.submissions, scheme }, en),
-    quiz: quizFinal({ id: courseId, quizzes: pack.quizzes, quizAttempts: pack.quizAttempts, scheme }, en),
-    attendance: attendancePct(courseId, en.uid, { ...pack, courseId }).pct
-  });
+  const livePack = autoPackFor({ ...pack, ...liveExtra, errors: liveExtra.errors }, courseId, scheme);
+  const autoFor = (en) => {
+    const pv = projectedValues(courseId, livePack, scheme, en);
+    return {
+      homework: pv.homework.value,
+      quiz: pv.quiz.value,
+      attendance: pv.attendance.value,
+      meta: pv
+    };
+  };
 
   const load = async () => {
     setLoading(true); setLoadErr("");
+    const errors = {};
+    const take = async (key, col) => {
+      try {
+        const snap = await getDocs(query(collection(db, col), where("courseId", "==", courseId)));
+        return docsOf(snap);
+      } catch (er) {
+        errors[key] = true;
+        console.error("[ghz-grades] " + col, er);
+        return [];
+      }
+    };
     try {
       const sch = await getDoc(doc(db, "gradeSchemes", courseId));
       setSchemeOk(sch.exists());
       const schemeData = sch.exists() ? sch.data() : null;
       setScheme(schemeData);
-      const snap = await getDocs(query(collection(db, "gradeScores"), where("courseId", "==", courseId)));
+      const [scoresSnap, assignments, submissions, quizzes, quizAttempts, attendance, sessions] = await Promise.all([
+        getDocs(query(collection(db, "gradeScores"), where("courseId", "==", courseId))),
+        take("assignments", "assignments"),
+        take("submissions", "submissions"),
+        take("quizzes", "quizzes"),
+        take("quizAttempts", "quizAttempts"),
+        take("attendance", "attendance"),
+        take("sessions", "sessions")
+      ]);
       const map = {};
-      snap.docs.forEach((d) => { const x = d.data(); map[x.uid] = { ...(x.scores || {}) }; });
+      scoresSnap.docs.forEach((d) => { const x = d.data(); map[x.uid] = { ...(x.scores || {}) }; });
       setSaved(map);
       setDraft(map);
       setInvalid({});
+      setLiveExtra({ assignments, submissions, quizzes, quizAttempts, attendance, sessions, errors });
     } catch (er) { setLoadErr("gradeScores: " + fbErr(er)); }
     setLoading(false);
   };
   useEffect(() => { load(); }, [courseId]);
 
-  const gradePack = {
-    courseId, scheme,
-    assignments: pack.assignments, submissions: pack.submissions,
-    quizzes: pack.quizzes, quizAttempts: pack.quizAttempts,
-    attendance: pack.attendance, sessions: pack.sessions
-  };
+  const gradePack = livePack;
   const mergedFor = (en) => {
-    const g = gradeCalc({ id: courseId, pack: gradePack }, scheme, { uid: en.uid, scores: draft[en.uid] || {}, pack: gradePack });
-    return g.values || {};
+    const g = gradeCalc({ id: courseId, pack: gradePack }, scheme, { uid: en.uid, scores: manualsOnly(draft[en.uid] || {}, comps), pack: gradePack });
+    const live = g.values || {};
+    const auto = autoFor(en);
+    const out = { ...live };
+    comps.forEach((c) => {
+      if (isLockedAuto(c)) {
+        const k = kindFrom(c);
+        out[c.id] = auto[k];
+      }
+    });
+    return out;
   };
 
   const setCell = (uidS, cid, raw) => {
@@ -191,19 +262,26 @@ function CourseSheet({ pack, course, uid, go }) {
 
   const vis = ens.filter((en) => ((en.studentName || "") + " " + id7(en)).toLowerCase().includes(q.toLowerCase()));
   const dirtyUids = ens.filter((en) => {
-    const m = mergedFor(en);
-    const s = saved[en.uid] || {};
-    return comps.some((c) => !sameVal(m[c.id], s[c.id]));
+    const m = manualsOnly(draft[en.uid] || {}, comps);
+    const s = manualsOnly(saved[en.uid] || {}, comps);
+    return comps.some((c) => !isLockedAuto(c) && !sameVal(m[c.id], s[c.id]));
   }).map((en) => en.uid);
   const changeN = ens.reduce((n, en) => {
-    const m = mergedFor(en);
-    const s = saved[en.uid] || {};
-    return n + comps.filter((c) => !sameVal(m[c.id], s[c.id])).length;
+    const m = manualsOnly(draft[en.uid] || {}, comps);
+    const s = manualsOnly(saved[en.uid] || {}, comps);
+    return n + comps.filter((c) => !isLockedAuto(c) && !sameVal(m[c.id], s[c.id])).length;
   }, 0);
   const dirty = changeN > 0;
   const rows = vis.map((en) => {
     const vals = mergedFor(en);
-    const info = statusOf(scheme, vals, locked, gradePack, en);
+    const info = statusOf(scheme, manualsOnly(draft[en.uid] || {}, comps), locked, gradePack, en);
+    info.avg = computeAverage(scheme, vals);
+    info.tip = averageTip(scheme, vals);
+    info.values = vals;
+    const pass = info.avg >= passMarkOf(scheme);
+    info.result = pass ? "Passed" : "Failed";
+    if (!locked) info.csv = "IP · " + info.result;
+    else info.csv = info.result;
     return { en, vals, info, auto: autoFor(en) };
   });
   const avgs = rows.map((r) => r.info.avg).filter((n) => n != null);
@@ -213,8 +291,9 @@ function CourseSheet({ pack, course, uid, go }) {
   const pendingN = rows.filter((r) => !filledFor(r)).length;
   const passingN = rows.filter((r) => r.info.result === "Passed").length;
   const failedN = rows.filter((r) => r.info.result === "Failed").length;
+  const displayed = (r, c) => isLockedAuto(c) ? r.auto[kindFrom(c)] : r.vals[c.id];
   const foot = comps.map((c) => {
-    const nums = rows.map((r) => parseScore(r.vals[c.id])).filter((n) => n != null);
+    const nums = rows.map((r) => parseScore(displayed(r, c))).filter((n) => n != null);
     return nums.length ? fmt1(nums.reduce((a, b) => a + b, 0) / nums.length) : "—";
   });
   const passM = passMarkOf(scheme);
@@ -229,6 +308,7 @@ function CourseSheet({ pack, course, uid, go }) {
         const auto = autoFor(en);
         const cur = { ...(next[en.uid] || {}) };
         projComps.forEach((c) => {
+          if (parseScore(cur[c.id]) != null) return;
           const nv = auto[kindFrom(c)];
           if (nv != null) cur[c.id] = nv;
         });
@@ -242,7 +322,7 @@ function CourseSheet({ pack, course, uid, go }) {
     setSaving(true);
     const jobs = uids.map((id) => {
       const en = ens.find((x) => x.uid === id);
-      const scoresMap = mergedFor(en);
+      const scoresMap = manualsOnly(draft[id] || {}, comps);
       return setDoc(doc(db, "gradeScores", id + "_" + courseId), {
         uid: id, courseId, scores: scoresMap, updatedAt: serverTimestamp(), updatedBy: uid
       }).then(() => ({ id, ok: true, scoresMap })).catch((er) => ({ id, ok: false, er, scoresMap }));
@@ -305,7 +385,7 @@ function CourseSheet({ pack, course, uid, go }) {
 
   const csv = () => {
     const head = ["Name (ID)", "ID", ...comps.map((c) => (c.title || "") + " (" + (c.weight || 0) + "%)"), "Average", "Status"];
-    const body = rows.map((r) => [nameWithId(r.en.studentName, id7(r.en)).label, id7(r.en), ...comps.map((c) => parseScore(r.vals[c.id]) ?? ""), r.info.avg == null ? "" : fmt1(r.info.avg), r.info.csv]);
+    const body = rows.map((r) => [nameWithId(r.en.studentName, id7(r.en)).label, id7(r.en), ...comps.map((c) => parseScore(displayed(r, c)) ?? ""), r.info.avg == null ? "" : fmt1(r.info.avg), r.info.csv]);
     const blob = new Blob([[head, ...body].map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n")], { type: "text/csv" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "grades.csv"; a.click();
   };
@@ -313,7 +393,7 @@ function CourseSheet({ pack, course, uid, go }) {
     page: (course.title || "Course") + " · Grades",
     filters: (Array.isArray(course.trainerNames) ? course.trainerNames.join(", ") : course.trainerName || ""),
     columns: [{ key: "n", label: "Student" }, ...comps.map((c) => ({ key: c.id, label: c.title })), { key: "avg", label: "Average" }, { key: "st", label: "Status" }],
-    rows: rows.map((r) => { const o = { n: nameWithId(r.en.studentName, id7(r.en)).label, avg: r.info.avg == null ? "—" : fmt1(r.info.avg), st: r.info.csv }; comps.forEach((c) => { o[c.id] = parseScore(r.vals[c.id]) == null ? "—" : fmt1(r.vals[c.id]); }); return o; })
+    rows: rows.map((r) => { const o = { n: nameWithId(r.en.studentName, id7(r.en)).label, avg: r.info.avg == null ? "—" : fmt1(r.info.avg), st: r.info.csv }; comps.forEach((c) => { const v = displayed(r, c); o[c.id] = parseScore(v) == null ? "—" : fmt1(v); }); return o; })
   });
 
   const statusCell = (info) => {
@@ -371,9 +451,10 @@ function CourseSheet({ pack, course, uid, go }) {
             ),
             comps.map((c) => {
               const kind = kindFrom(c);
-              const autoV = r.auto[kind];
+              const autoV = isLockedAuto(c) ? r.vals[c.id] : r.auto[kind];
               const v = isLockedAuto(c) ? autoV : r.vals[c.id];
-              const tip = calcTip(kind, pack, scheme, courseId, r.en, autoV);
+              const projMeta = r.auto.meta?.[kind] || {};
+              const tip = isLockedAuto(c) ? calcTip(kind, livePack, scheme, courseId, r.en, autoV) : (projMeta.tip || calcTip(kind, livePack, scheme, courseId, r.en, autoV));
               const dirtyCell = !sameVal(r.vals[c.id], (saved[r.en.uid] || {})[c.id]);
               if (isLockedAuto(c)) {
                 const autoTip = "Auto · " + (tip || "");
@@ -390,14 +471,14 @@ function CourseSheet({ pack, course, uid, go }) {
               return e("td", { key: c.id, className: "th2-numh" },
                 e("div", { className: "th2-gline" },
                   e("input", { type: "number", min: 0, max: 100, className: "th2-gin " + (bad ? "th2-badin " : "") + (dirtyCell ? "th2-dirtyin" : ""), disabled: locked || !schemeOk, value: v == null ? "" : v, onChange: (ev) => setCell(r.en.uid, c.id, ev.target.value) }),
-                  isProjected(c) ? e("button", { type: "button", className: "th2-approx", title: "Projected from saved attendance / homework / quiz grades. Click to apply.", disabled: locked || autoV == null, onClick: () => setCell(r.en.uid, c.id, autoV) }, e(TinyTarget), autoV == null ? "—" : fmt1(autoV)) : null
+                  isProjected(c) ? e("button", { type: "button", className: "th2-approx" + (autoV == null ? " th2-approx-off" : ""), title: projMeta.failed ? "Could not load" : (autoV == null ? (projMeta.tip || "No data") : ("Projected from attendance / homework / quizzes. Click to apply. " + (projMeta.tip || ""))), disabled: locked || autoV == null, onClick: () => setCell(r.en.uid, c.id, autoV) }, e(TinyTarget), autoV == null ? "—" : ("proj " + fmt1(autoV))) : null
                 ),
                 bad ? e("div", { className: "th2-badmsg" }, "0–100") : null
               );
             }),
-            e("td", { className: "th2-avgl" },
+            e("td", { className: "th2-avgl", title: r.info.tip || "" },
               e("div", { className: "th2-avgstack" },
-                e("strong", { className: (r.info.avg || 0) >= passM ? "ok" : "bad" }, r.info.avg == null ? "—" : fmt1(r.info.avg)),
+                e("strong", { className: (r.info.avg || 0) >= passM ? "ok" : "bad", title: r.info.tip || "" }, r.info.avg == null ? "—" : fmt1(r.info.avg)),
                 e("i", { className: "th2-minibar" }, e("b", { className: (r.info.avg || 0) >= passM ? "ok" : "bad", style: { width: Math.min(100, r.info.avg || 0) + "%" } }))
               )
             ),
@@ -405,7 +486,7 @@ function CourseSheet({ pack, course, uid, go }) {
           )),
           e("tr", { className: "th2-foot" },
             e("td", { className: "th2-stul" }, e("strong", null, "Class average")),
-            comps.map((c, i) => e("td", { key: c.id, className: "th2-numh" }, foot[i])),
+            comps.map((c, i) => e("td", { key: c.id, className: "th2-numh" }, e("strong", null, foot[i]))),
             e("td", { className: "th2-avgl" }, e("strong", null, classAvg)),
             e("td", { className: "th2-stath" }, "")
           ))

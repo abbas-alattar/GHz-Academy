@@ -1,5 +1,6 @@
 import { auth, db } from "./firebase-config.js?v=auth8";
 import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp, deleteField, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { isSessionPastWithoutAttendance, isSessionUpcoming, needsManualQuizGrade } from "./sessionStatus.js";
 
 const byCourse = async (col, cid, step) => {
   try {
@@ -14,13 +15,16 @@ export async function completeCounts(cid) {
   const submissions = await byCourse("submissions", cid, "submissions");
   const attempts = await byCourse("quizAttempts", cid, "quizAttempts");
   const sessions = await byCourse("sessions", cid, "sessions");
+  const attendance = await byCourse("attendance", cid, "attendance");
   const enrollments = await byCourse("enrollments", cid, "enrollments");
   const certificates = await byCourse("certificates", cid, "certificates");
+  const pack = { attendance };
   const ungradedHw = submissions.filter((s) => s.status && s.status !== "graded").length;
-  const ungradedQuiz = attempts.filter((s) => s.status && s.status !== "graded").length;
-  const scheduled = sessions.filter((s) => s.status === "Scheduled").length;
+  const ungradedQuiz = attempts.filter((s) => needsManualQuizGrade(s)).length;
+  const pastNoAtt = sessions.filter((s) => isSessionPastWithoutAttendance(s, new Date(), pack)).length;
+  const upcoming = sessions.filter((s) => isSessionUpcoming(s, new Date(), pack)).length;
   const noCert = enrollments.filter((en) => !certificates.some((c) => c.uid === en.uid && c.status === "issued")).length;
-  return { ungradedHw, ungradedQuiz, scheduled, noCert };
+  return { ungradedHw, ungradedQuiz, pastNoAtt, upcoming, noCert };
 }
 
 function ensureCss() {
@@ -39,9 +43,9 @@ function ico(kind, color) {
   if (kind === "cal") return `<svg ${common}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>`;
   return `<svg ${common}><circle cx="12" cy="8" r="5"/><path d="M8.2 13.2 7 22l5-3 5 3-1.2-8.8"/></svg>`;
 }
-function rowHtml(kind, ok, okText, warnLead, warnRest) {
-  const color = ok ? "#16A34A" : "#B45309";
-  const cls = ok ? "ok" : "warn";
+function rowHtml(kind, ok, okText, warnLead, warnRest, info) {
+  const cls = ok ? "ok" : (info ? "info" : "warn");
+  const color = ok ? "#16A34A" : (info ? "#2563EB" : "#B45309");
   const label = ok ? okText : `<strong>${warnLead}</strong> ${warnRest}`;
   return `<div class="cc-row ${cls}"><span class="cc-ico ${cls}" aria-hidden="true">${ico(kind, color)}</span><span>${label}</span></div>`;
 }
@@ -60,6 +64,8 @@ function paintDialog(modal, html) {
       .cc-row { display:flex; align-items:center; gap:10px; height:48px; min-height:48px; padding:0 12px; border-radius:12px; font-size:13.5px; color:#0F2747; box-sizing:border-box; }
       .cc-row.ok { background:#F0FDF4; }
       .cc-row.warn { background:#FFFBEB; }
+      .cc-row.info { background:#EFF6FF; }
+      .cc-ico.info { background:#DBEAFE; }
       .cc-ico { width:32px; height:32px; min-width:32px; min-height:32px; border-radius:999px; display:flex; align-items:center; justify-content:center; flex:none; }
       .cc-ico svg { width:18px; height:18px; display:block; }
       .cc-ico.ok { background:#DCFCE7; }
@@ -97,11 +103,15 @@ export async function confirmComplete(course, toast, reload) {
   modal.querySelector("[data-cc-dim]").onclick = (ev) => { if (ev.target.hasAttribute("data-cc-dim")) close(); };
   try {
     const c = await completeCounts(course.id);
-    const allOk = !c.ungradedHw && !c.ungradedQuiz && !c.scheduled && !c.noCert;
+    const allOk = !c.ungradedHw && !c.ungradedQuiz && !c.pastNoAtt && !c.noCert;
+    const sessRows = [];
+    if (c.pastNoAtt) sessRows.push(rowHtml("cal", false, "All sessions completed", String(c.pastNoAtt), "past sessions without attendance"));
+    else sessRows.push(rowHtml("cal", true, "All sessions completed", "0", ""));
+    if (c.upcoming) sessRows.push(rowHtml("cal", false, "", String(c.upcoming), "upcoming sessions will be closed", true));
     const rows = [
       rowHtml("hw", !c.ungradedHw, "All homework submissions are graded", String(c.ungradedHw), "homework submissions not graded yet"),
       rowHtml("quiz", !c.ungradedQuiz, "All quiz attempts are graded", String(c.ungradedQuiz), "quiz attempts not graded yet"),
-      rowHtml("cal", !c.scheduled, "No sessions still Scheduled", String(c.scheduled), "sessions still Scheduled"),
+      ...sessRows,
       rowHtml("award", !c.noCert, "Every enrollment has an issued certificate", String(c.noCert), "enrollments without an issued certificate")
     ].join("");
     paintDialog(modal, `<div class="ghz-cd-dim" data-cc-dim>

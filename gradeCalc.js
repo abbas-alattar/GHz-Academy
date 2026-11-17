@@ -56,7 +56,7 @@ export function attendancePct(courseId, uid, pack) {
   const marked = present + late + absent + excused;
   const den = marked - excused;
   const good = present + late;
-  const pct = !den || den <= 0 ? null : round1((good / den) * 100);
+  const pct = !den || den <= 0 ? null : (good / den) * 100;
   const tip = !marked ? "No marked sessions" : (den <= 0 ? "All marked sessions are excused" : ("Present " + present + " + Late " + late + " = " + good + " of " + den + (excused ? " (" + excused + " excused not counted)" : "") + " = " + fmt1(pct) + "%"));
   return { pct, present, late, absent, excused, marked, den, good, tip, display: pct == null ? "—" : fmt1(pct) };
 }
@@ -106,12 +106,12 @@ export function homeworkFinal(course, student) {
   }).sort((a, b) => b - a);
   const take = pcts.slice(0, n);
   const avg = take.reduce((sum, v) => sum + v, 0) / n;
-  return round1(avg);
+  return avg;
 }
 
-export function homeworkAuto(uid, assignments, submissions, scheme) {
+export function homeworkAuto(uid, assignments, submissions, scheme, courseId) {
   return homeworkFinal({
-    id: assignments?.[0]?.courseId,
+    id: courseId || assignments?.[0]?.courseId,
     assignments,
     submissions,
     scheme,
@@ -151,11 +151,11 @@ export function quizFinal(course, student) {
     return quizAttemptPct(q, a);
   }).sort((a, b) => b - a);
   const avg = pcts.slice(0, n).reduce((sum, v) => sum + v, 0) / n;
-  return round1(avg);
+  return avg;
 }
-export function quizAuto(uid, quizzes, attempts, scheme) {
+export function quizAuto(uid, quizzes, attempts, scheme, courseId) {
   return quizFinal({
-    id: quizzes?.[0]?.courseId,
+    id: courseId || quizzes?.[0]?.courseId,
     quizzes,
     quizAttempts: attempts,
     scheme,
@@ -165,10 +165,11 @@ export function quizAuto(uid, quizzes, attempts, scheme) {
 
 export function autoValuesForStudent(uid, pack) {
   const scheme = pack?.scheme || pack?.gradeScheme;
+  const courseId = pack.courseId || pack.id || "";
   return {
-    attendance: attendancePct(pack.courseId || pack.id, uid, pack).pct,
-    homework: homeworkAuto(uid, pack.assignments, pack.submissions, scheme),
-    quiz: quizAuto(uid, pack.quizzes, pack.quizAttempts, scheme)
+    attendance: attendancePct(courseId, uid, pack).pct,
+    homework: homeworkAuto(uid, pack.assignments, pack.submissions, scheme, courseId),
+    quiz: quizAuto(uid, pack.quizzes, pack.quizAttempts, scheme, courseId)
   };
 }
 
@@ -179,7 +180,17 @@ export function computeAverage(scheme, valuesBySection) {
     const v = parseScore(valuesBySection?.[c.id]);
     sum += ((v == null ? 0 : v) * (Number(c.weight) || 0)) / 100;
   }
-  return round1(sum);
+  return sum;
+}
+export function averageTip(scheme, valuesBySection) {
+  const components = Array.isArray(scheme?.components) ? scheme.components : scheme || [];
+  if (!components.length) return "";
+  const parts = components.map((c) => {
+    const v = parseScore(valuesBySection?.[c.id]);
+    const w = Number(c.weight) || 0;
+    return fmt1(v == null ? 0 : v) + " × " + w + "/100";
+  });
+  return "(" + parts.join(") + (") + ") = " + fmt1(computeAverage(scheme, valuesBySection));
 }
 
 export function computeStatus(scheme, valuesBySection, passMark) {
@@ -240,5 +251,5 @@ export function gradeCalc(course, scheme, student) {
   const passMark = Number(scheme?.passMark);
   const mark = Number.isFinite(passMark) ? passMark : 60;
   const passed = average >= mark;
-  return { average, passed, status: passed ? "Passed" : "Failed", values, display: fmt1(average), passMark: mark, failed: false };
+  return { average, passed, status: passed ? "Passed" : "Failed", values, display: fmt1(average), passMark: mark, failed: false, tip: averageTip(scheme, values) };
 }

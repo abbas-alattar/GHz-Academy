@@ -5,6 +5,7 @@ import { getReadSet, unreadCount, onAnnouncementReads, loadAnnouncementReads, an
 import { db } from "./firebase-config.js?v=auth8";
 import { getDoc, doc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { attendancePct, gradeCalc } from "./gradeCalc.js";
+import { sessionStatus } from "./sessionStatus.js";
 
 class Boundary extends Component {
   constructor(p) { super(p); this.state = { err: null }; }
@@ -248,9 +249,9 @@ function Dash({ onClassic }) {
   const nextHwDay = nextHw ? new Date(nextHw.dueDate).toLocaleDateString(undefined, { weekday: "long" }) : "—";
   const qzDays = nextQz ? Math.max(0, Math.ceil((new Date(nextQz.dueDate) - now) / 86400000)) : null;
 
-  const sessions = data.sessions.filter((s) => s.status !== "Cancelled")
+  const sessions = data.sessions.filter((s) => { const st = sessionStatus(s, now, data); return st === "Upcoming" || st === "In progress"; })
     .map((s) => ({ s, t: localPartsMs(s.date, s.startTime) }))
-    .filter((x) => Number.isFinite(x.t) && x.t >= now.getTime() - 15 * 60000)
+    .filter((x) => Number.isFinite(x.t))
     .sort((a, b) => a.t - b.t);
   const nextClass = sessions[0];
 
@@ -347,9 +348,9 @@ function Dash({ onClassic }) {
             const attG = attC.filter((a) => a.status === "present" || a.status === "late").length;
             const attCourse = attDen ? Math.round((attG / attDen) * 100) : null;
             const nowMs = now.getTime();
-            const nextSess = data.sessions.filter((s) => s.courseId === cid && s.status !== "Cancelled")
+            const nextSess = data.sessions.filter((s) => s.courseId === cid && (sessionStatus(s, now, data) === "Upcoming" || sessionStatus(s, now, data) === "In progress"))
               .map((s) => ({ s, t: localPartsMs(s.date, s.startTime) }))
-              .filter((x) => Number.isFinite(x.t) && x.t >= nowMs - 15 * 60000)
+              .filter((x) => Number.isFinite(x.t))
               .sort((a, b) => a.t - b.t)[0];
             const nextHwItem = hw.pending.filter((a) => a.courseId === cid).sort((a, b) => dueLocal(a.dueDate).localeCompare(dueLocal(b.dueDate)))[0];
             const nextQzItem = data.quizzes.filter((q) => q.courseId === cid && !attIds.has(q.id) && String(q.status || "Published") === "Published").sort((a, b) => dueLocal(a.dueDate || a.closeDate).localeCompare(dueLocal(b.dueDate || b.closeDate)))[0];

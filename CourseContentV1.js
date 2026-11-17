@@ -7,6 +7,7 @@ import {
 import { ConfirmDialog, showNoticeDialog } from "./ConfirmDialog.js";
 import { formatCourseDate } from "./courseDates.js";
 import { courseStatusLabel } from "./courseStatusLabel.js";
+import { sessionStatus } from "./sessionStatus.js";
 
 const roots = new WeakMap();
 const TYPES = [
@@ -733,7 +734,7 @@ function App({ opts }) {
           e("div", null, e("strong", null, s.date || "To be announced")),
           e("div", { className: "cc1-rd" }),
           e("div", { className: "cc1-sc" },
-            e("div", { className: "cc1-shead" }, e("strong", null, s.title || "Class session"), s.status ? e("span", { className: "cc1-spill" }, s.status) : null),
+            e("div", { className: "cc1-shead" }, e("strong", null, s.title || "Class session"), e("span", { className: "cc1-spill" }, sessionStatus(s))),
             e("p", { className: "cc1-time" }, range)
           )
         );

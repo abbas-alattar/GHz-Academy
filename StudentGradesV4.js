@@ -1,6 +1,6 @@
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { parseScore, computeAverage, fmt1, gradeCalc } from "./gradeCalc.js";
+import { parseScore, computeAverage, fmt1, gradeCalc, averageTip } from "./gradeCalc.js";
 import { exportStudentGradesPdf } from "./AdminPdfExport.js";
 
 const roots = new WeakMap();
@@ -74,7 +74,7 @@ function liveGrade(course) {
   if (!scheme) return { avg: null, passed: false, values: course.vals || {} };
   const pack = course.pack || {};
   const g = gradeCalc({ id: course.id, pack: { ...pack, scheme } }, scheme, { uid: course.uid, scores: course.scores || {}, pack: { ...pack, scheme } });
-  if (!g.failed) return { avg: g.average, passed: g.passed, values: g.values };
+  if (!g.failed) return { avg: g.average, passed: g.passed, values: g.values, tip: g.tip || averageTip(scheme, g.values) };
   const vals = course.vals || {};
   const avg = computeAverage(scheme, vals);
   return { avg, passed: avg != null && avg >= passMarkOf(scheme), values: vals };
@@ -87,6 +87,7 @@ function rowsForCourse(course) {
   const pass = passMarkOf(scheme);
   const avg = live.avg;
   const passed = !!live.passed;
+  const tip = live.tip || averageTip(scheme, vals);
   const rows = comps.map((c) => {
     const w = Number(c.weight) || 0;
     const v = parseScore(vals[c.id]);
@@ -100,7 +101,7 @@ function rowsForCourse(course) {
     weighted: passed ? "Passed" : "Failed",
     result: passed ? "Passed" : "Failed"
   });
-  return { rows, avg, passed, pass, comps };
+  return { rows, avg, passed, pass, comps, values: vals, tip };
 }
 async function printCourses(opts, list) {
   const preview = window.open("", "_blank");
@@ -173,14 +174,14 @@ function CompletedCard({ course, opts, onPopup }) {
       e("button", { type: "button", className: "sg4-print", title: "Print", "aria-label": "Print this course", onClick: async () => { const okp = await printCourses(opts, [course]); onPopup(printState.popup); if (!okp) return; } }, icoPrint())
     ),
     course.schemeErr ? e("p", { className: "sg4-err" }, "Could not load " + course.schemeErr) : null,
-    avg != null ? e("div", { className: "sg4-avg " + (ok ? "sg4-pass" : "sg4-fail") }, fmt1(avg), e("span", null, "/ 100 · " + deltaTxt)) : null,
-    comps.length ? e("div", { className: "sg4-tiles" }, comps.map((c, i) => e(Tile, { key: String(c.id || c.title || i), name: c.title || "Section", weight: Number(c.weight) || 0, score: parseScore((course.vals || {})[c.id]) }))) : null,
+    avg != null ? e("div", { className: "sg4-avg " + (ok ? "sg4-pass" : "sg4-fail"), title: pack.tip || "" }, fmt1(avg), e("span", null, "/ 100 · " + deltaTxt)) : null,
+    comps.length ? e("div", { className: "sg4-tiles" }, comps.map((c, i) => e(Tile, { key: String(c.id || c.title || i), name: c.title || "Section", weight: Number(c.weight) || 0, score: parseScore((pack.values || course.vals || {})[c.id]) }))) : null,
     e("button", { type: "button", className: "sg4-more", onClick: () => setOpen(!open) }, open ? "Hide breakdown" : "View full breakdown ›"),
     open ? e("table", { className: "sg4-table" },
       e("thead", null, e("tr", null, e("th", null, "Section"), e("th", null, "Weight"), e("th", null, "Score"), e("th", null, "Points"), e("th", null, "Out of"))),
       e("tbody", null, comps.map((c, i) => {
         const w = Number(c.weight) || 0;
-        const v = parseScore((course.vals || {})[c.id]);
+        const v = parseScore((pack.values || course.vals || {})[c.id]);
         const pts = ((v == null ? 0 : v) * w) / 100;
         return e("tr", { key: String(c.id || c.title || i) }, e("td", null, c.title || "Section"), e("td", null, w + "%"), e("td", null, v == null ? "—" : fmt1(v)), e("td", null, fmt1(pts)), e("td", null, String(w)));
       }))

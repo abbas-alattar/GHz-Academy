@@ -10,6 +10,7 @@ import { attendancePct, fmt1 } from "./gradeCalc.js";
 import { exportAttendanceSessionPdf, exportAttendanceMatrixPdf, nameWithId } from "./AdminPdfExport.js";
 import { showConfirmDialog, showNoticeDialog, showLeaveGradesDialog } from "./ConfirmDialog.js";
 import { RowMenu } from "./TrainerRowMenu.js";
+import { sessionStatus } from "./sessionStatus.js";
 
 function fbErr(er) { return String((er?.code || "") + " " + (er?.message || er)).trim(); }
 function initials(n) { return String(n || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((x) => x[0].toUpperCase()).join("") || "?"; }
@@ -60,16 +61,12 @@ function Users() { return e(Ico, { d: ["M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"
 function Trend() { return e(Ico, { d: ["M3 17l6-6 4 4 8-8", "M14 7h7v7"] }); }
 function Alarm() { return e(Ico, { d: ["M12 8v5l3 2", "M12 21a9 9 0 110-18 9 9 0 010 18z"] }); }
 
-function sessKind(s, marked, enrolled, now = Date.now()) {
-  const t = sessWhen(s);
-  const end = s.endTime && s.date ? new Date(s.date + "T" + s.endTime).getTime() : t + 2 * 3600000;
-  const today = todayStr();
-  if (s.status === "Cancelled") return { k: "gray", l: "Cancelled" };
-  if (marked >= enrolled && enrolled > 0) return { k: "graded", l: "Marked" };
-  if (s.date === today) return { k: marked ? "soon" : "soon", l: marked ? "Today" : "Needs marking" };
-  if (end < now && !marked) return { k: "soon", l: "Needs marking" };
-  if (t > now) return { k: "submitted", l: "Scheduled" };
-  if (marked) return { k: "graded", l: "Marked" };
+function sessKind(s, marked, enrolled, now = Date.now(), atts) {
+  const st = sessionStatus(s, new Date(now), { attendance: atts || (marked ? [{ sessionId: s.id, status: "present" }] : []) });
+  if (st === "Cancelled") return { k: "gray", l: "Cancelled" };
+  if (st === "Completed") return { k: "graded", l: "Completed" };
+  if (st === "In progress") return { k: "soon", l: marked ? "In progress" : "Needs marking" };
+  if (st === "Upcoming") return { k: "submitted", l: "Upcoming" };
   return { k: "soon", l: "Needs marking" };
 }
 
@@ -267,6 +264,7 @@ function MarkPage({ pack, uid, go, sessionId }) {
     const bad = results.filter((r) => !r.ok);
     setSaving(false);
     if (!bad.length) {
+      try { await updateDoc(doc(db, "sessions", sessionId), { status: "Completed" }); } catch (_) {}
       const next = { ...draft };
       setBase(next);
       setLocalAtt((p) => {
@@ -404,7 +402,7 @@ function ListPage({ pack, uid, go, courseId }) {
   const today = todayStr();
   const rows = sessAll.map((s) => {
     const marked = atts.filter((a) => a.sessionId === s.id && a.status).length;
-    const kind = sessKind(s, marked, ens.length, now);
+    const kind = sessKind(s, marked, ens.length, now, atts);
     return { s, marked, kind };
   }).filter((r) => {
     if (chip === "Upcoming") return sessWhen(r.s) > now;

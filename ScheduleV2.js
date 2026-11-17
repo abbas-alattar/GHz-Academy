@@ -1,4 +1,5 @@
 import { deliveryDaysHtml } from "./DeliveryDays.js";
+import { sessionStatus } from "./sessionStatus.js";
 
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
 const COLORS = ["#2563EB", "#16A34A", "#D97706", "#7C3AED", "#0EA5E9", "#DC2626"];
@@ -190,8 +191,8 @@ export function renderScheduleV2(opts) {
     const dated = filtered.filter(validDate);
     const nodate = filtered.filter((s) => !validDate(s));
     const t = todayStr();
-    const upcoming = dated.filter((s) => String(s.date) >= t && s.status !== "Cancelled").sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.startTime||"").localeCompare(String(b.startTime||"")));
-    const past = dated.filter((s) => String(s.date) < t).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    const upcoming = dated.filter((s) => { const st = sessionStatus(s, new Date(), { attendance }); return st === "Upcoming" || st === "In progress"; }).sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.startTime||"").localeCompare(String(b.startTime||"")));
+    const past = dated.filter((s) => sessionStatus(s, new Date(), { attendance }) === "Completed").sort((a, b) => String(b.date).localeCompare(String(a.date)));
     const next = upcoming[0] || null;
     const byDay = {};
     for (const s of upcoming) { (byDay[s.date] = byDay[s.date] || []).push(s); }

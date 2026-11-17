@@ -306,6 +306,7 @@
   display:inline-flex; align-items:center; gap:4px; padding:0 7px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap; line-height:20px; flex:none; vertical-align:middle;
 }
 .th2-approx:disabled { opacity:.45; cursor:not-allowed; }
+.th2-approx-off { background:#F1F5F9; color:#94A3B8; }
 .th2-synced { align-self:flex-start; background:#DCFCE7; color:#166534; border-radius:999px; padding:4px 10px; font-size:12px; font-weight:700; }
 .th2-grd-table th.th2-avgl, .th2-grd-table td.th2-avgl { right:96px; min-width:96px; }
 .th2-grd-table th.th2-stath, .th2-grd-table td.th2-stath { position:sticky; right:0; z-index:2; background:#fff; min-width:96px; }

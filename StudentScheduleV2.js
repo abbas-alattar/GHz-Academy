@@ -3,6 +3,7 @@ import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { db } from "./firebase-config.js?v=auth8";
 import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { getStudentStore, onDashData, loadStudentDash } from "./student-dash-data.js?v=stu7";
+import { sessionStatus } from "./sessionStatus.js";
 
 const roots = new WeakMap();
 const COLORS = ["#D97706", "#2563EB", "#7C3AED", "#16A34A", "#0EA5E9"];
@@ -140,9 +141,9 @@ function dayLabel(iso) {
 function splitSessions(all) {
   const t = todayStr();
   const dated = (all || []).filter(validDate);
-  const upcoming = dated.filter((s) => String(s.date) >= t && s.status !== "Cancelled")
+  const upcoming = dated.filter((s) => sessionStatus(s) === "Upcoming" || sessionStatus(s) === "In progress")
     .sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.startTime || "").localeCompare(String(b.startTime || "")));
-  const past = dated.filter((s) => String(s.date) < t).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const past = dated.filter((s) => sessionStatus(s) === "Completed").sort((a, b) => String(b.date).localeCompare(String(a.date)));
   return { upcoming, past, recentPast: past.slice(0, 1) };
 }
 

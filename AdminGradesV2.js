@@ -2,7 +2,7 @@ import { createElement as e, useMemo, useState, useEffect, Component } from "htt
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { db } from "./firebase-config.js?v=auth8";
 import { collection, query, where, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { parseScore, computeAverage, computeStatus, mergedSectionValues, fmt1, gradeCalc } from "./gradeCalc.js";
+import { parseScore, computeAverage, computeStatus, mergedSectionValues, fmt1, gradeCalc, averageTip } from "./gradeCalc.js";
 import { AdminPdfButton } from "./AdminPdfExport.js";
 import { csvDown } from "./grades-shell.js";
 import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
@@ -229,7 +229,7 @@ function App({ courses, courseId, setCourseId, pack, loading, error, onRetry, tr
               const low = v != null && v < passMark;
               return e("div", { key: c.id, className: v == null ? "agv2-z" : (low ? "agv2-low" : "") }, v == null ? "—" : fmt1(v));
             }),
-            e("div", { className: "agv2-avg" }, Number.isFinite(r.avg) ? fmt1(r.avg) : "—"),
+            e("div", { className: "agv2-avg", title: r.tip || "" }, Number.isFinite(r.avg) ? fmt1(r.avg) : "—"),
             e("div", { className: "agv2-pills" },
               r.info?.ip ? e("span", { className: "agv2-pill i", title: "In progress" }, "IP") : null,
               r.info?.result ? e("span", { className: "agv2-pill " + (r.info.result === "Passed" ? "p" : "f") }, r.info.result) : null
@@ -352,7 +352,7 @@ export async function loadGradePack(courseId) {
       const avg = g.average;
       const st = g.failed ? { label: "—", avg: null } : { label: g.status === "Passed" ? "P" : "F", avg: g.average };
       const u = userBy[en.uid] || {};
-      return { uid: en.uid, name: en.studentName || u.name || en.studentEmail || en.uid || "", studentId: u.studentId || en.studentId || "", vals, avg, st };
+      return { uid: en.uid, name: en.studentName || u.name || en.studentEmail || en.uid || "", studentId: u.studentId || en.studentId || "", vals, avg, st, tip: g.tip || averageTip(scheme, vals) };
     });
     return { components, passMark, rows, err: null };
   } catch (err) {
