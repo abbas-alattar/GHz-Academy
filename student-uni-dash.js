@@ -1,7 +1,7 @@
-import { bound, loadStudentDash } from "./student-dash-data.js?v=stu7";
-import { db } from "./firebase-config.js?v=auth8";
+import { bound, loadStudentDash } from "./student-dash-data.js?v=stu11";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { gradeCalc } from "./gradeCalc.js";
+import { gradeCalc, formatGrade } from "./gradeCalc.js";
 
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
 const firstName = (n) => String(n || "student").split(" ")[0];
@@ -200,7 +200,7 @@ function mountAnn(el) {
 }
 
 function paintAvgCard(root, pct, nDone) {
-  const shown = pct == null ? "–" : Number(pct).toFixed(1);
+  const shown = pct == null ? "–" : formatGrade(pct);
   const c = 2 * Math.PI * 36;
   const dash = pct == null ? 0 : (Math.min(100, Math.max(0, Number(pct))) / 100) * c;
   const stroke = pct == null ? "#94a3b8" : Number(pct) >= 80 ? "#16A34A" : Number(pct) >= 50 ? "#D97706" : "#DC2626";

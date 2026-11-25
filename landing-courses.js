@@ -1,14 +1,53 @@
-import { db } from "./firebase-config.js?v=auth8";
-import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { courseCardHtml } from "./CourseCard.js";
+import { auth, db } from "./firebase-config.js?v=auth10";
+import { collection, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { renderBrowseCoursesV2 } from "./BrowseCoursesV2.js";
+import { stripCoverFields, hydrateCovers } from "./coverFor.js?v=stu11";
+import { publicCardActions, moneyLabel } from "./courseCardActions.js";
 
 const PUBLIC = ["Open", "Coming soon", "Closed"];
-const ORDER = { Open: 0, "Coming soon": 1, Closed: 2 };
 
-function applyFilter(f) {
-  document.querySelectorAll("#courseGrid .cc1-card[data-status]").forEach((el) => {
-    el.classList.toggle("hide", f !== "all" && el.dataset.status !== f);
+async function loadRegs(uid) {
+  if (!uid) return {};
+  const map = {};
+  try {
+    const snap = await getDocs(query(collection(db, "registrations"), where("uid", "==", uid)));
+    snap.docs.forEach((d) => {
+      const r = { id: d.id, ...d.data() };
+      if (r.courseId) map[r.courseId] = r;
+    });
+  } catch (_) {}
+  try {
+    const snap = await getDocs(query(collection(db, "enrollments"), where("uid", "==", uid)));
+    snap.docs.forEach((d) => {
+      const e = d.data() || {};
+      const cid = e.courseId;
+      if (cid && !map[cid]) map[cid] = { courseId: cid, status: "enrolled" };
+    });
+  } catch (_) {}
+  return map;
+}
+
+async function roleOf(user) {
+  if (!user) return "guest";
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid));
+    return String(snap.exists() ? (snap.data().role || "student") : "student");
+  } catch {
+    return "student";
+  }
+}
+
+function paint(host, list, ctx) {
+  if (!host) return;
+  renderBrowseCoursesV2({
+    host,
+    catalog: list,
+    bare: true,
+    money: moneyLabel,
+    cardActions: (c) => publicCardActions(c, ctx)
   });
+  hydrateCovers(host);
 }
 
 try {
@@ -16,18 +55,22 @@ try {
   const filters = document.getElementById("filters");
   const sub = document.getElementById("coursesSub");
   const openLabel = document.getElementById("openRegLabel");
-  if (grid) {
-    grid.classList.add("cc1-grid");
-    grid.innerHTML = Array.from({ length: 3 }, () => `<article class="cc1-card"><div class="cc1-cover"></div><div class="cc1-body"></div></article>`).join("");
-  }
+  if (filters) filters.hidden = true;
 
-  const snap = await getDocs(query(collection(db, "courses"), where("status", "in", PUBLIC)));
-  const list = snap.docs.map((d) => {
-    const data = d.data() || {};
-    return { id: d.id, ...data, coverImage: data.coverImage || data.cover || "" };
-  })
-    .filter((c) => PUBLIC.includes(c.status))
-    .sort((a, b) => (ORDER[a.status] ?? 9) - (ORDER[b.status] ?? 9) || String(a.title || "").localeCompare(String(b.title || "")));
+  let list = [];
+  try {
+    const snap = await getDocs(query(collection(db, "courses"), where("status", "in", PUBLIC)));
+    list = snap.docs.map((d) => stripCoverFields({ id: d.id, ...d.data() }))
+      .filter((c) => PUBLIC.includes(c.status));
+    try { console.log("[ghz-courses] loaded", list.length); } catch {}
+  } catch (err) {
+    try { console.log("[ghz-courses] error", err?.code, err?.message); } catch {}
+    if (grid) {
+      grid.innerHTML = `<div class="pc1-err"><p>Could not load courses. Retry</p><button type="button" class="pc1-btn pri" id="landRetry">Retry</button></div>`;
+      document.getElementById("landRetry")?.addEventListener("click", () => location.reload());
+    }
+    throw err;
+  }
 
   const openCount = list.filter((c) => c.status === "Open").length;
   if (openLabel) openLabel.hidden = openCount < 1;
@@ -38,19 +81,65 @@ try {
       : `Build your knowledge from wireless fundamentals to advanced telecom engineering applications. ${openCount} courses are open for registration.`;
   }
 
-  if (grid) {
-    if (!list.length) grid.innerHTML = `<p class="empty-courses">New courses are coming soon.</p>`;
-    else grid.innerHTML = list.map((c) => courseCardHtml(c, { viewMode: "link" })).join("");
+  const t0 = performance.now();
+  const ctx = { role: "guest", user: null, authReady: false, regsReady: false, regsByCourse: {}, checkingTimedOut: false };
+  paint(grid, list, ctx);
+  try { console.log("[ghz-reg] cards", list.length, Math.round(performance.now() - t0)); } catch {}
+  if (!document.getElementById("pc1Modal")) {
+    const m = document.createElement("div");
+    m.id = "pc1Modal"; m.className = "pc1-modal"; m.hidden = true;
+    document.body.appendChild(m);
+  }
+  grid?.addEventListener("click", async (ev) => {
+    const a = ev.target?.closest("[data-view]");
+    if (!a) return;
+    ev.preventDefault();
+    const id = a.getAttribute("data-view");
+    const c = list.find((x) => x.id === id);
+    if (!c) return;
+    const { openModal } = await import("./PublicCoursesV1.js?v=21");
+    openModal(c, ctx.role, list);
+  });
+  const want = new URLSearchParams(location.search).get("course");
+  if (want) {
+    const { openModal, applyCourseParam } = await import("./PublicCoursesV1.js?v=21");
+    const c = list.find((x) => String(x.id) === want || String(x.slug || "").toLowerCase() === want.toLowerCase() || String(x.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === want.toLowerCase());
+    if (c) openModal(c, ctx.role, list, true);
+    else applyCourseParam(false);
   }
 
-  if (filters) {
-    filters.querySelectorAll("button").forEach((b) => {
-      b.onclick = () => {
-        filters.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
-        applyFilter(b.dataset.f);
-      };
-    });
-  }
+  onAuthStateChanged(auth, async (user) => {
+    ctx.user = user || null;
+    ctx.authReady = true;
+    try { console.log("[ghz-reg] auth", user || null, Math.round(performance.now() - t0)); } catch {}
+    ctx.role = user ? "student" : "guest";
+    ctx.regsByCourse = {};
+    ctx.regsReady = !user;
+    ctx.checkingTimedOut = false;
+    paint(grid, list, ctx);
+    try { console.log("[ghz-reg] cards", list.length, Math.round(performance.now() - t0)); } catch {}
+    if (!user) return;
+    try {
+      ctx.role = await roleOf(user);
+    } catch { ctx.role = "student"; }
+    if (ctx.role !== "student") {
+      ctx.regsReady = true;
+      paint(grid, list, ctx);
+      return;
+    }
+    const once = loadRegs(user.uid);
+    const timed = Promise.race([once, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 4000))]);
+    try {
+      ctx.regsByCourse = await timed;
+      ctx.regsReady = true;
+    } catch {
+      ctx.checkingTimedOut = true;
+      ctx.regsReady = false;
+      once.then((m) => { ctx.regsByCourse = m; ctx.regsReady = true; ctx.checkingTimedOut = false; paint(grid, list, ctx); }).catch(() => {});
+    }
+    paint(grid, list, ctx);
+    try { console.log("[ghz-reg] cards", list.length, Math.round(performance.now() - t0)); } catch {}
+  });
 } catch (err) {
   console.error(err);
   const grid = document.getElementById("courseGrid");

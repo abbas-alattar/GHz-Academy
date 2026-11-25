@@ -1,7 +1,7 @@
-import { protect } from "./auth-guard.js?v=auth8";
-import { db } from "./firebase-config.js?v=auth8";
+import { protect } from "./auth-guard.js?v=auth10";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { parseScore, computeAverage, computeStatus, gradeCalc } from "./gradeCalc.js";
+import { parseScore, computeAverage, computeStatus, gradeCalc, formatGrade } from "./gradeCalc.js";
 import { mountPdfButton } from "./AdminPdfExport.js";
 import { courseStatusLabel } from "./courseStatusLabel.js";
 
@@ -76,7 +76,7 @@ try {
         const v = parseScore(r.vals[c.id]);
         return `<td>${v == null ? "—" : v}</td>`;
       }).join("");
-      return `<tr><td>${esc(r.name)}</td>${cells}<td style="font-weight:700">${r.avg.toFixed(1)}/100</td><td>${badge(r.st)}</td></tr>`;
+      return `<tr><td>${esc(r.name)}</td>${cells}<td style="font-weight:700">${formatGrade(r.avg)}/100</td><td>${badge(r.st)}</td></tr>`;
     }).join("") : `<tr><td colspan="${3 + components.length}">No students match.</td></tr>`}</tbody></table></div>`;
   };
 
@@ -88,7 +88,7 @@ try {
         const v = parseScore(r.vals[c.id]);
         return v == null ? "" : v;
       });
-      return [JSON.stringify(r.name), ...cells, r.avg.toFixed(1), r.st.label].join(",");
+      return [JSON.stringify(r.name), ...cells, formatGrade(r.avg), r.st.label].join(",");
     }));
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const a = document.createElement("a");
@@ -127,41 +127,22 @@ try {
       return;
     }
 
-    let scoreMap = {};
+    let recMap = {};
     try {
       const ss = await getDocs(query(collection(db, "gradeScores"), where("courseId", "==", courseId)));
-      ss.docs.forEach((d) => { const data = d.data(); scoreMap[data.uid] = data.scores || {}; });
+      ss.docs.forEach((d) => { const data = d.data(); recMap[data.uid] = data; });
     } catch (e) {
       body.innerHTML = `<p class="banner">gradeScores: ${esc((e && (e.code || e.message)) || e)}</p>`;
       return;
     }
 
-    const loadCol = async (name) => {
-      try {
-        return (await getDocs(query(collection(db, name), where("courseId", "==", courseId)))).docs.map((d) => ({ id: d.id, ...d.data() }));
-      } catch (e) {
-        body.innerHTML = `<p class="banner">${name}: ${esc((e && (e.code || e.message)) || e)}</p>`;
-        throw e;
-      }
-    };
-    let autoPack;
-    try {
-      autoPack = {
-        assignments: await loadCol("assignments"),
-        quizzes: await loadCol("quizzes"),
-        attendance: await loadCol("attendance"),
-        submissions: await loadCol("submissions"),
-        quizAttempts: await loadCol("quizAttempts")
-      };
-    } catch { return; }
-
     rows = enrolled.map((en) => {
-      const manual = { ...(scoreMap[en.uid] || {}) };
-      const g = gradeCalc({ id: courseId, pack: { ...autoPack, scheme } }, scheme, { uid: en.uid, scores: manual, pack: { ...autoPack, scheme } });
-      const vals = g.values || {};
-      const avg = g.average;
-      const st = computeStatus({ components }, vals, passMark);
-      return { uid: en.uid, name: en.studentName || en.studentEmail || en.uid || "", vals, avg, st };
+      const rec = recMap[en.uid];
+      const unpublished = !rec || !rec.scores;
+      const vals = unpublished ? {} : { ...(rec.scores || {}) };
+      const avg = unpublished ? null : (rec.average != null ? Number(rec.average) : null);
+      const st = unpublished ? { label: "Not published by trainer", avg: null } : { label: rec.status === "Passed" ? "P" : rec.status === "Failed" ? "F" : "In progress", avg };
+      return { uid: en.uid, name: en.studentName || en.studentEmail || en.uid || "", vals, avg, st, unpublished };
     });
     const passed = rows.filter((r) => r.st.label === "P").length;
     const failed = rows.filter((r) => r.st.label === "F").length;
@@ -190,7 +171,7 @@ try {
       page: "Grades",
       filters: "Course: " + ctitle + (q ? " · Search: " + q : "") + (stFilter ? " · Status: " + stFilter : ""),
       columns: [{ key: "student", label: "Student" }, { key: "course", label: "Course" }, { key: "avg", label: "Final average" }, { key: "result", label: "Result" }],
-      rows: visible().map((r) => ({ student: r.name, course: ctitle, avg: r.avg.toFixed(1), result: r.st.label === "P" ? "Passed" : r.st.label === "F" ? "Failed" : r.st.label }))
+      rows: visible().map((r) => ({ student: r.name, course: ctitle, avg: formatGrade(r.avg), result: r.st.label === "P" ? "Passed" : r.st.label === "F" ? "Failed" : r.st.label }))
     }), "Grades");
   };
 

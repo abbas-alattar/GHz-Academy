@@ -1,13 +1,15 @@
-import { createElement as e, useEffect, useState, Component } from "https://esm.sh/react@18.3.1";
+import { createElement as e, useEffect, useLayoutEffect, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { db } from "./firebase-config.js?v=auth8";
+import { createPortal } from "https://esm.sh/react-dom@18.3.1";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTrainerStore, setTrainerCourseId, resolveTrainerCourseId } from "./TrainerStore.js";
 import { CourseSelect, StatusBadge } from "./TrainerHomeworkV2.js";
 import { isCourseLocked } from "./course-lock.js";
-import { parseScore, homeworkFinal, quizFinal, attendancePct, fmt1, bestNTip, publishedHomework, homeworkBestN, publishedQuizzes, quizBestN, gradeCalc, averageTip, computeAverage } from "./gradeCalc.js";
+import { parseScore, homeworkFinal, quizFinal, attendancePct, fmt1, formatGrade, roundGradeInput, bestNTip, publishedHomework, homeworkBestN, publishedQuizzes, quizBestN, gradeCalc, averageTip, computeAverage, gradeCoverage, numericScores, kindFrom, isLockedAuto } from "./gradeCalc.js";
 import { exportAdminPdf, nameWithId } from "./AdminPdfExport.js";
 import { showConfirmDialog, showNoticeDialog, showLeaveGradesDialog } from "./ConfirmDialog.js";
+import { formatCourseDate } from "./courseDates.js";
 
 function fbErr(er) { return String((er?.code || "") + " " + (er?.message || er)).trim(); }
 function initials(n) { return String(n || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((x) => x[0].toUpperCase()).join("") || "?"; }
@@ -15,18 +17,48 @@ function id7(en) {
   const s = String(en?.studentId || en?.id7 || "").replace(/\D/g, "");
   return s ? s.padStart(7, "0").slice(-7) : "—";
 }
-function kindFrom(c) {
-  const s = String(c?.source || "").toLowerCase();
-  if (s === "attendance" || s === "homework" || s === "quiz") return s;
-  const t = String(c?.title || "").toLowerCase();
-  if (/\battendance\b/.test(t)) return "attendance";
-  if (/homework/.test(t)) return "homework";
-  if (/quiz/.test(t)) return "quiz";
-  return "manual";
+function storedStatus(avg, passMark, completed) {
+  if (avg == null || !Number.isFinite(Number(avg))) return "In progress";
+  if (!completed) return "In progress";
+  return Number(avg) >= Number(passMark) ? "Passed" : "Failed";
 }
-function isLockedAuto(c) {
-  const s = String(c?.source || "").toLowerCase();
-  return s === "attendance" || s === "homework" || s === "quiz";
+function scoresTrainerSees(en, comps, draftMap, pack, scheme, courseId) {
+  const g = gradeCalc({ id: courseId, pack }, scheme, { uid: en.uid, scores: manualsOnly(draftMap[en.uid] || {}, comps), pack });
+  const vals = { ...(g.values || {}) };
+  const auto = projectedValues(courseId, pack, scheme, en);
+  (comps || []).forEach((c) => {
+    if (isLockedAuto(c)) {
+      const n = auto[kindFrom(c)]?.value;
+      if (n != null && Number.isFinite(Number(n))) vals[c.id] = Number(n);
+    }
+  });
+  const scoresMap = numericScores(vals);
+  const avg = computeAverage(scheme, scoresMap);
+  const pass = passMarkOf(scheme);
+  const completed = String(en.courseStatus || en.status || "").toLowerCase() === "completed";
+  return {
+    scores: scoresMap,
+    average: avg == null ? null : Number(fmt1(avg)),
+    averageRaw: avg == null ? null : Number(avg),
+    status: storedStatus(avg, pass, completed),
+    passMark: pass
+  };
+}
+function gradeDocPayload(en, comps, draftMap, pack, scheme, courseId, byUid) {
+  const p = scoresTrainerSees(en, comps, draftMap, pack, scheme, courseId);
+  return {
+    uid: en.uid, courseId, scores: p.scores, average: p.average, averageRaw: p.averageRaw,
+    status: p.status, passMark: p.passMark, savedAt: Date.now(), updatedAt: serverTimestamp(), updatedBy: byUid
+  };
+}
+function scoresChanged(prev, next) {
+  const a = prev && typeof prev === "object" ? prev : {};
+  const b = next && typeof next === "object" ? next : {};
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  for (const k of keys) {
+    if (Number(a[k]) !== Number(b[k]) && !(a[k] == null && b[k] == null)) return true;
+  }
+  return false;
 }
 function manualsOnly(scores, comps) {
   const o = {};
@@ -90,10 +122,12 @@ function statusOf(scheme, vals, completed, pack, en) {
   const g = gradeCalc({ id: pack?.courseId, pack }, scheme, { uid: en?.uid, scores: vals, pack });
   if (g.failed) return { avg: null, ip: false, result: "—", csv: "—", tip: "", values: {} };
   const avg = g.average;
-  const pass = !!g.passed;
+  const mark = Number(scheme?.passMark);
+  const passMark = Number.isFinite(mark) ? mark : 60;
+  const pass = Number.isFinite(avg) && avg >= passMark;
   const base = { avg, values: g.values || {}, tip: g.tip || averageTip(scheme, g.values || vals) };
   if (completed) return { ...base, ip: false, result: pass ? "Passed" : "Failed", csv: pass ? "Passed" : "Failed" };
-  return { ...base, ip: true, result: pass ? "Passed" : "Failed", csv: "IP · " + (pass ? "Passed" : "Failed") };
+  return { ...base, ip: true, result: "In progress", csv: "In progress" };
 }
 const DOT = ["#2563EB", "#7C3AED", "#10B981", "#F59E0B", "#EF4444", "#0EA5E9", "#EC4899"];
 
@@ -129,6 +163,39 @@ function TinyTarget() {
   return e("svg", { width: 11, height: 11, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2 },
     e("circle", { cx: 12, cy: 12, r: 8 }), e("circle", { cx: 12, cy: 12, r: 3 }),
     e("path", { d: "M12 2v3M12 19v3M2 12h3M19 12h3" }));
+}
+function ProjChip({ autoV, failed, emptyTip, disabled, onApply }) {
+  const [tip, setTip] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const btn = useRef(null);
+  const n = autoV == null ? null : Number(autoV);
+  const shown = n == null || !Number.isFinite(n) ? "—" : formatGrade(n);
+  const label = failed ? "Could not load" : (n == null ? (emptyTip || "No data") : ("Projected " + formatGrade(n) + " · click to apply"));
+  const place = () => {
+    const r = btn.current?.getBoundingClientRect();
+    if (!r) return;
+    const w = 220, h = 40;
+    let top = r.top - h - 8;
+    if (top < 8) top = r.bottom + 8;
+    let left = r.left + r.width / 2 - w / 2;
+    if (left < 8) left = 8;
+    if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
+    setPos({ top, left });
+  };
+  useLayoutEffect(() => { if (tip) place(); }, [tip]);
+  const fly = tip ? createPortal(e("div", {
+    className: "th2-projtip", role: "tooltip",
+    style: { position: "fixed", top: pos.top, left: pos.left, width: 220, maxWidth: 220, pointerEvents: "none", zIndex: 10060 }
+  }, label), document.body) : null;
+  return e("button", {
+    type: "button", ref: btn, className: "th2-approx" + (n == null ? " th2-approx-off" : ""),
+    disabled: disabled || n == null,
+    onMouseEnter: () => { place(); setTip(true); },
+    onMouseLeave: () => setTip(false),
+    onFocus: () => { place(); setTip(true); },
+    onBlur: () => setTip(false),
+    onClick: () => { if (n != null) onApply(roundGradeInput(n)); }
+  }, e(TinyTarget), shown, fly);
 }
 function viewHash(kind, courseId) {
   if (kind === "attendance") return "attendance";
@@ -230,11 +297,39 @@ function CourseSheet({ pack, course, uid, go }) {
       setSaved(map);
       setDraft(map);
       setInvalid({});
-      setLiveExtra({ assignments, submissions, quizzes, quizAttempts, attendance, sessions, errors });
+      const extra = { assignments, submissions, quizzes, quizAttempts, attendance, sessions, errors };
+      setLiveExtra(extra);
+      const packNow = autoPackFor({ ...pack, ...extra, errors }, courseId, schemeData);
+      const completed = String(course?.status || "").toLowerCase() === "completed";
+      ens.forEach((en) => { en.courseStatus = course?.status; });
+      if (!completed) {
+        const compsNow = Array.isArray(schemeData?.components) ? schemeData.components : [];
+        const prevDocs = {};
+        scoresSnap.docs.forEach((d) => { const x = d.data(); prevDocs[x.uid] = x; });
+        Promise.all(ens.map((en) => {
+          const payload = gradeDocPayload(en, compsNow, map, packNow, schemeData, courseId, uid);
+          const prev = prevDocs[en.uid] || {};
+          const sameAvg = Number(prev.average) === Number(payload.average) || (prev.average == null && payload.average == null);
+          const sameSt = String(prev.status || "") === String(payload.status || "");
+          if (!scoresChanged(prev.scores, payload.scores) && sameAvg && sameSt) return Promise.resolve();
+          return setDoc(doc(db, "gradeScores", en.uid + "_" + courseId), payload, { merge: true }).catch(() => {});
+        })).catch(() => {});
+      }
     } catch (er) { setLoadErr("gradeScores: " + fbErr(er)); }
     setLoading(false);
   };
   useEffect(() => { load(); }, [courseId]);
+  useEffect(() => {
+    if (loading || !scheme || !ens.length) return;
+    const publishOpen = async () => {
+      try {
+        await Promise.all(ens.map((en) => {
+          return Promise.resolve();
+        }));
+      } catch (_) {}
+    };
+    publishOpen();
+  }, [loading, courseId, schemeOk]);
 
   const gradePack = livePack;
   const mergedFor = (en) => {
@@ -252,9 +347,17 @@ function CourseSheet({ pack, course, uid, go }) {
   };
 
   const setCell = (uidS, cid, raw) => {
-    const t = String(raw ?? "").trim();
-    setDraft((prev) => ({ ...prev, [uidS]: { ...(prev[uidS] || {}), [cid]: t === "" ? null : t } }));
-    if (t === "") { setInvalid((p) => ({ ...p, [uidS + "_" + cid]: false })); return; }
+    let t = String(raw ?? "").trim();
+    if (t === "") {
+      setDraft((prev) => ({ ...prev, [uidS]: { ...(prev[uidS] || {}), [cid]: null } }));
+      setInvalid((p) => ({ ...p, [uidS + "_" + cid]: false }));
+      return;
+    }
+    if (/\.\d{2,}/.test(t)) {
+      const r = roundGradeInput(t);
+      t = r == null ? t : formatGrade(r);
+    }
+    setDraft((prev) => ({ ...prev, [uidS]: { ...(prev[uidS] || {}), [cid]: t } }));
     const n = Number(t);
     const bad = !Number.isFinite(n) || n < 0 || n > 100;
     setInvalid((p) => ({ ...p, [uidS + "_" + cid]: bad }));
@@ -278,8 +381,9 @@ function CourseSheet({ pack, course, uid, go }) {
     info.avg = computeAverage(scheme, vals);
     info.tip = averageTip(scheme, vals);
     info.values = vals;
-    const pass = info.avg >= passMarkOf(scheme);
-    info.result = pass ? "Passed" : "Failed";
+    info.coverageNote = gradeCoverage(scheme, vals).note || "";
+    const pass = info.avg == null ? null : info.avg >= passMarkOf(scheme);
+    info.result = pass == null ? "—" : (pass ? "Passed" : "Failed");
     if (!locked) info.csv = "IP · " + info.result;
     else info.csv = info.result;
     return { en, vals, info, auto: autoFor(en) };
@@ -310,7 +414,7 @@ function CourseSheet({ pack, course, uid, go }) {
         projComps.forEach((c) => {
           if (parseScore(cur[c.id]) != null) return;
           const nv = auto[kindFrom(c)];
-          if (nv != null) cur[c.id] = nv;
+          if (nv != null) cur[c.id] = roundGradeInput(nv);
         });
         next[en.uid] = cur;
       });
@@ -322,10 +426,9 @@ function CourseSheet({ pack, course, uid, go }) {
     setSaving(true);
     const jobs = uids.map((id) => {
       const en = ens.find((x) => x.uid === id);
-      const scoresMap = manualsOnly(draft[id] || {}, comps);
-      return setDoc(doc(db, "gradeScores", id + "_" + courseId), {
-        uid: id, courseId, scores: scoresMap, updatedAt: serverTimestamp(), updatedBy: uid
-      }).then(() => ({ id, ok: true, scoresMap })).catch((er) => ({ id, ok: false, er, scoresMap }));
+      const payload = gradeDocPayload(en, comps, draft, livePack, scheme, courseId, uid);
+      const scoresMap = payload.scores;
+      return setDoc(doc(db, "gradeScores", id + "_" + courseId), payload).then(() => ({ id, ok: true, scoresMap })).catch((er) => ({ id, ok: false, er, scoresMap }));
     });
     const settled = await Promise.allSettled(jobs);
     const results = settled.map((r, i) => r.status === "fulfilled" ? r.value : { id: uids[i], ok: false, er: r.reason });
@@ -348,13 +451,13 @@ function CourseSheet({ pack, course, uid, go }) {
   };
 
   const saveGrades = async () => {
-    if (locked || saving || !dirty) return false;
+    if (locked || saving) return false;
     const badCells = Object.keys(invalid).filter((k) => invalid[k]);
     if (badCells.length) {
       await showNoticeDialog({ tone: "danger", title: "Check the numbers", message: "Scores must be between 0 and 100." });
       return false;
     }
-    return writeStudents(dirtyUids);
+    return writeStudents(dirtyUids.length ? dirtyUids : ens.map((en) => en.uid));
   };
 
   const discard = () => { setDraft(saved); setInvalid({}); };
@@ -385,7 +488,7 @@ function CourseSheet({ pack, course, uid, go }) {
 
   const csv = () => {
     const head = ["Name (ID)", "ID", ...comps.map((c) => (c.title || "") + " (" + (c.weight || 0) + "%)"), "Average", "Status"];
-    const body = rows.map((r) => [nameWithId(r.en.studentName, id7(r.en)).label, id7(r.en), ...comps.map((c) => parseScore(displayed(r, c)) ?? ""), r.info.avg == null ? "" : fmt1(r.info.avg), r.info.csv]);
+    const body = rows.map((r) => [nameWithId(r.en.studentName, id7(r.en)).label, id7(r.en), ...comps.map((c) => { const n = parseScore(displayed(r, c)); return n == null ? "" : formatGrade(n); }), r.info.avg == null ? "" : formatGrade(r.info.avg), r.info.csv]);
     const blob = new Blob([[head, ...body].map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n")], { type: "text/csv" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "grades.csv"; a.click();
   };
@@ -408,13 +511,17 @@ function CourseSheet({ pack, course, uid, go }) {
   return e("div", { className: "th2 th2-grd th2-jak" },
     e("button", { type: "button", className: "th2-backpill", "data-nav": "grades?course=" + (courseId || ""), "aria-label": "Back to Grades" }, "← Grades"),
     locked ? e("div", { className: "th2-lockban" }, "Course completed — grades are locked") : null,
-    e("div", { className: "th2-hero" },
-      e("h2", { style: { margin: 0 } }, course.title || "Course"),
-      e("div", { className: "th2-optrow" }, e(StatusBadge, { course }), e("span", { className: "th2-sub" }, Array.isArray(course.trainerNames) ? course.trainerNames.join(", ") : (course.trainerName || ""))),
-      schemeOk ? e("div", { className: "th2-schips" },
-        comps.map((c, i) => e("span", { key: c.id, className: "th2-schip" }, e("i", { style: { background: DOT[i % DOT.length] } }), (c.title || "Section") + " " + (c.weight || 0) + "%")),
-        e("span", { className: "th2-schip pass" }, "Pass mark " + passM + "%")
-      ) : e("p", { className: "th2-err" }, "The admin has not set up the grade scheme for this course yet")
+    e("div", { className: "th2-hero th2-sheet-hero" },
+      e("h2", { className: "th2-sheet-title" }, course.title || "Course"),
+      e("div", { className: "th2-sheet-meta" },
+        e(StatusBadge, { course }),
+        e("span", { className: "th2-sub" }, Array.isArray(course.trainerNames) ? course.trainerNames.join(", ") : (course.trainerName || "")),
+        schemeOk ? e("div", { className: "th2-schips" },
+          comps.map((c, i) => e("span", { key: c.id, className: "th2-schip" }, e("i", { style: { background: DOT[i % DOT.length] } }), (c.title || "Section") + " " + (c.weight || 0) + "%")),
+          e("span", { className: "th2-schip pass" }, "Pass mark " + passM + "%")
+        ) : null
+      ),
+      schemeOk ? null : e("p", { className: "th2-err" }, "The admin has not set up the grade scheme for this course yet")
     ),
     loadErr ? e("p", { className: "th2-err" }, loadErr, " ", e("button", { className: "th2-btn", onClick: load }, "Try again")) : null,
     e("div", { className: "th2-grd-toolbar" },
@@ -424,13 +531,11 @@ function CourseSheet({ pack, course, uid, go }) {
       e("button", { type: "button", className: "th2-btn nowrap", onClick: csv }, e(Dl), " Export CSV"),
       saveBtn
     ),
-    e("div", { className: "th2-kpis" },
+    e("div", { className: "th2-kpis th2-sheet-kpis" },
       e("div", { className: "th2-kpi blue" }, e("span", { className: "ico" }, e(Users)), e("div", null, e("span", null, "Students"), e("strong", null, String(ens.length)))),
       e("div", { className: "th2-kpi violet" }, e("span", { className: "ico" }, e(Trend)), e("div", null, e("span", null, "Class average"), e("strong", null, String(classAvg)))),
-      e("div", { className: "th2-kpi teal" }, e("span", { className: "ico" }, e(Award)), e("div", null, e("span", null, locked ? "Passed" : "Passing (provisional)"), e("strong", null, String(passingN)))),
-      e("div", { className: "th2-kpi violet" }, e("span", { className: "ico" }, e(CheckIco)), e("div", null, e("span", null, "Fully graded"), e("strong", null, fullyN + " / " + ens.length))),
-      e("div", { className: "th2-kpi amber" }, e("span", { className: "ico" }, e(Hour)), e("div", null, e("span", null, "Pending"), e("strong", null, String(pendingN)))),
-      locked ? e("div", { className: "th2-kpi rose" }, e("span", { className: "ico" }, e(Hour)), e("div", null, e("span", null, "Failed/Below pass mark"), e("strong", null, String(failedN)))) : null
+      e("div", { className: "th2-kpi teal" }, e("span", { className: "ico" }, e(CheckIco)), e("div", null, e("span", null, "Fully graded"), e("strong", null, fullyN + " / " + ens.length))),
+      e("div", { className: "th2-kpi amber" }, e("span", { className: "ico" }, e(Hour)), e("div", null, e("span", null, "Pending"), e("strong", null, String(pendingN))))
     ),
     loading ? e("div", { className: "th2-skline", style: { height: 160, marginTop: 12 } }) :
     e("div", { className: "th2-card th2-grd-card" },
@@ -438,7 +543,11 @@ function CourseSheet({ pack, course, uid, go }) {
         e("table", { className: "th2-table th2-grd-table" },
           e("thead", null, e("tr", null,
             e("th", { className: "th2-stul" }, "Student"),
-            comps.map((c) => e("th", { key: c.id, className: "th2-numh" }, e("span", { className: "th2-2line" }, c.title || "Section"), e("span", { className: "th2-sub" }, (c.weight || 0) + "%"))),
+            comps.map((c) => {
+              const t = String(c.title || "Section");
+              const short = /attendance/i.test(t) ? "Attend." : /homework/i.test(t) ? "Home." : t;
+              return e("th", { key: c.id, className: "th2-numh", title: t }, e("span", { className: "th2-2line" }, short), e("span", { className: "th2-sub" }, (c.weight || 0) + "%"));
+            }),
             e("th", { className: "th2-avgl" }, "Average"),
             e("th", { className: "th2-stath" }, "Status")
           )),
@@ -469,16 +578,16 @@ function CourseSheet({ pack, course, uid, go }) {
               }
               const bad = invalid[r.en.uid + "_" + c.id];
               return e("td", { key: c.id, className: "th2-numh" },
-                e("div", { className: "th2-gline" },
-                  e("input", { type: "number", min: 0, max: 100, className: "th2-gin " + (bad ? "th2-badin " : "") + (dirtyCell ? "th2-dirtyin" : ""), disabled: locked || !schemeOk, value: v == null ? "" : v, onChange: (ev) => setCell(r.en.uid, c.id, ev.target.value) }),
-                  isProjected(c) ? e("button", { type: "button", className: "th2-approx" + (autoV == null ? " th2-approx-off" : ""), title: projMeta.failed ? "Could not load" : (autoV == null ? (projMeta.tip || "No data") : ("Projected from attendance / homework / quizzes. Click to apply. " + (projMeta.tip || ""))), disabled: locked || autoV == null, onClick: () => setCell(r.en.uid, c.id, autoV) }, e(TinyTarget), autoV == null ? "—" : ("proj " + fmt1(autoV))) : null
+                e("div", { className: "th2-gline" + (isProjected(c) ? " th2-gstack" : "") },
+                  e("input", { type: "number", min: 0, max: 100, step: 0.1, inputMode: "decimal", className: "th2-gin " + (bad ? "th2-badin " : "") + (dirtyCell ? "th2-dirtyin" : ""), disabled: locked || !schemeOk, value: v == null || v === "" ? "" : formatGrade(v), onChange: (ev) => setCell(r.en.uid, c.id, ev.target.value), onFocus: (ev) => { const n = parseScore(ev.target.value); if (n != null) ev.target.value = formatGrade(n); } }),
+                  isProjected(c) ? e(ProjChip, { autoV, failed: projMeta.failed, emptyTip: projMeta.tip || "No data", disabled: locked, onApply: (n) => setCell(r.en.uid, c.id, n) }) : null
                 ),
                 bad ? e("div", { className: "th2-badmsg" }, "0–100") : null
               );
             }),
             e("td", { className: "th2-avgl", title: r.info.tip || "" },
               e("div", { className: "th2-avgstack" },
-                e("strong", { className: (r.info.avg || 0) >= passM ? "ok" : "bad", title: r.info.tip || "" }, r.info.avg == null ? "—" : fmt1(r.info.avg)),
+                e("strong", { className: r.info.avg == null ? "" : ((r.info.avg || 0) >= passM ? "ok" : "bad"), title: r.info.tip || "" }, r.info.avg == null ? "—" : fmt1(r.info.avg), r.info.coverageNote ? e("em", { style: { display: "block", fontWeight: 500, fontSize: 11, opacity: 0.75 } }, r.info.coverageNote) : null),
                 e("i", { className: "th2-minibar" }, e("b", { className: (r.info.avg || 0) >= passM ? "ok" : "bad", style: { width: Math.min(100, r.info.avg || 0) + "%" } }))
               )
             ),
@@ -575,11 +684,17 @@ function ListPage({ pack, uid, go, pick }) {
   const clickSort = (key) => setSort((s) => ({ key, dir: s.key === key ? -s.dir : (key === "name" ? 1 : -1) }));
   const chip = (n, cls) => e("span", { className: "th2-cnt " + ((Number(n) || 0) === 0 ? "zero" : cls) }, String(n ?? 0));
   const debugOn = /(?:\?|&)debug=1\b/.test(location.hash) || /[?&]debug=1\b/.test(location.search);
+  const titleCounts = {};
+  courses.forEach((c) => { const k = String(c.title || "").trim().toLowerCase(); titleCounts[k] = (titleCounts[k] || 0) + 1; });
+  const courseSub = (c) => {
+    if (titleCounts[String(c.title || "").trim().toLowerCase()] < 2) return "";
+    return String(c.level || c.courseLevel || "").trim() || formatCourseDate(c.startDate) || "";
+  };
 
   return e("div", { className: "th2 th2-grd th2-jak" },
-    e("div", { className: "th2-head" },
+    e("div", { className: "th2-head th2-grd-head" },
       e("div", null, e("h2", null, "Grades"), e("p", null, "Course results for your classes")),
-      e(CourseSelect, { courses, cid: pick, counts: Object.fromEntries(courses.map((c) => [c.id, { items: (pack.enrollments || []).filter((en) => en.courseId === c.id && String(en.status || "").toLowerCase() !== "cancelled").length }])), countNoun: "student", onPick: (id) => go(id ? "grades/" + id : "grades") })
+      e(CourseSelect, { hideAll: true, courses, cid: pick, counts: Object.fromEntries(courses.map((c) => [c.id, { items: (pack.enrollments || []).filter((en) => en.courseId === c.id && String(en.status || "").toLowerCase() !== "cancelled").length }])), countNoun: "student", onPick: (id) => go(id ? "grades/" + id : "grades") })
     ),
     e("div", { className: "th2-kpis" },
       e("div", { className: "th2-kpi blue" }, e("span", { className: "ico" }, e(CapIco)), e("div", null, e("span", null, "Courses"), e("strong", null, String(courses.length)))),
@@ -588,29 +703,28 @@ function ListPage({ pack, uid, go, pick }) {
       e("div", { className: "th2-kpi amber" }, e("span", { className: "ico" }, e(Award)), e("div", null, e("span", null, "Passed"), e("strong", null, String(totPass))))
     ),
     !courses.length ? e("div", { className: "th2-empty" }, e(CapIco), e("p", null, "No courses assigned yet")) :
-    e("div", { className: "th2-card" },
-      e("table", { className: "th2-table th2-glist" },
-        e("thead", null, e("tr", null,
-          e("th", { className: "th2-sort", onClick: () => clickSort("name") }, "Course"),
-          e("th", null, "Status"),
-          e("th", { className: "th2-sort", onClick: () => clickSort("students") }, "Students"),
-          e("th", { className: "th2-sort", onClick: () => clickSort("avg") }, "Class average"),
-          e("th", null, "Passed"), e("th", null, "Failed"), e("th", null, "In progress"), e("th", null, "")
-        )),
-        e("tbody", null, rows.map(({ c, m }) => {
+    e("div", { className: "th2-card th2-gscroll" },
+      e("div", { className: "th2-ggrid" },
+        e("div", { className: "th2-rh th2-ggrid" },
+          e("div", { className: "th2-sort", onClick: () => clickSort("name") }, "Course"),
+          e("div", { className: "th2-sort th2-numh", onClick: () => clickSort("students") }, "Students"),
+          e("div", { className: "th2-sort th2-numh", title: "Class average", onClick: () => clickSort("avg") }, "Class avg"),
+          e("div", { className: "th2-numh" }, "Passed"), e("div", { className: "th2-numh" }, "Failed"), e("div", { className: "th2-numh" }, "In progress"), e("div", { className: "th2-hact" }, "Actions")
+        ),
+        rows.map(({ c, m }) => {
           const pass = m.pass || 60;
           const tone = barTone(m.avg, pass);
-          return e("tr", { key: c.id, className: "th2-clickrow", onClick: () => go("grades/" + c.id) },
-            e("td", null, e("span", { className: "th2-cname", title: c.title || "Course" }, c.title || "Course")),
-            e("td", null, e(StatusBadge, { course: c })),
-            e("td", { className: "th2-num" }, String(m.n)),
-            e("td", null, e("div", { className: "th2-avgbar " + tone }, e("span", { className: "th2-num" }, m.avg == null ? "—" : fmt1(m.avg)), e("i", null, e("b", { style: { width: Math.min(100, m.avg || 0) + "%" } })), e("em", null, m.avg == null ? "" : Math.round(m.avg) + "%"))),
-            e("td", null, chip(m.passed, "ok")),
-            e("td", null, chip(m.failed, "bad")),
-            e("td", null, chip(m.ip, "warn")),
-            e("td", { onClick: (ev) => ev.stopPropagation() }, e("button", { className: "th2-open", onClick: () => go("grades/" + c.id) }, "Open grades", e(ArrowIco)))
+          const sub = courseSub(c);
+          return e("div", { key: c.id, className: "th2-rr th2-clickrow th2-gcard", onClick: () => go("grades/" + c.id) },
+            e("div", { className: "th2-gc-course" }, e("span", { className: "th2-cname", title: c.title || "Course" }, c.title || "Course"), e("span", { className: "th2-gc-under" }, e(StatusBadge, { course: c }), sub ? e("span", { className: "th2-sub" }, sub) : null)),
+            e("div", { className: "th2-num th2-gc-stu", "data-lab": "Students" }, String(m.n)),
+            e("div", { className: "th2-gc-avg th2-numh", "data-lab": "Class avg" }, e("div", { className: "th2-avgbar " + tone }, e("span", { className: "th2-num" }, m.avg == null ? "—" : fmt1(m.avg)))),
+            e("div", { className: "th2-numh", "data-lab": "Passed" }, chip(m.passed, "ok")),
+            e("div", { className: "th2-numh", "data-lab": "Failed" }, chip(m.failed, "bad")),
+            e("div", { className: "th2-numh", "data-lab": "In progress" }, chip(m.ip, "warn")),
+            e("div", { className: "th2-cact", onClick: (ev) => ev.stopPropagation() }, e("button", { className: "th2-open", onClick: () => go("grades/" + c.id) }, "Open grades"))
           );
-        }))
+        })
       ),
       debugOn ? e("div", { className: "th2-card", style: { marginTop: 16, overflow: "auto" } },
         e("h3", { style: { fontSize: 14, margin: "0 0 8px" } }, "Grade check (list vs live gradeCalc)"),
@@ -625,6 +739,242 @@ function ListPage({ pack, uid, go, pick }) {
   );
 }
 
+function initialsG(n) { return String(n || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((x) => x[0].toUpperCase()).join("") || "?"; }
+function isPhoneGr() { try { return window.matchMedia("(max-width: 767px)").matches; } catch { return false; } }
+function PhoneGradebookUI({ pack, course, uid, go }) {
+  const courseId = course.id;
+  const locked = isCourseLocked(course);
+  const [scheme, setScheme] = useState(null);
+  const [saved, setSaved] = useState({});
+  const [draft, setDraft] = useState({});
+  const [q, setQ] = useState("");
+  const [mode, setMode] = useState("student");
+  const [cat, setCat] = useState("");
+  const [open, setOpen] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState("");
+  const [err, setErr] = useState("");
+  const [menu, setMenu] = useState(false);
+  const [liveExtra, setLiveExtra] = useState({ assignments: [], submissions: [], quizzes: [], quizAttempts: [], attendance: [], sessions: [], errors: {} });
+  const ens = (pack.enrollments || []).filter((en) => en.courseId === courseId && String(en.status || "").toLowerCase() !== "cancelled");
+  const comps = Array.isArray(scheme?.components) ? scheme.components : [];
+  const manuals = comps;
+  useEffect(() => { if (courseId) setTrainerCourseId("grades", courseId); }, [courseId]);
+  useEffect(() => {
+    let on = true;
+    (async () => {
+      const errors = {};
+      const take = async (key, col) => {
+        try {
+          const snap = await getDocs(query(collection(db, col), where("courseId", "==", courseId)));
+          return docsOf(snap);
+        } catch (er) {
+          errors[key] = true;
+          console.error("[ghz-grades] " + col, er);
+          return [];
+        }
+      };
+      try {
+        const sch = await getDoc(doc(db, "gradeSchemes", courseId));
+        const schemeData = sch.exists() ? sch.data() : null;
+        const [scoresSnap, assignments, submissions, quizzes, quizAttempts, attendance, sessions] = await Promise.all([
+          getDocs(query(collection(db, "gradeScores"), where("courseId", "==", courseId))),
+          take("assignments", "assignments"),
+          take("submissions", "submissions"),
+          take("quizzes", "quizzes"),
+          take("quizAttempts", "quizAttempts"),
+          take("attendance", "attendance"),
+          take("sessions", "sessions")
+        ]);
+        const map = {};
+        scoresSnap.docs.forEach((d) => { const x = d.data(); map[x.uid] = { ...(x.scores || {}) }; });
+        if (!on) return;
+        setScheme(schemeData);
+        setSaved(map); setDraft(map);
+        setLiveExtra({ assignments, submissions, quizzes, quizAttempts, attendance, sessions, errors });
+        const cs = Array.isArray(schemeData?.components) ? schemeData.components : [];
+        setCat(cs[0]?.id || "");
+        const lockedN = cs.filter(isLockedAuto).length * ens.length;
+        const scoreN = ens.length * cs.length;
+        console.log("[ghz-gradebook-phone]", courseId, ens.length, cs.length, scoreN, lockedN);
+      } catch (er) { if (on) setErr(fbErr(er)); }
+    })();
+    return () => { on = false; };
+  }, [courseId]);
+  const livePack = autoPackFor({ ...pack, ...liveExtra, errors: liveExtra.errors }, courseId, scheme);
+  const autoFor = (en) => {
+    const pv = projectedValues(courseId, livePack, scheme, en);
+    return { homework: pv.homework.value, quiz: pv.quiz.value, attendance: pv.attendance.value, meta: pv };
+  };
+  const displayed = (en, c) => {
+    if (isLockedAuto(c)) return autoFor(en)[kindFrom(c)];
+    const g = gradeCalc({ id: courseId, pack: livePack }, scheme, { uid: en.uid, scores: manualsOnly(draft[en.uid] || {}, comps), pack: livePack });
+    return (g.values || {})[c.id];
+  };
+  const setCell = (uidS, cid, raw) => {
+    let t = String(raw ?? "").trim();
+    if (t === "") { setDraft((prev) => ({ ...prev, [uidS]: { ...(prev[uidS] || {}), [cid]: null } })); return; }
+    if (/\.\d{2,}/.test(t)) {
+      const r = roundGradeInput(t);
+      t = r == null ? t : formatGrade(r);
+    }
+    setDraft((prev) => ({ ...prev, [uidS]: { ...(prev[uidS] || {}), [cid]: t } }));
+  };
+  const vis = ens.filter((en) => ((en.studentName || "") + " " + id7(en)).toLowerCase().includes(q.toLowerCase()));
+  const changeN = ens.reduce((n, en) => {
+    const m = manualsOnly(draft[en.uid] || {}, comps);
+    const s = manualsOnly(saved[en.uid] || {}, comps);
+    return n + comps.filter((c) => !isLockedAuto(c) && !sameVal(m[c.id], s[c.id])).length;
+  }, 0);
+  const dirtyUids = ens.filter((en) => {
+    const m = manualsOnly(draft[en.uid] || {}, comps);
+    const s = manualsOnly(saved[en.uid] || {}, comps);
+    return comps.some((c) => !isLockedAuto(c) && !sameVal(m[c.id], s[c.id]));
+  }).map((en) => en.uid);
+  const avgOf = (en) => {
+    const g = gradeCalc({ id: courseId, pack: livePack }, scheme, { uid: en.uid, scores: manualsOnly(draft[en.uid] || {}, comps), pack: livePack });
+    const vals = { ...(g.values || {}) };
+    const auto = autoFor(en);
+    comps.forEach((c) => { if (isLockedAuto(c)) vals[c.id] = auto[kindFrom(c)]; });
+    return computeAverage(scheme, vals);
+  };
+  const avgs = vis.map(avgOf).filter((n) => n != null);
+  const classAvg = avgs.length ? fmt1(avgs.reduce((a, b) => a + b, 0) / avgs.length) : "—";
+  const pendingN = vis.filter((en) => comps.some((c) => parseScore(displayed(en, c)) == null)).length;
+  const passM = passMarkOf(scheme);
+  const passingN = vis.filter((en) => { const a = avgOf(en); return a != null && a >= passM; }).length;
+  const highest = avgs.length ? fmt1(Math.max(...avgs)) : "—";
+  const chipOf = (en) => {
+    const a = avgOf(en);
+    if (a == null) return { t: "Pending", k: "pend" };
+    if (a >= passM) return { t: "Passing", k: "ok" };
+    return { t: "At risk", k: "risk" };
+  };
+  const save = async () => {
+    if (locked) return;
+    setSaving(true); setErr("");
+    try {
+      const ids = dirtyUids.length ? dirtyUids : ens.map((en) => en.uid);
+      await Promise.all(ids.map((id) => {
+        const en = ens.find((x) => x.uid === id);
+        return setDoc(doc(db, "gradeScores", id + "_" + courseId), gradeDocPayload(en, comps, draft, livePack, scheme, courseId, uid));
+      }));
+      setSaved(draft);
+      setToast("Grades saved");
+      setTimeout(() => setToast(""), 1800);
+      try { window.__ghzBumpActive?.(); } catch (_) {}
+    } catch (er) {
+      setErr(fbErr(er) || "Could not save");
+    }
+    setSaving(false);
+  };
+  useEffect(() => {
+    window.__ghzTrainerLeave = async () => {
+      if (!changeN) return true;
+      const a = await showLeaveGradesDialog();
+      if (a === "stay") return false;
+      if (a === "discard") { setDraft(saved); return true; }
+      await save();
+      return true;
+    };
+    return () => { window.__ghzTrainerLeave = null; };
+  }, [changeN, draft, saved]);
+  const focusNext = (si, ci) => {
+    const nextC = ci + 1;
+    if (nextC < manuals.length) {
+      document.querySelector('[data-gb="' + vis[si].uid + '_' + manuals[nextC].id + '"]')?.focus();
+      return;
+    }
+    if (si + 1 < vis.length && manuals[0]) document.querySelector('[data-gb="' + vis[si + 1].uid + '_' + manuals[0].id + '"]')?.focus();
+  };
+  const csv = () => {
+    const head = ["Name", "ID", ...comps.map((c) => c.title), "Average"];
+    const body = vis.map((en) => [en.studentName, id7(en), ...comps.map((c) => { const n = parseScore(displayed(en, c)); return n == null ? "" : formatGrade(n); }), avgOf(en) == null ? "" : formatGrade(avgOf(en))]);
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([[head, ...body].map((r) => r.join(",")).join("\n")], { type: "text/csv" })); a.download = "grades.csv"; a.click();
+  };
+  const pdf = () => exportAdminPdf({
+    page: (course.title || "Course") + " · Grades",
+    columns: [{ key: "n", label: "Student" }, { key: "avg", label: "Average" }],
+    rows: vis.map((en) => ({ n: en.studentName, avg: avgOf(en) == null ? "—" : fmt1(avgOf(en)) }))
+  });
+  const scoreInput = (en, c, si, ci) => {
+    const lockCat = isLockedAuto(c) || locked;
+    const cur = displayed(en, c);
+    const base = (saved[en.uid] || {})[c.id];
+    const changed = !lockCat && !sameVal((draft[en.uid] || {})[c.id], base);
+    return e("label", { className: "gb-inwrap" + (changed ? " ch" : "") + (lockCat ? " lock" : "") },
+      e("input", {
+        className: "gb-in", type: "text", inputMode: "decimal", step: "0.1", value: cur == null || cur === "" ? "" : formatGrade(cur),
+        disabled: lockCat, readOnly: lockCat, "data-gb": en.uid + "_" + c.id, enterKeyHint: "next",
+        onChange: (ev) => { if (!lockCat) setCell(en.uid, c.id, ev.target.value); },
+        onFocus: (ev) => { const n = parseScore(ev.target.value); if (n != null) ev.target.value = formatGrade(n); },
+        onKeyDown: (ev) => { if (ev.key === "Enter") { ev.preventDefault(); focusNext(si, ci); } }
+      }),
+      e("span", null, lockCat ? "Locked" : "/100")
+    );
+  };
+  return e("div", { className: "gb" },
+    e("div", { className: "gb-top" },
+      e("button", { type: "button", className: "gb-back", "data-nav": "grades?course=" + courseId, "aria-label": "Back to Grades" }, "← Grades"),
+      e("h2", { className: "gb-title" }, course.title || "Course"),
+      e("button", { type: "button", className: "gb-more", "aria-label": "More", onClick: () => setMenu(true) }, "⋯")
+    ),
+    menu ? e("div", { className: "gb-sheet" },
+      e("div", { className: "gb-scrim", onClick: () => setMenu(false) }),
+      e("div", { className: "gb-menu", role: "dialog" },
+        e("button", { type: "button", onClick: () => { setMenu(false); pdf(); } }, "View PDF"),
+        e("button", { type: "button", onClick: () => { setMenu(false); csv(); } }, "Export CSV")
+      )
+    ) : null,
+    e("div", { className: "gb-kpis" },
+      [["Students", String(ens.length)], ["Class average", String(classAvg)], ["Pending", String(pendingN)], [passingN ? "Passing" : "Highest", passingN ? String(passingN) : String(highest)]].map(([l, v]) =>
+        e("div", { key: l, className: "gb-kpi" }, e("span", null, l), e("strong", null, v))
+      )
+    ),
+    e("p", { className: "gb-lockline" }, (ens.length * comps.length) + " grades · " + (comps.filter(isLockedAuto).length * ens.length) + " locked"),
+    e("input", { className: "gb-search", type: "search", placeholder: "Search students", value: q, onChange: (ev) => setQ(ev.target.value) }),
+    e("div", { className: "gb-seg" },
+      e("button", { type: "button", className: mode === "student" ? "on" : "", onClick: () => setMode("student") }, "By student"),
+      e("button", { type: "button", className: mode === "cat" ? "on" : "", onClick: () => setMode("cat") }, "By category")
+    ),
+    mode === "cat" ? e("div", { className: "gb-cats" }, comps.map((c) => e("button", { key: c.id, type: "button", className: "gb-chip" + (cat === c.id ? " on" : ""), onClick: () => setCat(c.id) }, c.title || "Section", isLockedAuto(c) ? e("em", { className: "gb-lockb" }, " lock") : null))) : null,
+    mode === "cat" && cat ? e("p", { className: "gb-cavg" }, "Category average ", (() => {
+      const nums = vis.map((en) => parseScore((draft[en.uid] || {})[cat])).filter((n) => n != null);
+      return nums.length ? fmt1(nums.reduce((a, b) => a + b, 0) / nums.length) : "—";
+    })()) : null,
+    e("div", { className: "gb-list" }, vis.map((en, si) => {
+      const a = avgOf(en);
+      const ch = chipOf(en);
+      if (mode === "cat") {
+        const c = comps.find((x) => x.id === cat) || comps[0];
+        if (!c) return null;
+        return e("div", { key: en.uid, className: "gb-card" },
+          e("span", { className: "gb-av" }, initialsG(en.studentName)),
+          e("div", { className: "gb-meta" }, e("strong", null, en.studentName || "Student"), e("span", null, id7(en))),
+          scoreInput(en, c, si, comps.indexOf(c))
+        );
+      }
+      return e("div", { key: en.uid, className: "gb-card" + (open[en.uid] ? " open" : "") },
+        e("button", { type: "button", className: "gb-head", onClick: () => setOpen((p) => ({ ...p, [en.uid]: !p[en.uid] })) },
+          e("span", { className: "gb-av" }, initialsG(en.studentName)),
+          e("div", { className: "gb-meta" }, e("strong", null, en.studentName || "Student"), e("span", null, id7(en))),
+          e("div", { className: "gb-right" }, e("b", null, a == null ? "—" : fmt1(a)), e("em", { className: "gb-st " + ch.k }, ch.t))
+        ),
+        open[en.uid] ? e("div", { className: "gb-exp" }, comps.map((c, ci) => e("div", { key: c.id, className: "gb-catrow" },
+          e("div", null, e("strong", null, c.title || "Section"), e("span", null, " · " + (c.weight || 0) + "%"), isLockedAuto(c) ? e("em", { className: "gb-lockb" }, " lock") : null),
+          e("i", { className: "gb-dot" + (parseScore(displayed(en, c)) != null ? " on" : "") }),
+          scoreInput(en, c, si, ci)
+        ))) : null
+      );
+    })),
+    changeN ? e("div", { className: "gb-savebar" },
+      e("button", { type: "button", className: "gb-save", disabled: saving || locked, onClick: save }, saving ? "Saving…" : ("Save " + changeN + " change" + (changeN === 1 ? "" : "s"))),
+      e("button", { type: "button", className: "gb-disc", onClick: () => setDraft(saved) }, "Discard")
+    ) : null,
+    toast ? e("div", { className: "gb-toast ok" }, toast) : null,
+    err ? e("div", { className: "gb-toast bad" }, err, " ", e("button", { type: "button", onClick: save }, "Retry")) : null
+  );
+}
 function Page({ uid, go, courseId, listCourse }) {
   const [pack, setPack] = useState(getTrainerStore());
   useEffect(() => subscribeTrainerStore(setPack), []);
@@ -634,7 +984,10 @@ function Page({ uid, go, courseId, listCourse }) {
   if (!pack || !pack.extrasReady) return e("div", { className: "th2" }, e("div", { className: "th2-hero" }, e("h2", { style: { margin: 0 } }, "Grades"), e("div", { className: "th2-skline", style: { height: 120 } })));
   if (pack.enrollErr) return e("div", { className: "th2" }, e("p", { className: "th2-err" }, pack.enrollErr, " ", e("button", { className: "th2-btn", onClick: () => refreshTrainerStore(uid) }, "Try again")));
   const sheetCourse = courses.find((c) => c.id === courseId);
-  if (courseId && sheetCourse) return e(CourseSheet, { pack, course: sheetCourse, uid, go });
+  if (courseId && sheetCourse) {
+    if (isPhoneGr()) return e(PhoneGradebookUI, { pack, course: sheetCourse, uid, go });
+    return e(CourseSheet, { pack, course: sheetCourse, uid, go });
+  }
   return e(ListPage, { pack, uid, go, pick });
 }
 

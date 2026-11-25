@@ -1,5 +1,5 @@
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { auth, roleHome } from "./firebase-config.js?v=auth8";
+import { auth, roleHome } from "./firebase-config.js?v=auth10";
 
 const CH = "ghz-auth";
 const LS = "ghz-logout";
@@ -41,6 +41,7 @@ function keepResultKeys(uid) {
 }
 
 export function clearPortalCaches(uid) {
+  try { import("./displayName.js").then((m) => m.clearNameCache()).catch(() => {}); } catch (_) {}
   unsubs.forEach((fn) => { try { fn(); } catch (_) {} });
   unsubs.clear();
   try { window.dispatchEvent(new Event("ghz-logout")); } catch (_) {}

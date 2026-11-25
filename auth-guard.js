@@ -1,10 +1,12 @@
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { auth, db, roleHome } from "./firebase-config.js?v=auth8";
+import { doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getDisplayName, getFirstName, getInitials, writeNameCache, readNameCache, profileFromAuth } from "./displayName.js";
+import { auth, db, roleHome } from "./firebase-config.js?v=auth10";
 import { setAuthReady } from "./RouteLoader.js";
 import { healStudentIdIfMissing } from "./studentId.js";
 import { ensureLocalPersistence, leaveToLogin, bindLogoutButton, watchCrossTab, broadcastLogin, performLogout } from "./auth-sync.js?v=auth9";
 import { bootPending, bootOk, bootFail } from "./bootTrace.js";
+import { ghzPerf, timedQuery } from "./ghz-perf.js";
 
 let authReady = false;
 let resolvedOnce = false;
@@ -21,8 +23,7 @@ function paintWhoChip({ name, role, studentId }) {
     av.setAttribute("aria-hidden", "true");
     who.prepend(av);
   }
-  const parts = String(name || "").split(/\s+/).filter(Boolean);
-  av.textContent = ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase() || "?";
+  av.textContent = getInitials({ name, fullName: name, displayName: name });
   let wrap = who.querySelector(".who-txt");
   if (!wrap) {
     wrap = document.createElement("div");
@@ -101,28 +102,30 @@ function paintWhoChip({ name, role, studentId }) {
   }
 }
 
-export function applyDisplayName(shown) {
-  const name = String(shown || "").trim();
-  if (!name) return;
+export function applyDisplayName(shown, extra) {
+  const profile = typeof shown === "object" && shown ? shown : { name: shown, ...(extra || {}) };
+  const name = getDisplayName(profile);
+  const first = getFirstName(profile);
   const nameEl = document.getElementById("userName");
   const greet = document.getElementById("welcomeName");
-  if (nameEl) nameEl.textContent = name;
-  if (greet) greet.textContent = name;
-  let cached = {};
-  try { cached = JSON.parse(localStorage.getItem("ghz-shell") || "{}") || {}; } catch (_) {}
-  try { localStorage.setItem("ghz-shell", JSON.stringify({ ...cached, name })); } catch (_) {}
-  paintWhoChip({ name, role: cached.role || document.getElementById("userRole")?.textContent?.toLowerCase() || "student", studentId: cached.studentId || "" });
+  if (nameEl) nameEl.textContent = name || "Account";
+  if (greet) greet.textContent = first;
+  writeNameCache({ ...readNameCache(), ...profile, name });
+  const cached = readNameCache();
+  paintWhoChip({ name: name || "Account", role: profile.role || cached.role || "student", studentId: profile.studentId || cached.studentId || "" });
   document.querySelectorAll(".pv2-name, .stu-who-name, [data-shell-name]").forEach((el) => {
     if (el.id === "userRole") return;
     if (el.classList.contains("pv2-name") || el.hasAttribute("data-shell-name") || el.classList.contains("stu-who-name")) {
       el.textContent = name;
     }
   });
+  try { window.dispatchEvent(new CustomEvent("ghz-profile", { detail: profile })); } catch (_) {}
 }
 
 export function protect(requiredRole) {
   return new Promise((resolve) => {
     let lastUid = "";
+    const tAuth0 = performance.now();
     bootPending("auth restored");
     const showSlow = () => {
       const host = document.getElementById("studentDashRoot") || document.getElementById("tr2CoursesRoot") || document.querySelector(".content") || document.body;
@@ -148,6 +151,7 @@ export function protect(requiredRole) {
         else location.replace("./login.html");
         return;
       }
+      ghzPerf("auth ready", { ms: Math.round(performance.now() - tAuth0) });
       bootOk("auth restored", "uid " + String(user.uid).slice(0, 8));
       if (resolvedOnce) {
         if (lastUid) lastUid = user.uid;
@@ -155,22 +159,37 @@ export function protect(requiredRole) {
       }
       lastUid = user.uid;
       const nameEl = document.getElementById("userName");
-      const roleEl = document.getElementById("userRole");
       const greet = document.getElementById("welcomeName");
-      const fallbackName = (user.displayName || "").trim() || (user.email || "") || "Account";
-      let cachedShell = {};
-      try { cachedShell = JSON.parse(localStorage.getItem("ghz-shell") || "{}") || {}; } catch (_) {}
-      const firstName = (cachedShell.name && cachedShell.name !== "…" && String(cachedShell.name).toLowerCase() !== "admin") ? cachedShell.name : fallbackName;
-      if (nameEl) nameEl.textContent = firstName;
-      if (greet) greet.textContent = firstName;
-      paintWhoChip({ name: firstName, role: cachedShell.role || requiredRole, studentId: cachedShell.studentId || "" });
-      let profile = { name: fallbackName, role: requiredRole, email: user.email, active: true };
+      const cachedShell = readNameCache();
+      const paintProf = profileFromAuth(user, cachedShell);
+      const firstPaint = getDisplayName(paintProf) || "Account";
+      if (nameEl) nameEl.textContent = firstPaint;
+      if (greet) greet.textContent = getFirstName(paintProf);
+      paintWhoChip({ name: firstPaint, role: cachedShell.role || requiredRole, studentId: cachedShell.studentId || "" });
+      let profile = {
+        ...paintProf,
+        name: firstPaint,
+        role: cachedShell.role || requiredRole,
+        email: user.email,
+        active: true,
+        studentId: cachedShell.studentId || ""
+      };
+      authReady = true;
+      resolvedOnce = true;
+      setAuthReady(true);
+      applyDisplayName(profile);
+      paintWhoChip({ name: firstPaint, role: profile.role, studentId: profile.studentId || "" });
+      clearTimeout(authTimer);
+      resolve({ user, profile });
       bootPending("users/uid read");
+      const tProf = performance.now();
+      (async () => {
       try {
         const snap = await Promise.race([
-          getDoc(doc(db, "users", user.uid)),
+          timedQuery("users/" + user.uid, () => getDoc(doc(db, "users", user.uid))),
           new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("Profile timed out"), { code: "timeout" })), 8000))
         ]);
+        ghzPerf("user profile load", { ms: Math.round(performance.now() - tProf) });
         if (snap.exists()) {
           profile = snap.data();
           bootOk("users/uid read", "ok");
@@ -180,7 +199,8 @@ export function protect(requiredRole) {
       } catch (e) {
         bootFail("users/uid read", e);
         console.error("profile", e);
-        profile = { name: fallbackName, role: requiredRole, email: user.email, active: true };
+        ghzPerf("user profile load", { ms: Math.round(performance.now() - tProf), ok: false });
+        profile = { email: user.email, role: requiredRole, active: true, displayName: user.displayName || "" };
       }
       if (profile.active === false) {
         await signOut(auth);
@@ -191,14 +211,25 @@ export function protect(requiredRole) {
         location.replace(roleHome[profile.role] || "./student.html");
         return;
       }
-      authReady = true;
-      resolvedOnce = true;
-      setAuthReady(true);
-      const shown = (profile.name || "").trim() || user.email || fallbackName;
+      const live = { ...profile, uid: user.uid, email: profile.email || user.email, displayName: profile.displayName || user.displayName };
+      const shown = getDisplayName(live);
       const role = profile.role || requiredRole;
-      try { localStorage.setItem("ghz-shell", JSON.stringify({ role, name: shown, studentId: profile.studentId || "" })); } catch (_) {}
-      applyDisplayName(shown);
-      paintWhoChip({ name: shown, role, studentId: profile.studentId || "" });
+      writeNameCache({ ...live, role, name: shown });
+      applyDisplayName(live);
+      paintWhoChip({ name: shown || "Account", role, studentId: profile.studentId || "" });
+      try {
+        if (window.__ghzUserUnsub) window.__ghzUserUnsub();
+        window.__ghzUserUnsub = onSnapshot(doc(db, "users", user.uid), (snap) => {
+          if (!snap.exists()) return;
+          const next = { uid: user.uid, email: user.email, displayName: user.displayName, ...snap.data() };
+          if (next.active === false) return;
+          writeNameCache(next);
+          applyDisplayName(next);
+          try {
+            import("./student-dash-data.js?v=stu11").then((m) => m.applyLiveProfile?.(next)).catch(() => {});
+          } catch (_) {}
+        });
+      } catch (_) {}
       const banner = document.getElementById("verifyBanner");
       if (banner && requiredRole === "student" && !user.emailVerified) banner.hidden = false;
       document.querySelectorAll("[data-needs-verified]").forEach((el) => {
@@ -210,8 +241,6 @@ export function protect(requiredRole) {
       });
       healStudentIdIfMissing(user.uid, profile).then(() => {}).catch(() => {});
       broadcastLogin(user.uid);
-      clearTimeout(authTimer);
-      resolve({ user, profile });
       setDoc(doc(db, "users", user.uid), {
         emailVerified: !!user.emailVerified,
         lastLoginAt: serverTimestamp(),
@@ -221,6 +250,7 @@ export function protect(requiredRole) {
         const role = profile.role || requiredRole;
         import("./portal-notify.js").then((m) => m.bootNotify({ role, uid: user.uid })).catch(() => {});
       } catch (_) {}
+      })();
     });
     try {
       watchCrossTab({

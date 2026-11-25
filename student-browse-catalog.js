@@ -50,7 +50,7 @@ function cardHtml(c, cardActions, money, badge) {
           <p class="cat-desc">${esc(desc)}</p>
           <div class="cat-meta">
             <div>${esc(c?.duration ?? "Duration TBC")}</div>
-            <div>${esc(c?.sessionsPerWeek ? c.sessionsPerWeek + " sessions / week" : "Sessions TBC")}</div>
+            <div>${esc((() => { const n = Number(c?.sessionsPerWeek); if (!n) return "To be announced"; if (n===1) return "Once a week"; if (n===2) return "Twice a week"; if (n===3) return "Three times a week"; if (n===4) return "Four times a week"; if (n===5) return "Five times a week"; return n + " times a week"; })())}</div>
             <div>${esc(level || "Level TBC")}</div>
             <div>${esc(startsEndsLine(c) || "Start date TBC")}</div>
             ${c?.trainerName || c?.instructor ? `<div>${esc(c.trainerName || c.instructor)}</div>` : ""}

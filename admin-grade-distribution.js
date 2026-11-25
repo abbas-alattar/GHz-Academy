@@ -1,5 +1,6 @@
-import { db, auth } from "./firebase-config.js?v=auth8";
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { db, auth } from "./firebase-config.js?v=auth10";
+import { doc, getDoc, getDocs, collection, query, where, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { kindFrom } from "./gradeCalc.js";
 
 const SOURCES = [
   { id: "manual", label: "Manual (trainer enters)" },
@@ -7,7 +8,7 @@ const SOURCES = [
   { id: "homework", label: "Homework (auto)" },
   { id: "quiz", label: "Quiz (auto)" }
 ];
-const normSource = (s) => (s === "attendance" || s === "homework" || s === "quiz" ? s : "manual");
+const normSource = (c) => kindFrom(typeof c === "string" ? { source: c } : c);
 const defaults = () => [
   { id: "c1", title: "Attendance", weight: 10, source: "attendance" },
   { id: "c2", title: "Homeworks", weight: 20, source: "homework" },
@@ -40,6 +41,8 @@ export function openGradeDistribution(course, toast) {
   (async () => {
     let passMark = 60;
     let components = defaults();
+    let origById = {};
+    let hasSavedScores = false;
     try {
       const snap = await getDoc(doc(db, "gradeSchemes", course.id));
       if (snap.exists()) {
@@ -51,10 +54,15 @@ export function openGradeDistribution(course, toast) {
             id: c.id || ("c" + (i + 1)),
             title: c.title || "",
             weight: Number(c.weight) || 0,
-            source: normSource(c.source)
+            source: kindFrom(c)
           }));
+          origById = Object.fromEntries(components.map((c) => [c.id, c.source]));
         }
       }
+      try {
+        const qs = await getDocs(query(collection(db, "gradeScores"), where("courseId", "==", course.id)));
+        hasSavedScores = !qs.empty;
+      } catch (_) { hasSavedScores = false; }
     } catch (e) { fail("gradeSchemes", e); return; }
 
     const paint = () => {
@@ -106,6 +114,7 @@ export function openGradeDistribution(course, toast) {
           <button class="btn" type="button" id="gdSave" style="width:auto;margin:0" ${ok?"":"disabled"}>Save</button>
           <button class="btn btn-ghost" type="button" id="gdClose" style="width:auto;margin:0">Close</button>
         </div>
+        <p id="gdWarn" style="display:none;margin:12px 0 0;padding:10px 12px;border-radius:10px;background:#fff7ed;color:#9a3412;font-size:.9rem"></p>
         <p id="gdErr" class="err"></p>`;
       const sync = () => {
         body.querySelectorAll("tr.gd-row").forEach((el) => {
@@ -133,6 +142,22 @@ export function openGradeDistribution(course, toast) {
         if (err) {
           if (autoDup) { err.style.display = "block"; err.textContent = "Only one section can use each auto source."; }
           else if (!err.textContent.startsWith("save:")) { err.style.display = "none"; err.textContent = ""; }
+        }
+        const warn = body.querySelector("#gdWarn");
+        if (warn) {
+          const flipped = components.filter((c) => {
+            const was = origById[c.id];
+            if (!was) return false;
+            const now = kindFrom(c);
+            return (was === "manual") !== (now === "manual");
+          });
+          if (hasSavedScores && flipped.length) {
+            warn.style.display = "block";
+            warn.textContent = "Existing saved values for this part will be replaced/ignored: " + flipped.map((c) => c.title || c.id).join(", ") + ". Old stored scores are kept.";
+          } else {
+            warn.style.display = "none";
+            warn.textContent = "";
+          }
         }
         const stack = body.querySelector("#gdStack");
         if (stack) stack.innerHTML = components.map((c,i)=>`<div title="${esc(c.title)} ${c.weight}%" style="flex:0 0 ${Math.max(0,Number(c.weight)||0)}%;background:${hues[i%hues.length]}"></div>`).join("");
@@ -175,7 +200,7 @@ export function openGradeDistribution(course, toast) {
           await setDoc(doc(db, "gradeSchemes", course.id), {
             courseId: course.id,
             passMark: Number(body.querySelector("#gdPass").value) || 60,
-            components: components.map((c) => ({ id: c.id, title: String(c.title).trim(), weight: Number(c.weight) || 0, source: normSource(c.source) })),
+            components: components.map((c) => ({ id: c.id, title: String(c.title).trim(), weight: Number(c.weight) || 0, source: kindFrom({ source: c.source || "manual" }) })),
             updatedAt: serverTimestamp(),
             updatedBy: auth.currentUser?.uid || ""
           });

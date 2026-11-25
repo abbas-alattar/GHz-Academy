@@ -1,5 +1,6 @@
 import { loadAnnouncementReads, markAnnouncementRead, markAllAnnouncementsRead, isRead, unreadCount, onAnnouncementReads } from "./announcementReads.js";
 
+const asArray = (x) => Array.isArray(x) ? x : [];
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
 const state = { tab: "all", course: "all", more: {}, uid: "", tick: 0 };
 
@@ -107,7 +108,7 @@ export function renderAnnouncementsV2(opts) {
       host.replaceChildren(wrap);
       return true;
     }
-    const items = Array.isArray(opts.items) ? opts.items.slice() : [];
+    const items = asArray(opts.items).slice();
     const courses = opts.courses || {};
     state.uid = opts.uid || state.uid || "";
     if (state.uid && !state._readsHook) {

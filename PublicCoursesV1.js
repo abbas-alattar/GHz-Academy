@@ -1,15 +1,20 @@
 import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { auth, db } from "./firebase-config.js?v=auth8";
+import { auth, db } from "./firebase-config.js?v=auth10";
 import { formatCourseDate, startsEndsLine } from "./courseDates.js";
-import { formatDuration, formatPrice, formatSchedule, parseCourseDays } from "./DeliveryDays.js";
+import { formatDuration, formatPrice, formatSchedule, parseCourseDays, sessionsPerWeekWords } from "./DeliveryDays.js";
+import { formatBeirutTimeLine, timeInfoButton, bindTimePopovers } from "./courseTimeFacts.js";
 import { courseCardHtml, coverHtml } from "./CourseCard.js";
+import { stripCoverFields, hydrateCovers } from "./coverFor.js?v=stu11";
+import { renderBrowseCoursesV2 } from "./BrowseCoursesV2.js";
+import { publicCardActions, moneyLabel, getCourseAction, courseSlug } from "./courseCardActions.js";
 import { statusLabel, statusChipKind, canRegisterForCourse } from "./courseStatusLabel.js";
+import { icon } from "./ghz-icons.js";
 
 const PUBLIC = ["Open", "Coming soon", "Closed"];
-const CACHE_KEY = "ghz-pc1-courses-v5";
-const CACHE_MS = 5 * 60 * 1000;
+const CACHE_KEY = "ghz-pc1-courses-v6";
+const CACHE_MS = 30 * 60 * 1000;
 const root = document.getElementById("pc1Root");
 
 function esc(s) {
@@ -61,9 +66,14 @@ function registerHref(id, role) {
   return "./login.html?tab=signup&course=" + encodeURIComponent(id) + "&next=register";
 }
 
+function findByParam(list, want) {
+  const w = String(want || "").trim().toLowerCase();
+  if (!w) return null;
+  return (list || []).find((x) => String(x.id) === want || courseSlug(x) === w) || null;
+}
 function readCache() {
   try {
-    const raw = sessionStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(CACHE_KEY) || sessionStorage.getItem("ghz-pc1-courses-v5");
     if (!raw) return null;
     const o = JSON.parse(raw);
     if (!o || !Array.isArray(o.list)) return null;
@@ -72,7 +82,7 @@ function readCache() {
 }
 
 function writeCache(list) {
-  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), list })); } catch {}
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), list })); } catch {}
 }
 
 async function fetchCourses() {
@@ -100,7 +110,7 @@ async function fetchCourses() {
       topic: data.topic || data.category || "",
       coverImage: data.coverImage || data.cover || ""
     };
-  }).filter((c) => PUBLIC.includes(c.status));
+  }).map(stripCoverFields).filter((c) => PUBLIC.includes(c.status));
   list.forEach((c) => {
     const sch = formatSchedule(c);
     if (sch.invalidLetterString) console.warn("Bad course.days (letter string, ignored):", c.title, sch.rawDays);
@@ -215,14 +225,42 @@ function icsBlob(c) {
   const ics = ["BEGIN:VCALENDAR","VERSION:2.0","BEGIN:VEVENT","SUMMARY:" + String(c.title || "Course").replace(/\n/g, " "),"DTSTART:" + dt(a),"DTEND:" + dt(Math.max(a + 3600000, end)),"END:VEVENT","END:VCALENDAR"].join("\r\n");
   return ics;
 }
+function factRow(kind, label, valueHtml) {
+  if (!valueHtml) return "";
+  return `<li>${icon(kind)} <span>${esc(label)}</span> <strong>${valueHtml}</strong></li>`;
+}
+let authKnown = false;
+let authReady = false;
+let authUser = null;
+let regsReady = false;
+let checkingTimedOut = false;
+function userCtx(role) {
+  return {
+    role: role || (authUser ? "student" : "guest"),
+    user: authUser,
+    regsByCourse,
+    authKnown,
+    authReady,
+    regsReady,
+    checkingTimedOut
+  };
+}
+function withTimeout(p, ms) {
+  return Promise.race([
+    p,
+    new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))
+  ]);
+}
+function ctaMarkup(st) {
+  if (st.checking) {
+    return `<button type="button" class="pc1-btn pri pc1-footbtn" disabled><span class="pc1-spin" aria-hidden="true"></span> Checking…</button>`;
+  }
+  if (st.disabled) return `<button type="button" class="pc1-btn pri pc1-footbtn" disabled>${esc(st.label)}</button>`;
+  return `<a class="pc1-btn pri pc1-footbtn" href="${esc(st.href)}">${esc(st.label)}</a>`;
+}
 function modalHtml(c, role, all) {
   const dur = formatDuration(c);
   const sch = formatSchedule(c);
-  const href = registerHref(c.id, role);
-  let cta;
-  if (role === "trainer" || role === "admin") cta = `<span class="pc1-opensoon">Registration is for student accounts</span>`;
-  else if (canRegisterForCourse(c)) cta = `<a class="pc1-btn pri pc1-footbtn" href="${esc(href)}" target="_blank" rel="noopener noreferrer">Register for this course</a>`;
-  else cta = `<span class="pc1-opensoon">${statusLabel(c)}</span>`;
   const start = formatCourseDate(c.startDate);
   const end = formatCourseDate(c.endDate);
   const schedVal = [sch.daysLine, sch.timeLine ? esc(sch.timeLine) + (sch.zone ? ` <span class="dd-zone">${esc(sch.zone)}</span>` : "") : ""].filter(Boolean).join("<br/>");
@@ -258,57 +296,94 @@ function modalHtml(c, role, all) {
     ["Price", esc(priceLine(c))]
   ].filter(Boolean);
   const ics = icsBlob(c);
-  return `<div class="pc1-sheet pc1-sheet-v3 pc1-in" role="dialog" aria-modal="true" aria-labelledby="pc1DlgTitle">
-    <div class="pc1-scroll" id="pc1Scroll">
-    <div class="pc1-hero ${edge(c.status)}">
-      ${coverHtml(c)}
-      <div class="pc1-herowave" aria-hidden="true"></div>
-      <div class="pc1-herotop">${badge(c)}${c.level ? `<span class="pc1-lev">${esc(c.level)}</span>` : ""}${countdownHtml(c)}</div>
-      <h2 id="pc1DlgTitle">${esc(c.title)}</h2>
-      <p class="pc1-herosub">${esc(short)}</p>
-      <div class="pc1-glass">${glass.map((g) => `<span>${g}</span>`).join("")}</div>
-      <button type="button" class="pc1-x" data-close aria-label="Close">×</button>
+  const names = Array.isArray(c.trainerNames) ? c.trainerNames.filter(Boolean) : [];
+  const days = Array.isArray(c.days) ? c.days.filter(Boolean).join(" · ") : "";
+  const tline = String(c.sessionTime || sch.timeLine || "").trim();
+  const dayTime = [days, tline].filter(Boolean).join(" · ") || "Not set";
+  const pri = getCourseAction(c, { ...userCtx(role), forDetails: true });
+  const cta = ctaMarkup(pri);
+  const enrolledChip = pri.enrolled ? `<span class="pc1-enrolled">Enrolled</span>` : "";
+  const bullets = (mods.length ? mods.map((m) => m.title).filter(Boolean) : []).slice(0, 8);
+  const sessN = Number(c.sessions || c.sessionCount || c.totalSessions) || (codes.length ? codes.length : 0);
+  const sessLine = sessN ? sessN + " session" + (sessN === 1 ? "" : "s") : (sch.daysLine || "");
+  const weekN = Number(c.sessionsPerWeek) || codes.length || 0;
+  const weekLine = weekN ? sessionsPerWeekWords(weekN) : sessLine;
+  const learnHtml = bullets.length ? `<div class="pc1-v4learn"><h3>${icon("level")} What you will learn</h3><ul>${bullets.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>` : "";
+  const extraHtml = `<div class="pc1-v4extra">
+        <section class="pc1-v4sec"><h3>${icon("trainers")} Your trainers</h3><div class="pc1-trcards">${names.length ? names.map((name) => {
+          const ini = name.split(/\s+/).map((p) => p[0] || "").join("").slice(0, 2).toUpperCase();
+          return `<article class="pc1-trcard"><span class="pc1-ini lg" aria-hidden="true">${esc(ini)}</span><div><strong>${esc(name)}</strong><span>Instructor</span></div></article>`;
+        }).join("") : `<p class="pc1-muted">To be announced</p>`}</div></section>
+      </div>`;
+  const daysVal = sch.daysLine || days;
+  const timeVal = formatBeirutTimeLine(sch.timeLine || tline) || sch.timeLine || tline;
+  const sessVal = weekN ? sessionsPerWeekWords(weekN) : "To be announced";
+  const desc = full || short || "";
+  const factsPhone = [
+    ["Level", c.level, "level"],
+    ["Duration", dur, "info"],
+    ["Starts", start || "To be announced", "calendar"],
+    ["Ends", end, "flag"],
+    ["Days", daysVal, "clock"],
+    ["Time", timeVal, "clock"],
+    ["Sessions", sessVal, "calendar"]
+  ].filter((r) => r[1]).map(([lab, val, k]) => {
+    const info = lab === "Time" ? ` <span class="ghz-tz-wrap">${timeInfoButton(timeVal)}</span>` : "";
+    const stacked = lab === "Time" ? `<span class="ghz-tz-wrap"><span class="ghz-tz-stack"><span class="ghz-tz-main">${esc(val)}</span><span class="ghz-tz-sub">Beirut time</span></span>${timeInfoButton(timeVal)}</span>` : `<strong>${esc(val)}</strong>`;
+    return `<div class="pc1-ph-fact">${icon(k)}<span>${esc(lab)}</span>${stacked}</div>`;
+  }).join("");
+  const learnPhone = bullets.length ? `<div class="pc1-ph-learn" data-ph="learn"><h3>What you will learn</h3><ul>${bullets.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>` : "";
+  const trainersPhone = `<div class="pc1-ph-train" data-ph="trainers"><h3>Your trainers</h3><div class="pc1-ph-trlist">${names.length ? names.map((name) => {
+    const ini = name.split(/\s+/).map((p) => p[0] || "").join("").slice(0, 2).toUpperCase();
+    return `<article class="pc1-trcard"><span class="pc1-ini lg" aria-hidden="true">${esc(ini)}</span><div><strong>${esc(name)}</strong><span>Instructor</span></div></article>`;
+  }).join("") : `<p class="pc1-muted">To be announced</p>`}</div></div>`;
+  const phoneSheet = `<div class="pc1-phone-sheet" role="dialog" aria-modal="true" aria-labelledby="pc1PhoneTitle">
+    <div class="pc1-ph-top"><span class="pc1-ph-handle" aria-hidden="true"></span><button type="button" class="pc1-x" data-close aria-label="Close">×</button></div>
+    <div class="pc1-ph-scroll">
+      <div class="pc1-ph-cover" data-ph="cover" data-cover-slot="${esc(c.id)}">${coverHtml(c)}</div>
+      <div class="pc1-ph-badge" data-ph="badge">${badge(c)}${enrolledChip}</div>
+      <h2 class="pc1-ph-title" data-ph="title" id="pc1PhoneTitle">${esc(c.title)}</h2>
+      ${desc ? `<p class="pc1-ph-desc" data-ph="description">${esc(desc)}</p>` : `<p class="pc1-ph-desc" data-ph="description" hidden></p>`}
+      <div class="pc1-ph-facts" data-ph="facts">${factsPhone}</div>
+      ${learnPhone}
+      ${trainersPhone}
     </div>
-    <div class="pc1-tabs" role="tablist">
-      <a href="#pc1-ov">Overview</a><a href="#pc1-ol">Outline</a><a href="#pc1-pr">Prerequisites</a><a href="#pc1-tr">Trainers</a>
-      <i class="pc1-tabind"></i>
+    <div class="pc1-ph-bar">
+      <div class="pc1-priceblock"><strong>${esc(priceLine(c))}</strong><span>per course</span></div>
+      <div class="pc1-footacts">
+        <button type="button" class="pc1-share" data-share="${esc(courseSlug(c))}" aria-label="Copy link">Share</button>
+        ${cta}
+      </div>
     </div>
-    <div class="pc1-sheet-b" id="pc1Body">
-      <section id="pc1-ov" class="pc1-rise">
-        ${full && full !== short ? `<p class="pc1-full">${esc(full)}</p>` : ""}
-        <div class="pc1-glance">${glance.map(([l,v]) => `<div><span>${l}</span><strong>${v}</strong></div>`).join("")}</div>
-        ${(start || end) ? `<p class="pc1-se">${start ? `Starts ${esc(start)}` : ""}${start && end ? " · " : ""}${end ? `Ends ${esc(end)}` : ""}</p>` : ""}
-        <div class="pc1-schedbox">
-          ${weekDots(codes)}
-          ${sch.timeLine ? `<p class="pc1-timel">${esc(sch.timeLine)} <em>Beirut time</em></p>` : ""}
-          ${ics ? `<button type="button" class="pc1-ics" data-ics>Add to calendar</button>` : ""}
-        </div>
-        ${seatsLine(c)}
-        <div class="pc1-gets">
-          <article><strong>Live sessions with expert trainers</strong></article>
-          <article><strong>Graded homework and quizzes</strong></article>
-          <article><strong>Verified certificate on completion</strong></article>
-        </div>
-      </section>
-      <section id="pc1-ol" class="pc1-rise">
-        <h3>${hico("list","blu")}Outline · ${mods.length} module${mods.length === 1 ? "" : "s"}${mods.length ? `<button type="button" class="pc1-exall" data-exall>Expand all</button>` : ""}</h3>
-        ${outlineHtml}
-      </section>
-      <section id="pc1-pr" class="pc1-rise">
-        <h3>${hico("shield","grn")}Prerequisites</h3>
-        ${prereqs.length ? `<ul class="pc1-check">${prereqs.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p class="pc1-prempty"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="#94a3b8" stroke-width="1.8"/><path d="M12 8v.01M12 11v5" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/></svg>No prerequisites listed</p>`}
-      </section>
-      <section id="pc1-tr" class="pc1-rise">
-        <h3>${hico("users","vio")}Trainers</h3>
-        ${trainerCards(c)}
-      </section>
-      ${relatedHtml(c, all)}
-    </div>
+  </div>`;
+  return phoneSheet + `<div class="pc1-sheet pc1-sheet-v4 pc1-in" role="dialog" aria-modal="true" aria-labelledby="pc1DlgTitle">
+    <button type="button" class="pc1-x" data-close aria-label="Close">×</button>
+    <div class="pc1-v4grid">
+      <div class="pc1-v4left">
+        <div class="pc1-v4cover" data-cover-slot="${esc(c.id)}">${coverHtml(c)}</div>
+        <ul class="pc1-v4facts">
+          ${factRow("level", "Level", c.level ? esc(c.level) : "")}
+          ${factRow("info", "Duration", dur ? esc(dur) : "")}
+          ${factRow("calendar", "Starts", start ? esc(start) : "To be announced")}
+          ${factRow("flag", "Ends", end ? esc(end) : "")}
+          ${factRow("clock", "Days", daysVal ? esc(daysVal) : "")}
+          ${timeVal ? factRow("clock", "Time", `<span class="ghz-tz-wrap"><span class="ghz-tz-stack"><span class="ghz-tz-main">${esc(daysVal ? daysVal.replace(/ · /g, ", ") + " · " : "")}${esc(timeVal)}</span><span class="ghz-tz-sub">Beirut time</span></span>${timeInfoButton(timeVal)}</span>`) : ""}
+          ${factRow("calendar", "Sessions", sessVal ? esc(sessVal) : "")}
+          ${factRow("seats", "Seats", c.seats ? esc(c.seats) : "")}
+          ${factRow("language", "Language", c.language ? esc(c.language) : "")}
+        </ul>
+      </div>
+      <div class="pc1-v4right" id="pc1Scroll">
+        <div class="pc1-v4head">${badge(c)}${enrolledChip}
+        <h2 id="pc1DlgTitle">${esc(c.title)}</h2></div>
+        <div class="pc1-v4desc">${desc ? `<p>${esc(desc)}</p>` : ""}</div>
+        ${learnHtml}${extraHtml}
+      </div>
     </div>
     <div class="pc1-sticky">
       <div class="pc1-priceblock"><strong>${esc(priceLine(c))}</strong><span>per course</span></div>
       <div class="pc1-footacts">
-        <button type="button" class="pc1-share" data-share="${esc(c.id)}" aria-label="Copy link">Share</button>
+        <button type="button" class="pc1-share" data-share="${esc(courseSlug(c))}" aria-label="Copy link">Share</button>
         ${cta}
       </div>
     </div>
@@ -330,6 +405,7 @@ function applyFilters(list, q, level, status, sort) {
   return out;
 }
 
+let regsByCourse = {};
 function renderGrid(list, role) {
   const grid = document.getElementById("pc1Grid");
   if (!grid) return;
@@ -338,9 +414,26 @@ function renderGrid(list, role) {
       <p><a class="pc1-btn pri" href="./login.html?tab=signup" target="_blank" rel="noopener noreferrer" style="display:inline-flex">Register</a></p></div>`;
     return;
   }
-  grid.innerHTML = list.map((c) => cardHtml(c, role)).join("");
+  renderBrowseCoursesV2({
+    host: grid,
+    catalog: list,
+    bare: true,
+    money: moneyLabel,
+    cardActions: (c) => publicCardActions(c, userCtx(role))
+  });
+  hydrateCovers(grid);
 }
 
+function logSheetBlocks(el) {
+  if (!window.matchMedia("(max-width: 767px)").matches) return;
+  const keys = ["cover", "badge", "title", "description", "facts", "learn", "trainers"];
+  keys.forEach((name) => {
+    const node = el.querySelector('[data-ph="' + name + '"]');
+    if (!node || node.hidden) return;
+    const r = node.getBoundingClientRect();
+    try { console.log("[ghz-sheet] block top/bottom", name, Math.round(r.top), Math.round(r.bottom)); } catch {}
+  });
+}
 function bindModal(el, c, all, role) {
   const sc = el.querySelector("#pc1Scroll");
   const tabsBar = el.querySelector(".pc1-tabs");
@@ -429,22 +522,13 @@ function bindModal(el, c, all, role) {
       }
     });
   });
-  el.querySelector("[data-share]")?.addEventListener("click", async () => {
-    const link = new URL("./courses.html?course=" + encodeURIComponent(c.id), location.href).href;
-    try { await navigator.clipboard.writeText(link); } catch {}
-    const t = document.createElement("div");
-    t.className = "pc1-toast"; t.textContent = "Link copied";
-    el.appendChild(t);
-    setTimeout(() => t.remove(), 1800);
-  });
 }
 function missingHtml() {
   return `<div class="pc1-sheet pc1-in" role="dialog" aria-modal="true" aria-labelledby="pc1Miss">
     <button type="button" class="pc1-x" data-close aria-label="Close">×</button>
     <div class="pc1-sheet-b" style="padding:40px 28px">
-      <h2 id="pc1Miss">This course is not available right now</h2>
-      <p class="pc1-muted">It may be completed, unpublished, or the link is out of date.</p>
-      <p><a class="pc1-btn pri" href="./courses.html">Browse all courses</a></p>
+      <h2 id="pc1Miss">This course is not available</h2>
+      <p class="pc1-muted">Stay on the list and pick another course.</p>
     </div>
   </div>`;
 }
@@ -455,41 +539,253 @@ function openMissing() {
   el.hidden = false;
   document.body.classList.add("pc1-lock");
 }
-function openModal(c, role, all) {
+function cloneCardCover(id, dest) {
+  if (!dest || !id) return;
+  const src = document.querySelector('#pc1Grid [data-cover-id="' + CSS.escape(id) + '"]');
+  if (!src) return;
+  const img = src.querySelector("img");
+  dest.innerHTML = src.outerHTML;
+  const copy = dest.querySelector("[data-cover-id]");
+  if (copy) {
+    copy.classList.add("cc1-cover");
+    copy.style.height = "200px";
+    copy.style.position = "relative";
+    if (img && img.src && !copy.querySelector("img")) {
+      const n = img.cloneNode(true);
+      n.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block";
+      copy.appendChild(n);
+    }
+    copy.dataset.coverHydrated = copy.querySelector("img") ? "1" : "";
+  }
+}
+let isClosing = false;
+let openSlug = "";
+let lastList = [];
+let lastRole = "guest";
+let closeBound = false;
+
+function pathWithoutCourseParam() {
+  const url = new URL(location.href);
+  url.searchParams.delete("course");
+  const q = url.searchParams.toString();
+  return url.pathname + (q ? "?" + q : "") + url.hash;
+}
+
+export function closeModal() {
+  isClosing = true;
   const el = document.getElementById("pc1Modal");
-  if (!el) return;
+  if (el) { el.hidden = true; el.innerHTML = ""; }
+  document.body.classList.remove("pc1-lock");
+  openSlug = "";
+  history.replaceState(null, "", pathWithoutCourseParam());
+  setTimeout(() => { isClosing = false; }, 300);
+}
+
+function landingShareUrl(slug) {
+  const u = new URL("./", location.href);
+  return u.origin + u.pathname + "?course=" + encodeURIComponent(slug);
+}
+function copyWithFallback(url) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(url).then(() => true).catch(() => false);
+  }
+  return Promise.resolve(false);
+}
+function execCopy(url) {
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = url;
+    ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    ta.remove();
+    return ok;
+  } catch { return false; }
+}
+function markCopied(btn) {
+  const prev = btn.innerHTML;
+  btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Link copied`;
+  setTimeout(() => { btn.innerHTML = prev; }, 2000);
+}
+function showManualLink(btn, url) {
+  let box = btn.parentElement?.querySelector(".pc1-share-box");
+  if (!box) {
+    box = document.createElement("input");
+    box.className = "pc1-share-box";
+    box.setAttribute("readonly", "");
+    btn.insertAdjacentElement("afterend", box);
+  }
+  box.value = url;
+  box.hidden = false;
+  box.select();
+}
+function onShareClick(ev) {
+  const btn = ev.target.closest("[data-share]");
+  if (!btn) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+  const slug = btn.getAttribute("data-share") || "";
+  const title = document.getElementById("pc1DlgTitle")?.textContent || "GHz Academy";
+  const url = landingShareUrl(slug);
+  const finishCopy = () => {
+    copyWithFallback(url).then((ok) => {
+      if (ok || execCopy(url)) markCopied(btn);
+      else showManualLink(btn, url);
+    });
+  };
+  if (typeof navigator.share === "function") {
+    const p = navigator.share({ title, text: "Check out this course at GHz Academy", url });
+    if (p && typeof p.then === "function") {
+      p.catch((err) => {
+        if (err && err.name === "AbortError") return;
+        finishCopy();
+      });
+    }
+    return;
+  }
+  finishCopy();
+}
+
+function bindCloseOnce() {
+  if (closeBound) return;
+  closeBound = true;
+  document.getElementById("pc1Modal")?.addEventListener("click", (ev) => {
+    if (ev.target.closest("[data-share]")) { onShareClick(ev); return; }
+    if (ev.target.id === "pc1Modal" || ev.target.closest("[data-close]")) closeModal();
+  });
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") closeModal();
+  });
+  window.addEventListener("popstate", () => {
+    const want = new URLSearchParams(location.search).get("course");
+    if (!want) {
+      if (!isClosing) {
+        const el = document.getElementById("pc1Modal");
+        if (el && !el.hidden) closeModal();
+      }
+      return;
+    }
+    applyCourseParam(true);
+  });
+}
+
+export function applyCourseParam(fromPop) {
+  if (isClosing) return;
+  const want = new URLSearchParams(location.search).get("course");
+  if (!want) return;
+  const el = document.getElementById("pc1Modal");
+  const open = el && !el.hidden;
+  if (open && openSlug === want) return;
+  if (open) return;
+  const c = findByParam(lastList, want);
+  if (c) openModal(c, lastRole, lastList, true);
+  else if (lastList.length) openMissing();
+}
+
+export function openModal(c, role, all, fromPop) {
+  const el = document.getElementById("pc1Modal");
+  if (!el || !c) return;
+  lastList = all || lastList;
+  lastRole = role || lastRole;
+  bindCloseOnce();
+  const slug = courseSlug(c);
+  if (!el.hidden && openSlug === slug) return;
   el.innerHTML = modalHtml(c, role, all);
   el.hidden = false;
   document.body.classList.add("pc1-lock");
   bindModal(el, c, all, role);
+  requestAnimationFrame(() => logSheetBlocks(el));
   el.querySelector("#pc1Scroll")?.scrollTo(0, 0);
-  const url = new URL(location.href);
-  url.searchParams.set("course", c.id);
-  history.replaceState(null, "", url);
+  const slot = el.querySelector("[data-cover-slot]");
+  cloneCardCover(c.id, slot);
+  hydrateCovers(el);
+  openSlug = slug;
+  if (!fromPop) {
+    const url = new URL(location.href);
+    if (url.searchParams.get("course") !== slug) {
+      url.searchParams.set("course", slug);
+      history.pushState({ pc1: "open", slug }, "", url);
+    }
+  }
 }
-
-function closeModal() {
-  const el = document.getElementById("pc1Modal");
-  if (el) { el.hidden = true; el.innerHTML = ""; }
-  document.body.classList.remove("pc1-lock");
-  const url = new URL(location.href);
-  url.searchParams.delete("course");
-  history.replaceState(null, "", url);
+function logGhzReg(kind, extra, t0) {
+  const ms = t0 != null ? Math.round(performance.now() - t0) : 0;
+  try { console.log("[ghz-reg] " + kind, extra, ms); } catch {}
 }
 
 export async function bootPublicCourses() {
   if (!root) return;
-  let role = "";
+  let role = "guest";
   let readyPaint = null;
+  const t0 = performance.now();
+  authKnown = false;
+  authReady = false;
+  authUser = null;
+  regsReady = false;
+  checkingTimedOut = false;
+  const authFailSafe = setTimeout(() => {
+    if (authReady) return;
+    authReady = true;
+    authKnown = true;
+    authUser = null;
+    role = "guest";
+    regsReady = true;
+    checkingTimedOut = true;
+    logGhzReg("auth", null, t0);
+    logGhzReg("cards", 0, t0);
+    readyPaint?.();
+  }, 3000);
   onAuthStateChanged(auth, async (u) => {
-    role = "";
-    if (u) {
+    clearTimeout(authFailSafe);
+    authUser = u || null;
+    authReady = true;
+    authKnown = true;
+    logGhzReg("auth", u || null, t0);
+    regsByCourse = {};
+    regsReady = false;
+    checkingTimedOut = false;
+    if (!u) {
+      role = "guest";
+      regsReady = true;
+      logGhzReg("cards", Array.isArray(list) ? list.length : 0, t0);
+      readyPaint?.();
+      return;
+    }
+    role = "student";
+    readyPaint?.();
+    try {
+      const snap = await withTimeout(getDoc(doc(db, "users", u.uid)), 4000);
+      role = String(snap.exists() ? snap.data().role : "student").toLowerCase() || "student";
+    } catch { role = "student"; }
+    if (role !== "student") {
+      regsReady = true;
+      logGhzReg("cards", Array.isArray(list) ? list.length : 0, t0);
+      readyPaint?.();
+      return;
+    }
+    const checkOnce = async () => {
+      const rs = await getDocs(query(collection(db, "registrations"), where("uid", "==", u.uid)));
+      rs.docs.forEach((d) => { const r = { id: d.id, ...d.data() }; if (r.courseId) regsByCourse[r.courseId] = r; });
       try {
-        const snap = await getDoc(doc(db, "users", u.uid));
-        role = String(snap.exists() ? snap.data().role : "student").toLowerCase() || "student";
-      } catch { role = "student"; }
+        const es = await getDocs(query(collection(db, "enrollments"), where("uid", "==", u.uid)));
+        es.docs.forEach((d) => { const e = d.data() || {}; if (e.courseId && !regsByCourse[e.courseId]) regsByCourse[e.courseId] = { courseId: e.courseId, status: "enrolled" }; });
+      } catch (_) {}
+    };
+    try {
+      await withTimeout(checkOnce(), 4000);
+      regsReady = true;
+    } catch (_) {
+      checkingTimedOut = true;
+      regsReady = false;
+      checkOnce().then(() => { regsReady = true; checkingTimedOut = false; readyPaint?.(); }).catch(() => {});
     }
     readyPaint?.();
+    const modal = document.getElementById("pc1Modal");
+    const titleEl = modal?.querySelector("#pc1DlgTitle");
+    const openC = titleEl && list.find((x) => x.title === titleEl.textContent);
+    logGhzReg("cards", Array.isArray(list) ? list.length : 0, t0);
   });
 
   const grid = document.getElementById("pc1Grid");
@@ -507,11 +803,13 @@ export async function bootPublicCourses() {
     try {
       const fresh = await fetchCourses();
       list = fresh;
+      try { console.log("[ghz-courses] loaded", Array.isArray(fresh) ? fresh.length : 0); } catch {}
       writeCache(fresh);
       paint();
     } catch (err) {
+      try { console.log("[ghz-courses] error", err?.code, err?.message); } catch {}
       if (!list.length && grid) {
-        grid.innerHTML = `<div class="pc1-err"><p>We couldn’t load courses just now.</p><code>${esc(err && err.message ? err.message : String(err))}</code>
+        grid.innerHTML = `<div class="pc1-err"><p>Could not load courses. Retry</p><code>${esc(err && err.message ? err.message : String(err))}</code>
           <button type="button" class="pc1-btn pri" id="pc1Retry">Retry</button></div>`;
         document.getElementById("pc1Retry")?.addEventListener("click", load);
       }
@@ -524,23 +822,27 @@ export async function bootPublicCourses() {
     const status = document.querySelector(".pc1-chip.st.on")?.dataset.v || "";
     const sort = document.getElementById("pc1Sort")?.value || "soon";
     const shown = applyFilters(list, q, level, status, sort);
+    const nEl = document.getElementById("pc1Count");
+    if (nEl) nEl.textContent = shown.length + (shown.length === 1 ? " course" : " courses");
+    lastList = list;
+    lastRole = role;
     renderGrid(shown, role);
-    applyCourseParam();
-  }
-  function applyCourseParam() {
-    const want = new URLSearchParams(location.search).get("course");
+    bindTimePopovers(document);
     const modal = document.getElementById("pc1Modal");
-    if (!want) {
-      if (modal && !modal.hidden) closeModal();
-      return;
+    const titleEl = modal?.querySelector("#pc1DlgTitle");
+    if (modal && !modal.hidden && titleEl) {
+      const openC = list.find((x) => x.title === titleEl.textContent) || findByParam(list, new URLSearchParams(location.search).get("course"));
+      if (openC) {
+        const foot = modal.querySelector(".pc1-footacts");
+        const pri = getCourseAction(openC, { ...userCtx(role), forDetails: true });
+        const share = modal.querySelector("[data-share]");
+        if (foot) {
+          const shareHtml = share ? share.outerHTML : "";
+          foot.innerHTML = shareHtml + ctaMarkup(pri);
+        }
+      }
     }
-    const c = list.find((x) => x.id === want);
-    const showing = modal && !modal.hidden && modal.querySelector("#pc1DlgTitle");
-    if (c) {
-      if (!showing) openModal(c, role, list);
-    } else if (list.length) openMissing();
   }
-
   document.getElementById("pc1Search")?.addEventListener("input", paint);
   document.getElementById("pc1Sort")?.addEventListener("change", paint);
   document.querySelectorAll(".pc1-chip.lv").forEach((b) => b.addEventListener("click", () => {
@@ -554,20 +856,22 @@ export async function bootPublicCourses() {
     paint();
   }));
   document.getElementById("pc1Grid")?.addEventListener("click", (ev) => {
-    const id = ev.target?.closest("[data-view]")?.getAttribute("data-view");
+    if (ev.defaultPrevented || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.button) return;
+    const viewA = ev.target?.closest?.("[data-view]");
+    const card = ev.target?.closest?.(".v2-card");
+    const id = viewA?.getAttribute("data-view") || card?.getAttribute("data-cid");
     if (!id) return;
+    if (ev.target?.closest?.("a.v2-pri, a.btn, button")) return;
+    ev.preventDefault();
     const c = list.find((x) => x.id === id);
     if (c) openModal(c, role, list);
   });
-  document.getElementById("pc1Modal")?.addEventListener("click", (ev) => {
-    if (ev.target.id === "pc1Modal" || ev.target.closest("[data-close]")) closeModal();
-  });
-  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") closeModal(); });
-  window.addEventListener("popstate", applyCourseParam);
+  lastList = list;
+  lastRole = role;
   readyPaint = paint;
-
-  if (!stale) await load();
-  else load();
+  paint();
+  if (new URLSearchParams(location.search).get("course")) applyCourseParam(false);
+  load();
 }
 
 bootPublicCourses();

@@ -1,8 +1,8 @@
 import { createElement as e, useEffect, useMemo, useRef, useState, memo, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { getStudentStore, onDashData, loadStudentDash } from "./student-dash-data.js?v=stu7";
+import { getStudentStore, onDashData, loadStudentDash, asArray } from "./student-dash-data.js?v=stu11";
 import { sessionStatus } from "./sessionStatus.js";
 
 const roots = new WeakMap();
@@ -216,9 +216,9 @@ function App({ opts }) {
   const [pickDay, setPickDay] = useState("");
   const [store, setStore] = useState(() => getStudentStore());
   const [sessions, setSessions] = useState(() => {
-    if (Array.isArray(opts.sessions) && opts.sessions.length) return opts.sessions;
+    if (asArray(opts.sessions).length) return asArray(opts.sessions);
     const st = getStudentStore();
-    return Array.isArray(st?.sessions) ? st.sessions : [];
+    return asArray(st?.sessions);
   });
   const [err, setErr] = useState("");
   const [ready, setReady] = useState(() => {
@@ -238,10 +238,10 @@ function App({ opts }) {
     }
   }), []);
 
-  const enrollments = store?.enrollments || [];
+  const enrollments = asArray(store?.enrollments);
   const courseMap = store?.courses || {};
   const courses = useMemo(() => {
-    if (Array.isArray(opts.courses) && opts.courses.length) return opts.courses;
+    if (asArray(opts.courses).length) return asArray(opts.courses);
     const ids = [...new Set(enrollments.map((x) => x.courseId).filter(Boolean))];
     return ids.map((id) => courseMap[id] ? { id, ...courseMap[id] } : { id, title: enrollments.find((x) => x.courseId === id)?.courseTitle || id });
   }, [opts.courses, enrollments, courseMap]);
@@ -294,7 +294,11 @@ function App({ opts }) {
     splitMemo.current = splitSessions(sessions);
     splitKey.current = sk;
   }
-  const { upcoming, past, recentPast } = splitMemo.current || { upcoming: [], past: [], recentPast: [] };
+  const split = splitMemo.current || { upcoming: [], past: [], recentPast: [] };
+  const doneIds = new Set((courses || []).filter((c) => String(c.status || "") === "Completed").map((c) => c.id));
+  const upcoming = (split.upcoming || []).filter((s) => !s.courseId || !doneIds.has(s.courseId));
+  const past = split.past || [];
+  const recentPast = split.recentPast || [];
   const shownPast = pastOpen ? past : recentPast;
   const next = upcoming[0] || null;
   const byDay = {};
@@ -400,13 +404,12 @@ function App({ opts }) {
       let line = tm;
       if (start && end) line = start + " – " + end;
       else if (start) line = start;
-      if (line && tz) line += " · " + tz;
       return e("div", { key: c.id, className: "ss2-cblk" },
         e("div", { className: "nm" }, e("span", { className: "ss2-sq", style: { background: col } }), e("span", { className: "ss2-cname" }, c.title || "Course")),
         days.length
           ? e("div", { className: "ss2-circs" }, WEEK.map((d) => e("span", { key: d.code, className: days.includes(d.code) ? "on" : "", style: days.includes(d.code) ? { background: col } : {} }, d.letter)))
           : e("p", { className: "ss2-ctime" }, "No weekly days set"),
-        days.length ? e("p", { className: "ss2-ctime" }, line || "Time TBA") : null
+        days.length ? e("p", { className: "ss2-ctime ghz-tz-wrap" }, e("span", { className: "ghz-tz-stack" }, e("span", { className: "ghz-tz-main" }, line || "Time TBA"), line ? e("span", { className: "ghz-tz-sub" }, "Beirut time") : null)) : null
       );
     })
   );

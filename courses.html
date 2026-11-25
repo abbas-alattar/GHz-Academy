@@ -1,9 +1,9 @@
-<!-- aha-build-id: bmvt74pfrdqnpxn42 -->
+<!-- aha-build-id: bmwojc1nis3lw32zb -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Courses — GHz Academy</title>
   <link rel="icon" type="image/png" href="./favicon.png" />
   <meta name="description" content="Explore GHz Academy telecom courses — RF, 5G, antennas, fiber, and microwave. Open, coming soon, and closed registrations." />
@@ -13,53 +13,107 @@
   <link rel="stylesheet" href="./DeliveryDays.css" />
   <link rel="stylesheet" href="./PublicCoursesV1.css" />
   <link rel="stylesheet" href="./CourseCard.css" />
-  <style>
-    .land-auth-login { color:#fff; text-decoration:none; font-weight:600; margin-right:10px; }
-    .btn-blue { background:#2563EB; color:#fff; text-decoration:none; border-radius:999px; padding:8px 14px; font-weight:600; }
-    .btn-blue:hover { background:#1D4ED8; }
-    .btn-blue:active { background:#1E40AF; }
-    .btn-blue:focus-visible { outline:2px solid #93C5FD; outline-offset:2px; }
-    .land-chip { display:inline-flex; align-items:center; gap:8px; color:#fff; text-decoration:none; }
-    .land-av { width:32px; height:32px; border-radius:50%; background:#1d4ed8; display:grid; place-items:center; font-size:.75rem; font-weight:700; }
-    .land-out { background:transparent; border:0; color:#fff; cursor:pointer; }
-    .land-auth-ph { width:88px; height:32px; }
-    .nav-right { display:flex; align-items:center; gap:8px; }
+  <link rel="stylesheet" href="./BrowseCoursesV2.css" />
+  <link rel="stylesheet" href="./ghz-responsive.css" />
+  <link rel="stylesheet" href="./public-header.css" />
+  <link rel="stylesheet" href="./ghz-mobile.css" />
+  <style id="page-courses-nav">
+    body.page-courses { padding-top: 0 !important; background: #f4f7fb; }
+    body.page-courses nav#siteNav,
+    body.page-courses nav#siteNav.scrolled {
+      background-color: #0F2747 !important;
+      background-image: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      opacity: 1 !important;
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 50 !important;
+      height: 72px !important;
+      color: #FFFFFF !important;
+    }
+    body.page-courses .nav-mid a { color: #FFFFFF !important; }
+    body.page-courses .nav-mid a.on {
+      color: #38BDF8 !important;
+      background: rgba(56,189,248,0.15) !important;
+    }
+    body.page-courses .brand .ghz { color: #FFFFFF !important; }
+    body.page-courses .brand .acad { color: #38BDF8 !important; }
+    body.page-courses .land-auth-login { color: #FFFFFF !important; }
+    body.page-courses .pc1-cathero { margin-top: 0 !important; }
   </style>
 </head>
-<body class="pc1-page">
-  <nav class="pc1-nav">
-    <a class="pc1-brand" href="./index.html"><svg viewBox="0 0 40 22" fill="none" aria-hidden="true"><path d="M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0" stroke="#2EC8FF" stroke-width="2.6" stroke-linecap="round"/></svg><span>GHz</span> <span class="pc1-acad">Academy</span></a>
-    <div class="nav-right" id="landAuthSlot" data-login-label="Student login"><div class="land-auth-ph" aria-hidden="true"></div></div>
+<body class="pc1-page page-courses">
+  <nav id="siteNav" class="site-header">
+    <a class="brand" href="./index.html" aria-label="GHz Academy">
+      <svg viewBox="0 0 40 22" fill="none" aria-hidden="true"><path d="M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0" stroke="#2EC8FF" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <span class="ghz">GHz</span> <span class="acad">Academy</span>
+    </a>
+    <ul class="nav-mid" id="navLinks">
+      <span class="nav-pill" id="navPill" aria-hidden="true"></span>
+      <li><a href="./index.html">Home</a></li>
+      <li><a class="on" href="./courses.html">Courses</a></li>
+      <li><a href="./index.html#about">About</a></li>
+      <li><a href="./index.html#leadership">Leadership</a></li>
+      <li><a href="./index.html#faq">FAQ</a></li>
+      <li><a href="./index.html#contact">Contact</a></li>
+      <li class="land-m-auth">
+        <a href="./login.html">Login</a>
+        <a href="./login.html?tab=signup">Register</a>
+      </li>
+    </ul>
+    <div class="nav-right">
+      <div id="landAuthSlot" data-login-label="Log in" aria-live="polite"></div>
+      <button class="menu-btn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
   </nav>
   <header class="pc1-cathero">
     <div class="pc1-wrap">
-      <div class="pc1-kicker">PUBLIC CATALOG</div>
       <h1>Explore our courses</h1>
-      <p class="pc1-sub">Live listings from the academy — On going and Scheduled. Draft and completed courses stay off this page.</p>
+      <p class="pc1-sub">Practical telecom engineering courses, from LTE to 6G, taught by industry experts.</p>
     </div>
   </header>
   <div class="pc1-tools">
     <input class="pc1-search" id="pc1Search" type="search" placeholder="Search title, trainer, or topic" aria-label="Search courses" />
-    <div class="pc1-chips" role="group" aria-label="Level">
-      <button type="button" class="pc1-chip lv on" data-v="All">All</button>
-      <button type="button" class="pc1-chip lv" data-v="Foundation">Foundation</button>
-      <button type="button" class="pc1-chip lv" data-v="Intermediate">Intermediate</button>
-      <button type="button" class="pc1-chip lv" data-v="Advanced">Advanced</button>
-    </div>
-    <div class="pc1-chips" role="group" aria-label="Status">
-      <button type="button" class="pc1-chip st" data-v="Open">On going</button>
-      <button type="button" class="pc1-chip st" data-v="Coming soon">Scheduled</button>
+    <div class="pc1-filts">
+      <div class="pc1-chips" role="group" aria-label="Level">
+        <button type="button" class="pc1-chip lv on" data-v="All">All</button>
+        <button type="button" class="pc1-chip lv" data-v="Foundation">Foundation</button>
+        <button type="button" class="pc1-chip lv" data-v="Intermediate">Intermediate</button>
+        <button type="button" class="pc1-chip lv" data-v="Advanced">Advanced</button>
+      </div>
+      <div class="pc1-fdiv" aria-hidden="true"></div>
+      <div class="pc1-chips" role="group" aria-label="Status">
+        <button type="button" class="pc1-chip st" data-v="Open">On going</button>
+        <button type="button" class="pc1-chip st" data-v="Coming soon">Scheduled</button>
+      </div>
     </div>
     <select class="pc1-sort" id="pc1Sort" aria-label="Sort courses">
       <option value="soon">Scheduled first</option>
       <option value="price">Price</option>
       <option value="title">Title</option>
     </select>
+    <p class="pc1-count" id="pc1Count"></p>
   </div>
   <div class="pc1-grid" id="pc1Grid"></div>
   <div class="pc1-modal" id="pc1Modal" hidden></div>
   <div id="pc1Root"></div>
-  <script type="module" src="./landing-header-auth.js?v=auth8"></script>
-  <script type="module" src="./PublicCoursesV1.js?v=10"></script>
+  <script src="./public-scroll.js"></script>
+  <script type="module" src="./landing-header-auth.js?v=auth11"></script>
+  <script type="module" src="./PublicCoursesV1.js?v=23"></script>
+  <script>
+    document.getElementById("menuBtn")?.addEventListener("click", () => document.getElementById("navLinks")?.classList.toggle("show"));
+    (function () {
+      const nav = document.getElementById("siteNav");
+      const home = document.querySelector("#navLinks a[href='./index.html']");
+      try {
+        const bg = nav ? getComputedStyle(nav).backgroundColor : "";
+        const lc = home ? getComputedStyle(home).color : "";
+        console.log("[ghz-header] bg", bg);
+        console.log("[ghz-header] link color", lc);
+      } catch {}
+    })();
+  </script>
+  <script src="./ghz-mobile.js"></script>
 </body>
 </html>

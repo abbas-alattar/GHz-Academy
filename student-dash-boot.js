@@ -1,5 +1,5 @@
 import { bootUniDash } from "./student-uni-dash.js";
-import { bootDashboardV3 } from "./DashboardV3.js";
+import { bootDashboardV3 } from "./DashboardV3.js?v=stu9";
 
 export function bootStudentDash() {
   const host = document.getElementById("studentDashRoot");

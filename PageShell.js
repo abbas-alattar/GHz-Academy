@@ -1,6 +1,6 @@
 import { beginNav, endNav, swapLoadingText } from "./NavLoader.js";
 import { idlePrefetch, hoverPrefetch } from "./usePrefetch.js";
-import { loadStudentDash } from "./student-dash-data.js?v=stu7";
+import { loadStudentDash } from "./student-dash-data.js?v=stu11";
 
 function roleOf() {
   const p = location.pathname || "";

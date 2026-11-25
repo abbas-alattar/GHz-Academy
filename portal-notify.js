@@ -29,7 +29,9 @@ function itemsFor(role) {
 }
 
 function ensureHost() {
-  let host = document.querySelector(".nv2-slot");
+  const phone = window.matchMedia("(max-width: 767px)").matches;
+  let host = phone ? document.getElementById("notifySlotPhone") : document.getElementById("notifySlot");
+  if (!host) host = document.querySelector(".nv2-slot");
   if (host) return host;
   const btn = document.getElementById("notifyBtn");
   if (btn && btn.parentNode) {

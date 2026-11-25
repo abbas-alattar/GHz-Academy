@@ -15,7 +15,8 @@ body.trainer-portal .top {
 }
 body.trainer-portal .top h1 { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
 body.trainer-portal .top-actions { flex:none; flex-wrap:nowrap; min-width:0; }
-body.trainer-portal .ghz-search { width:min(220px, 22vw); flex:none; }
+body.trainer-portal .ghz-search { width:min(220px, 22vw); flex:none; min-width:0; }
+body.trainer-portal .ghz-search kbd { display:inline-block; }
 body.trainer-portal .who { max-width:160px; }
 body.trainer-portal .out { flex:none; white-space:nowrap; display:inline-flex !important; margin-left:4px; position:relative; z-index:6; }
 body.trainer-portal .content { padding:24px; max-width:100%; width:100%; margin:0; box-sizing:border-box; }

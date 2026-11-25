@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase-config.js?v=auth8";
+import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp, deleteField, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { isSessionPastWithoutAttendance, isSessionUpcoming, needsManualQuizGrade } from "./sessionStatus.js";
 
@@ -140,11 +140,14 @@ export async function confirmComplete(course, toast, reload) {
       errEl.hidden = true;
       try {
         const uid = auth.currentUser?.uid || "";
+        const prevRound = Number(course.completionRound);
+        const nextRound = (Number.isFinite(prevRound) ? prevRound : 0) + 1;
         await updateDoc(doc(db, "courses", course.id), {
           status: "Completed",
           previousStatus: course.status || "Closed",
           completedAt: serverTimestamp(),
           completedBy: uid,
+          completionRound: nextRound,
           completionCount: increment(1),
           completedCount: increment(1)
         });
@@ -174,11 +177,7 @@ export async function confirmReopen(course, toast, reload) {
   if (!confirm("Reopen this course?")) return;
   try {
     await updateDoc(doc(db, "courses", course.id), {
-      status: course.previousStatus || "Open",
-      completedBy: deleteField(),
-      previousStatus: deleteField(),
-      reopenedAt: serverTimestamp(),
-      reopenCount: increment(1)
+      status: course.previousStatus || "Open"
     });
     toast("Course reopened");
     await reload();

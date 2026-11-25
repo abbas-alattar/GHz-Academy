@@ -1,7 +1,7 @@
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { addDoc, collection, deleteDoc, doc, serverTimestamp, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTrainerStore, setTrainerCourseId, resolveTrainerCourseId } from "./TrainerStore.js";
 import { CourseSelect, StatusBadge } from "./TrainerHomeworkV2.js";
@@ -65,9 +65,9 @@ function sessKind(s, marked, enrolled, now = Date.now(), atts) {
   const st = sessionStatus(s, new Date(now), { attendance: atts || (marked ? [{ sessionId: s.id, status: "present" }] : []) });
   if (st === "Cancelled") return { k: "gray", l: "Cancelled" };
   if (st === "Completed") return { k: "graded", l: "Completed" };
-  if (st === "In progress") return { k: "soon", l: marked ? "In progress" : "Needs marking" };
+  if (st === "In progress") return { k: "soon", l: "In progress" };
   if (st === "Upcoming") return { k: "submitted", l: "Upcoming" };
-  return { k: "soon", l: "Needs marking" };
+  return { k: "soon", l: "In progress" };
 }
 
 function timeMins(t) {
@@ -408,7 +408,7 @@ function ListPage({ pack, uid, go, courseId }) {
     if (chip === "Upcoming") return sessWhen(r.s) > now;
     if (chip === "Today") return r.s.date === today;
     if (chip === "Past") return sessWhen(r.s) < now && r.s.date !== today;
-    if (chip === "To mark") return r.kind.l === "Needs marking";
+    if (chip === "To mark") return r.kind.l !== "Completed" && r.kind.l !== "Upcoming" && !r.marked;
     return true;
   }).sort((a, b) => sessWhen(a.s) - sessWhen(b.s));
   const sessSorted = sessAll.slice().sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")) || String(a.startTime || "").localeCompare(String(b.startTime || "")));
@@ -422,7 +422,7 @@ function ListPage({ pack, uid, go, courseId }) {
   const stuInfos = ens.map((en) => attendancePct(cid, en.uid, pack));
   const rowPcts = stuInfos.map((x) => x.pct).filter((n) => n != null);
   const avg = rowPcts.length ? fmt1(rowPcts.reduce((a, b) => a + b, 0) / rowPcts.length) : "—";
-  const toMark = sessAll.filter((s) => sessKind(s, atts.filter((a) => a.sessionId === s.id && a.status).length, ens.length).l === "Needs marking").length;
+  const toMark = sessAll.filter((s) => { const mk = atts.filter((a) => a.sessionId === s.id && a.status).length; const k = sessKind(s, mk, ens.length, now, atts); return k.l !== "Completed" && k.l !== "Upcoming" && !mk; }).length;
   const next = sessAll.filter((s) => sessWhen(s) >= now).sort((a, b) => sessWhen(a) - sessWhen(b))[0];
   let lastM = "";
   const pdfMatrix = () => {
@@ -446,15 +446,18 @@ function ListPage({ pack, uid, go, courseId }) {
       )
     ),
     locked ? e("div", { className: "th2-lockban" }, "This course is completed and read-only.") : null,
-    e("div", { className: "th2-kpis" },
+    e("div", { className: "th2-kpis th2-sheet-kpis" },
       e("div", { className: "th2-kpi blue" }, e("span", { className: "ico" }, e(Cal)), e("div", null, e("span", null, "Sessions"), e("strong", null, String(sessAll.length)))),
       e("div", { className: "th2-kpi teal" }, e("span", { className: "ico" }, e(Trend)), e("div", null, e("span", null, "Average attendance"), e("strong", null, String(avg)))),
       e("div", { className: "th2-kpi amber" }, e("span", { className: "ico" }, e(Alarm)), e("div", null, e("span", null, "Sessions to mark"), e("strong", null, String(toMark)))),
       e("div", { className: "th2-kpi violet" }, e("span", { className: "ico" }, e(Cal)), e("div", null, e("span", null, "Next session"), e("strong", null, next ? dayLabel(next.date) : "—")))
     ),
-    e("div", { className: "th2-fchips" },
-      ["All", "Upcoming", "Today", "Past", "To mark"].map((c) => e("button", { key: c, className: "th2-fchip" + (chip === c ? " on" : ""), onClick: () => setChip(c) }, c)),
-      e("button", { className: "th2-tog" + (byStu ? " on" : ""), onClick: () => setByStu((v) => !v) }, "By student"),
+    e("div", { className: "th2-attbar" },
+      e("div", { className: "th2-fchips" },
+        ["All", "Upcoming", "Today", "Past", "To mark"].map((c) => e("button", { key: c, className: "th2-fchip" + (chip === c ? " on" : ""), onClick: () => setChip(c) }, c))
+      ),
+      e("div", { className: "th2-attbar-r" },
+      e("button", { className: "th2-btn th2-tog" + (byStu ? " on" : ""), onClick: () => setByStu((v) => !v) }, "By student"),
       e("button", { className: "th2-btn", onClick: pdfMatrix }, "View PDF"),
       e("button", { className: "th2-btn", onClick: () => {
         const head = ["Name (ID)", "Student ID", ...sessSorted.map((s) => shortSess(s)), "Attendance %", "Absences"];
@@ -469,6 +472,7 @@ function ListPage({ pack, uid, go, courseId }) {
         }));
         const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" })); a.download = "attendance-matrix.csv"; a.click();
       } }, "Export CSV")
+      )
     ),
     byStu ? e("div", { className: "th2-card th2-grd-wrap" },
       e("table", { className: "th2-table" },
@@ -489,43 +493,189 @@ function ListPage({ pack, uid, go, courseId }) {
       e("div", { className: "th2-legend" },
         [["present", "Present"], ["late", "Late"], ["absent", "Absent"], ["excused", "Excused"], ["none", "Not marked"]].map(([k, l]) => e("span", { key: k }, e("i", { className: "th2-dot " + k }), l))
       )
-    ) : e("div", { className: "th2-card" },
-      !rows.length ? e("div", { className: "th2-empty" }, e(Cal), e("p", null, "No sessions yet")) :
-      e("table", { className: "th2-table" },
-        e("thead", null, e("tr", null, e("th", null, "Session"), e("th", null, "Date and time"), e("th", null, "Attendance"), e("th", null, "Status"), e("th", null, ""))),
-        e("tbody", null, rows.flatMap((r) => {
+    ) : e("div", { className: "th2-card th2-att-scroll" },
+      !rows.length ? e("div", { className: "th2-empty th2-empty-sess" }, e(Cal), e("p", null, "No sessions yet"), e("span", null, "Sessions appear here when the course has a schedule")) :
+      e("div", { className: "th2-agrid" },
+        e("div", { className: "th2-rh" },
+          e("div", null, "Session"),
+          e("div", null, "Date and time"),
+          e("div", null, "Attendance"),
+          e("div", null, "Status"),
+          e("div", { className: "th2-hact" }, "Actions")
+        ),
+        rows.flatMap((r) => {
           const mk = monthKey(r.s.date);
-          const head = mk !== lastM ? [(lastM = mk, e("tr", { key: "m" + mk, className: "th2-month" }, e("td", { colSpan: 5 }, mk)))] : [];
+          const monthN = rows.filter((x) => monthKey(x.s.date) === mk).length;
+          const head = mk !== lastM ? [(lastM = mk, e("div", { key: "m" + mk, className: "th2-monthband" }, String(mk).toUpperCase() + " \u00b7 " + monthN + " session" + (monthN === 1 ? "" : "s")))] : [];
           const courseS = courses.find((c) => c.id === r.s.courseId);
           const pct = ens.length ? Math.round((r.marked / ens.length) * 100) : 0;
           const present = atts.filter((a) => a.sessionId === r.s.id && (a.status === "present" || a.status === "late")).length;
           const pPct = r.marked ? Math.round((present / r.marked) * 100) : 0;
-          return head.concat([e("tr", { key: r.s.id },
-            e("td", null, e("b", { className: "th2-cname", title: r.s.title }, r.s.title || "Session"), e("div", { className: "th2-sub" }, (courseS?.title || ""), " ", e(StatusBadge, { course: courseS }))),
-            e("td", null, e("div", null, dayLabel(r.s.date)), e("div", { className: "th2-sub" }, (r.s.startTime || "") + " – " + (r.s.endTime || ""))),
-            e("td", null, e("div", { className: "th2-bar" }, e("span", null, r.marked + " / " + ens.length), e("i", null, e("b", { style: { width: pct + "%" } })), e("span", { className: "th2-sub" }, pPct + "% present"))),
-            e("td", null, e("span", { className: "th2-pill " + r.kind.k }, r.kind.l)),
-            e("td", { className: "th2-act" },
-              e("button", { className: "th2-open", onClick: () => { setTrainerCourseId("attendance", r.s.courseId); go("attendance/" + r.s.id); } }, "Mark attendance"),
-              e(RowMenu, { locked: isCourseLocked(courseS), items: [
+          const upcoming = r.kind.l === "Upcoming";
+          const completed = r.kind.l === "Completed" && r.marked > 0;
+          const goMark = () => { setTrainerCourseId("attendance", r.s.courseId); go("attendance/" + r.s.id); };
+          const actBtn = upcoming ? e("button", { className: "th2-open th2-mark", disabled: true, title: "Available when the session starts" }, "Mark attendance")
+            : completed ? e("button", { className: "th2-btn th2-mark", onClick: goMark }, "Edit attendance")
+            : e("button", { className: "th2-open th2-mark", onClick: goMark }, "Mark attendance");
+          const extra = [r.s.notes, r.s.note, r.s.location, r.s.room].filter(Boolean).join(" \u00b7 ");
+          const showCourse = !cid;
+          const rawT = String(r.s.title || "").trim();
+          const generic = !rawT || /^session$/i.test(rawT) || rawT === "\u2014" || rawT === "-";
+          const sessN = sessAll.slice().sort((a, b) => sessWhen(a) - sessWhen(b)).findIndex((x) => x.id === r.s.id) + 1;
+          const sessTitle = generic ? ("Session " + (sessN || 1)) : rawT;
+          return head.concat([e("div", { key: r.s.id, className: "th2-rr th2-acard" },
+            e("div", { className: "th2-ac-sess" }, e("b", { className: "th2-cname", title: sessTitle }, sessTitle)),
+            e("div", { className: "th2-ac-when" }, e("div", null, dayLabel(r.s.date)), e("div", { className: "th2-sub" }, (r.s.startTime || "") + " \u2013 " + (r.s.endTime || ""))),
+            e("div", { className: "th2-attcell" }, e("span", { className: "th2-attn", title: r.marked + " of " + ens.length + " students marked" }, r.marked + " / " + ens.length), e("i", null, e("b", { style: { width: pct + "%" } })), e("span", { className: "th2-attp", title: "present" }, pPct + "%")),
+            e("div", { className: "th2-ac-st" }, e("span", { className: "th2-pill " + r.kind.k }, r.kind.l)),
+            e("div", { className: "th2-cact" }, actBtn, e(RowMenu, { locked: isCourseLocked(courseS), items: [
                 { label: "Edit", icon: "edit", lockWhenDone: true, onClick: () => setForm(r.s) },
                 { label: "Duplicate", icon: "dup", lockWhenDone: true, onClick: async () => { try { await addDoc(collection(db, "sessions"), { courseId: r.s.courseId, title: r.s.title, date: r.s.date, startTime: r.s.startTime, endTime: r.s.endTime, meetingLink: r.s.meetingLink || "", notes: r.s.notes || "", status: "Scheduled", createdBy: uid, createdAt: serverTimestamp() }); refreshTrainerStore(uid); } catch (er) { await showNoticeDialog({ tone: "danger", title: "Could not duplicate", message: fbErr(er) }); } } },
                 { label: "Delete", icon: "del", danger: true, lockWhenDone: true, onClick: async () => { const ok = await showConfirmDialog({ title: "Delete session?", message: "This cannot be undone.", tone: "danger", confirmLabel: "Delete" }); if (!ok || ok.ok === false) return; try { await deleteDoc(doc(db, "sessions", r.s.id)); refreshTrainerStore(uid); } catch (er) { await showNoticeDialog({ tone: "danger", title: "Could not delete", message: fbErr(er) }); } } }
-              ] })
-            )
+              ] }))
           )]);
-        }))
+        })
       )
     ),
     form ? e(SessionForm, { courses, uid, go, edit: form.id ? form : { courseId: cid }, onClose: () => setForm(null) }) : null
   );
 }
 
+function isPhoneAtt() {
+  try { return window.matchMedia("(max-width: 767px)").matches; } catch { return false; }
+}
+function chipLabel(s) {
+  const d = dayLabel(s.date);
+  const p = String(s.startTime || "").split(":");
+  let clock = s.startTime || "";
+  if (p.length >= 2) {
+    let h = Number(p[0]); const m = p[1];
+    const ap = h >= 12 ? "PM" : "AM";
+    h = (h % 12) || 12;
+    clock = h + ":" + m + " " + ap;
+  }
+  return d + " · " + clock;
+}
+function PhoneAttFlow({ pack, uid, go, sessionId, courseId }) {
+  const courses = pack.courses || [];
+  const [cid, setCid] = useState(courseId || resolveTrainerCourseId("attendance", { courses }) || courses[0]?.id || "");
+  const sessAll = (pack.sessions || []).filter((s) => s.courseId === cid && s.status !== "Cancelled").slice().sort((a, b) => sessWhen(a) - sessWhen(b));
+  const atts = pack.attendance || [];
+  const today = todayStr();
+  const pickDefault = () => {
+    if (sessionId && sessAll.some((s) => s.id === sessionId)) return sessionId;
+    const toMark = sessAll.find((s) => {
+      const mk = atts.filter((a) => a.sessionId === s.id && a.status).length;
+      return mk === 0 && s.date >= today;
+    }) || sessAll.find((s) => !atts.some((a) => a.sessionId === s.id && a.status)) || sessAll[0];
+    return toMark?.id || "";
+  };
+  const [sid, setSid] = useState(pickDefault);
+  useEffect(() => { setSid(pickDefault()); }, [cid, sessionId, sessAll.length]);
+  const sess = sessAll.find((s) => s.id === sid) || sessAll[0];
+  const course = courses.find((c) => c.id === cid);
+  const locked = isCourseLocked(course);
+  const ens = (pack.enrollments || []).filter((en) => en.courseId === cid && String(en.status || "").toLowerCase() !== "cancelled")
+    .slice().sort((a, b) => String(a.studentName || "").localeCompare(String(b.studentName || "")));
+  const savedMarks = {};
+  (atts).filter((a) => a.sessionId === sess?.id).forEach((a) => { savedMarks[a.uid] = { status: a.status || "", note: a.note || "" }; });
+  const [draft, setDraft] = useState(savedMarks);
+  const [base, setBase] = useState(savedMarks);
+  const [saving, setSaving] = useState(false);
+  const [noteFor, setNoteFor] = useState("");
+  useEffect(() => { setDraft(savedMarks); setBase(savedMarks); }, [sess?.id]);
+  useEffect(() => {
+    console.log("[ghz-attendance-phone]", cid, ens.length, sessAll.length, atts.filter((a) => a.courseId === cid).length);
+  }, [cid, ens.length, sessAll.length]);
+  const setSt = (id, st) => setDraft((p) => ({ ...p, [id]: { ...(p[id] || {}), status: st } }));
+  const n = (st) => ens.filter((en) => draft[en.uid]?.status === st).length;
+  const unmarked = ens.length - n("present") - n("late") - n("absent") - n("excused");
+  const markedN = ens.length - unmarked;
+  const save = async () => {
+    if (!sess || locked) return;
+    setSaving(true);
+    const jobs = ens.map((en) => {
+      const m = draft[en.uid] || {};
+      if (!m.status) return Promise.resolve({ ok: true });
+      return setDoc(doc(db, "attendance", sess.id + "_" + en.uid), {
+        sessionId: sess.id, courseId: cid, uid: en.uid, studentName: en.studentName || "",
+        status: m.status, note: m.note || "", markedBy: uid, markedAt: serverTimestamp()
+      }).then(() => ({ ok: true })).catch((er) => ({ ok: false, er }));
+    });
+    const results = await Promise.all(jobs);
+    setSaving(false);
+    if (results.some((r) => !r.ok)) {
+      await showNoticeDialog({ tone: "danger", title: "Could not save", message: "Try again." });
+      return;
+    }
+    try { await updateDoc(doc(db, "sessions", sess.id), { status: "Completed" }); } catch (_) {}
+    setBase(draft);
+    refreshTrainerStore(uid);
+  };
+  return e("div", { className: "att3" },
+    e("select", { className: "att3-course", value: cid, onChange: (ev) => { setCid(ev.target.value); setTrainerCourseId("attendance", ev.target.value); } },
+      courses.map((c) => e("option", { key: c.id, value: c.id }, c.title || "Course"))
+    ),
+    e("div", { className: "att3-chips", role: "listbox", "aria-label": "Sessions" },
+      sessAll.map((s) => {
+        const mk = atts.filter((a) => a.sessionId === s.id && a.status).length;
+        const st = s.date === today ? "today" : (mk ? "taken" : "mark");
+        return e("button", { key: s.id, type: "button", className: "att3-chip" + (s.id === sess?.id ? " on" : ""), onClick: () => setSid(s.id) },
+          e("i", { className: "att3-dot " + st }), chipLabel(s));
+      })
+    ),
+    e("p", { className: "att3-tz" }, "Beirut time"),
+    !sessAll.length ? e("div", { className: "th2-empty th2-empty-sess" }, e(Cal), e("p", null, "No sessions yet"), e("span", null, "Sessions appear here when the course has a schedule")) : null,
+    sess ? e("div", { className: "att3-sum" },
+      e("div", { className: "att3-counts" },
+        e("span", { className: "c-p" }, "Present ", n("present")),
+        e("span", { className: "c-l" }, "Late ", n("late")),
+        e("span", { className: "c-a" }, "Absent ", n("absent")),
+        e("span", { className: "c-n" }, "Not marked ", unmarked)
+      ),
+      e("div", { className: "att3-bar" }, e("i", { style: { width: (ens.length ? Math.round(markedN / ens.length * 100) : 0) + "%" } }))
+    ) : null,
+    sess ? e("div", { className: "att3-acts" },
+      e("button", { type: "button", className: "att3-out", disabled: locked, onClick: () => setDraft((p) => { const n = { ...p }; ens.forEach((en) => { n[en.uid] = { ...(n[en.uid] || {}), status: "present" }; }); return n; }) }, "Mark all present"),
+      e("button", { type: "button", className: "att3-out", disabled: locked, onClick: () => setDraft(base) }, "Reset")
+    ) : null,
+    e("div", { className: "att3-list" }, ens.map((en) => {
+      const st = draft[en.uid]?.status || "";
+      const info = attendancePct(cid, en.uid, pack);
+      const pct = info.pct == null ? "—" : info.display + "%";
+      return e("div", { key: en.uid, className: "att3-row" },
+        e("span", { className: "att3-av" }, initials(en.studentName)),
+        e("div", { className: "att3-meta" },
+          e("strong", null, en.studentName || "Student"),
+          e("span", null, "Attendance " + pct),
+          st === "absent" ? e("button", { type: "button", className: "att3-note", onClick: () => setNoteFor(en.uid) }, "Add note") : null,
+          noteFor === en.uid ? e("input", { className: "att3-note-in", value: draft[en.uid]?.note || "", placeholder: "Note", onChange: (ev) => setDraft((p) => ({ ...p, [en.uid]: { ...(p[en.uid] || {}), note: ev.target.value } })) }) : null
+        ),
+        e("div", { className: "att3-seg", role: "group", "aria-label": "Mark " + (en.studentName || "") },
+          [["present", "P", "ok"], ["late", "L", "warn"], ["absent", "A", "bad"]].map(([k, lab, cls]) =>
+            e("button", { key: k, type: "button", className: "att3-segb " + cls + (st === k ? " on" : ""), "aria-pressed": st === k, disabled: locked, onClick: () => setSt(en.uid, k) }, st === k ? lab + " ✓" : lab)
+          )
+        )
+      );
+    })),
+    sess ? e("div", { className: "att3-savebar" },
+      e("button", { type: "button", className: "att3-save", disabled: locked || saving, onClick: save }, saving ? "Saving…" : "Save attendance")
+    ) : null
+  );
+}
 function Page({ uid, go, sessionId, courseId }) {
   const [pack, setPack] = useState(getTrainerStore());
+  const [phone, setPhone] = useState(isPhoneAtt);
   useEffect(() => subscribeTrainerStore(setPack), []);
   useEffect(() => { if (uid) loadTrainerStore(uid); }, [uid]);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const on = () => setPhone(mq.matches);
+    mq.addEventListener?.("change", on);
+    return () => mq.removeEventListener?.("change", on);
+  }, []);
   if (!pack || !pack.extrasReady) return e("div", { className: "th2" }, e("div", { className: "th2-hero" }, e("h2", { style: { margin: 0 } }, "Attendance"), e("div", { className: "th2-skline", style: { height: 140 } })));
+  if (phone) return e(PhoneAttFlow, { pack, uid, go, sessionId, courseId });
   if (sessionId) return e(MarkPage, { pack, uid, go, sessionId });
   return e(ListPage, { pack, uid, go, courseId });
 }

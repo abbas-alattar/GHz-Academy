@@ -1,9 +1,9 @@
-<!-- aha-build-id: bmwl8lzzlo8j7tmjp -->
+<!-- aha-build-id: bmww0vb7vm9opqg4e -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>GHz Academy — Telecom Engineering Trainings Academies</title>
   <link rel="icon" type="image/png" href="./favicon.png" />
   <meta name="description" content="Practical telecom engineering training in RF, LTE, 5G, antennas, fiber, and microwave." />
@@ -12,6 +12,9 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./DeliveryDays.css" />
   <link rel="stylesheet" href="./CourseCard.css" />
+  <link rel="stylesheet" href="./BrowseCoursesV2.css" />
+  <link rel="stylesheet" href="./PublicCoursesV1.css" />
+  <link rel="stylesheet" href="./ghz-responsive.css" />
   <style>
     :root {
       --navy: #071a33;
@@ -24,13 +27,16 @@
       --white: #fff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    #home, #courses, #about, #leadership, #faq, #contact { scroll-margin-top: 80px; }
+    body { padding-top: 72px; }
+    .hero-shell { margin-top: -72px; }
     body { font-family: "IBM Plex Sans", sans-serif; background: var(--paper); color: var(--ink); }
     h1,h2,h3,.logo { font-family: "Space Grotesk", sans-serif; }
     img { max-width: 100%; display: block; }
     a { color: inherit; }
     .wrap { width: min(1120px, 92%); margin: 0 auto; }
-    .hero-shell { position: relative; color: #fff; min-height: 100vh; display: flex; flex-direction: column; background: #071a33; overflow: hidden; }
+    .hero-shell { position: relative; color: #fff; height: 70vh; min-height: 520px; max-height: 640px; display: flex; flex-direction: column; background: #071a33; overflow: hidden; }
     .hero-shell::after {
       content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
       background: url("./hero-tower-engineer.jpg") center right / cover no-repeat;
@@ -38,20 +44,21 @@
     }
     .hero-shell::before {
       content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
-      background: linear-gradient(90deg, rgba(7,26,51,.82) 0%, rgba(7,26,51,.5) 34%, rgba(7,26,51,.18) 64%, rgba(7,26,51,.04) 100%);
+      background: linear-gradient(90deg, rgba(5,15,35,0.85) 0%, rgba(5,15,35,0.55) 50%, rgba(5,15,35,0.15) 100%);
     }
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 50;
       display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      margin: 0; padding: 14px 4%;
-      background: transparent; border: 0; color: #fff;
-      transition: background .28s ease, backdrop-filter .28s ease, box-shadow .28s ease;
+      margin: 0; padding: 0 4%; height: 72px; box-sizing: border-box;
+      background: transparent; border: 0; border-bottom: 1px solid transparent; color: #fff;
+      transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
     }
     nav.scrolled {
-      background: rgba(7, 26, 51, .38);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      background: #0F2747;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 8px 24px rgba(0,0,0,.18);
     }
     .nav-mid {
       position: relative; display: flex; gap: 4px; list-style: none; font-size: .92rem; align-items: center;
@@ -72,7 +79,7 @@
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      nav, .nav-pill, .why-copy, .why img, .about-copy, .about-media img, .inst, .ring, .gchip, .faq-item, .faq-item .ans, .reg-card, .reg-cta { transition: none; animation: none; }
+      nav, .nav-pill, .why-copy, .why img, .inst, .ring, .gchip, .faq-item, .faq-item .ans, .reg-card, .reg-cta { transition: none; animation: none; }
     }
     .nav-right { display: flex; align-items: center; gap: 16px; position: relative; }
     #landAuthSlot { min-width: 168px; min-height: 42px; display: flex; align-items: center; justify-content: flex-end; gap: 16px; }
@@ -107,13 +114,13 @@
     .btn-blue:focus-visible { outline: 2px solid #93C5FD; outline-offset: 2px; }
     .btn-ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.45); }
     .hero .cta .btn { border-radius: 12px; }
-    .hero a.btn.hero-explore { background: #2563EB; color: #fff; border: 0; }
+    .hero a.btn.hero-explore { background: #2563EB; color: #fff; border: 0; height: 48px; display: inline-flex; align-items: center; padding: 0 20px; }
     .hero a.btn.hero-explore:hover { background: #1D4ED8; }
     .hero a.btn.hero-reg,
     a.btn.hero-reg#heroReg {
       background: transparent !important;
       color: #fff !important;
-      border: 1px solid rgba(255,255,255,0.45) !important;
+      border: 2px solid #fff !important; height: 48px; display: inline-flex; align-items: center; padding: 0 20px;
       box-shadow: none;
     }
     .hero a.btn.hero-reg:hover {
@@ -125,17 +132,13 @@
     .menu-btn { display: none; background: none; border: 1px solid rgba(255,255,255,.3); color: #fff; border-radius: 8px; padding: 8px 10px; }
     .hero {
       flex: 1; display: flex; align-items: center; color: #fff; overflow: hidden; position: relative; z-index: 1;
-      min-height: 560px; padding: 48px 0 72px;
+      min-height: 0; padding: 0 0 40px;
     }
-    .hero-copy { padding: 24px 5% 40px; max-width: 860px; position: relative; z-index: 2; background: none; }
-    .hero-copy h1 { font-size: clamp(2.3rem, 4.8vw, 3.7rem); line-height: 1.08; margin: 12px 0 18px; max-width: 820px; }
-    .hero-copy h1 em { font-style: normal; color: #3b8dff; display: inline-block; min-height: 1.1em; }
-    .hero-copy h1 em::after {
-      content: ""; display: inline-block; width: 2px; height: .85em; margin-left: 3px; background: #3b8dff; vertical-align: -2px; animation: caretBlink 1s step-end infinite;
-    }
-    @keyframes caretBlink { 50% { opacity: 0; } }
-    @media (prefers-reduced-motion: reduce) { .hero-copy h1 em::after { animation: none; } }
-    .hero-copy p { color: #c9d7e8; max-width: 720px; line-height: 1.65; }
+    .hero-copy { padding: 96px 5% 40px; max-width: 860px; position: relative; z-index: 2; background: none; }
+    .hero-copy .kicker { margin-top: 0; margin-bottom: 12px; }
+    .hero-copy h1 { font-size: 48px; line-height: 1.15; margin: 0 0 12px; max-width: 820px; font-weight: 700; }
+    .hero-copy h1 em { font-style: normal; color: inherit; }
+    .hero-copy p { color: #c9d7e8; max-width: 560px; line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
     .chips { margin-top: 22px; color: #9fb3c8; font-size: .82rem; }
     .cap { position: absolute; right: 22px; bottom: 16px; z-index: 3; font-size: .72rem; color: #e8eef6; }
@@ -156,11 +159,12 @@
     .filters button.on { background: var(--blue); color: #fff; border-color: var(--blue); }
     .card.hide { display: none; }
     section { padding: 80px 0; }
+    section#about { padding: 72px 0; }
     .kicker { color: var(--blue); font-size: .78rem; letter-spacing: .14em; font-weight: 600; margin-bottom: 8px; }
     h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 10px; }
     .sub { color: var(--muted); max-width: 640px; margin-bottom: 32px; }
     .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-    #courseGrid.cc1-grid { gap: 16px; }
+    #courseGrid, #courseGrid.cc1-grid { display: block; width: 100%; max-width: 1200px; margin-left: auto; margin-right: auto; padding-inline: 24px; box-sizing: border-box; }
     .cc1-card.hide { display: none; }
     .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
     .card img { height: 160px; width: 100%; object-fit: cover; flex-shrink: 0; }
@@ -195,37 +199,30 @@
     .why ul { margin-top: 16px; color: var(--muted); line-height: 1.7; padding-left: 0; list-style: none; }
     .why li { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
     .why li svg { flex-shrink: 0; margin-top: 3px; }
-    .why-card { margin-top: 18px; background: #fff; border-left: 4px solid var(--blue); border-radius: 12px; padding: 16px 18px; box-shadow: 0 10px 28px rgba(15,39,68,.08); }
-    .why-card strong { display: block; margin-bottom: 6px; color: var(--ink); }
-    .why-card p { color: var(--muted); font-size: .9rem; line-height: 1.5; }
-    .about { display: grid; grid-template-columns: 1.1fr .9fr; gap: 36px; align-items: center; }
-    .about-copy { opacity: 0; transform: translateX(-28px); transition: opacity .75s ease, transform .75s ease; }
-    .about.in .about-copy { opacity: 1; transform: none; }
-    .about-media { position: relative; opacity: 0; transform: translateX(28px); transition: opacity .75s ease, transform .75s ease; }
-    .about.in .about-media { opacity: 1; transform: none; }
-    .about-media img { width: 100%; height: 300px; object-fit: cover; border-radius: 16px; transform: scale(1.04); transform-origin: center; }
-    .about.in .about-media img { animation: aboutZoom 14s ease-out forwards; }
-    @keyframes aboutZoom { from { transform: scale(1.04); } to { transform: scale(1.12); } }
-    .about-float { position: absolute; left: 14px; bottom: 14px; background: #fff; color: var(--ink); font-size: .78rem; font-weight: 600; padding: 8px 12px; border-radius: 10px; box-shadow: 0 8px 22px rgba(15,39,68,.16); }
-    .about-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-    .about-pill { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; font-size: .86rem; color: var(--ink); }
-    .about-pill svg { flex-shrink: 0; }
-    .inst { display: grid; grid-template-columns: 280px 1fr; gap: 28px; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 22px; opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease, box-shadow .2s ease; transform-style: preserve-3d; }
+    .why-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .why-pill { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; font-size: .86rem; color: var(--ink); }
+    .why-pill svg { flex-shrink: 0; }
+    .lead-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
+    .inst { display: grid; grid-template-columns: 160px 1fr; gap: 20px; align-items: stretch; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 22px; height: 100%; box-sizing: border-box; box-shadow: 0 10px 28px rgba(15,39,68,.08); opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease, box-shadow .2s ease; transform-style: preserve-3d; }
     .inst.in { opacity: 1; transform: none; }
-    .photo-wrap { position: relative; width: 220px; height: 220px; margin: 0 auto; }
-    .inst img { width: 220px; height: 220px; object-fit: cover; border-radius: 50%; position: relative; z-index: 1; }
-    .ring { position: absolute; top: 50%; left: 50%; width: 220px; height: 220px; border: 2px solid rgba(29,111,214,.35); border-radius: 50%; transform: translate(-50%,-50%) scale(.92); animation: pulseRing 3.6s ease-out infinite; pointer-events: none; }
+    .inst-body { display: grid; grid-template-rows: auto auto minmax(0,1fr) auto; min-width: 0; height: 100%; }
+    .inst-body .sub { margin-bottom: 0; }
+    .photo-wrap { position: relative; width: 160px; height: 160px; margin: 0 auto; flex-shrink: 0; }
+    .inst img { width: 160px; height: 160px; object-fit: cover; object-position: center top; border-radius: 50%; position: relative; z-index: 1; }
+    .ring { position: absolute; top: 50%; left: 50%; width: 160px; height: 160px; border: 2px solid rgba(29,111,214,.35); border-radius: 50%; transform: translate(-50%,-50%) scale(.92); animation: pulseRing 3.6s ease-out infinite; pointer-events: none; }
     .ring.r2 { animation-delay: 1.2s; }
     .ring.r3 { animation-delay: 2.4s; }
     @keyframes pulseRing { 0% { opacity: .55; transform: translate(-50%,-50%) scale(.92); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.38); } }
-    .gchips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 0 4px; }
+    .gchips { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; margin: 12px 0 4px; padding-top: 0; }
     .gchip { border: 1px solid var(--line); background: #f8fafc; color: #64748b; border-radius: 999px; padding: 5px 12px; font-size: .78rem; font-weight: 600; transition: background .35s, color .35s, box-shadow .35s, border-color .35s; }
     .gchip.on { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
     .gchip.glow { box-shadow: 0 0 0 4px rgba(29,111,214,.18), 0 0 18px rgba(59,141,255,.45); background: #1d6fd6; color: #fff; border-color: #1d6fd6; }
     .garrow { color: #94a3b8; font-size: .8rem; }
-    .mission { margin-top: 16px; border-left: 4px solid var(--blue); padding: 10px 0 10px 16px; }
+    .mission { margin-top: 16px; border-left: 4px solid var(--blue); padding: 10px 0 10px 16px; align-self: stretch; }
     .mission .kicker { margin-bottom: 6px; }
-    .mission p { font-style: italic; font-size: 1.12rem; line-height: 1.55; color: var(--ink); min-height: 4.6em; }
+    .mission p { position: relative; font-style: italic; font-size: 1.12rem; line-height: 1.55; color: var(--ink); min-height: 4.6em; }
+    .quote-ghost { visibility: hidden; display: block; pointer-events: none; }
+    .quote-live { position: absolute; inset: 0; }
     .faq-list { width: min(900px, 100%); margin: 20px auto 0; }
     .faq-item { background: #fff; border: 1px solid var(--line); border-radius: 12px; margin: 0 auto 10px; overflow: hidden; width: 100%; opacity: 0; transform: translateY(14px); transition: opacity .55s ease, transform .55s ease; }
     .faq-list.in .faq-item { opacity: 1; transform: none; }
@@ -318,16 +315,21 @@
     @media (max-width: 800px) {
       .foot { grid-template-columns: 1fr; gap: 28px; }
     }
-    @media (max-width: 900px) {
-      .hero, .why, .about, .inst, .benefits, .grid, .steps { grid-template-columns: 1fr; }
-      .hero-shell { background-position: 72% center; min-height: auto; }
+    @media (max-width: 1100px) {
+      .nav-mid { gap: 0; }
+      .nav-mid a { padding: 8px 10px; font-size: .86rem; }
+    }
+    @media (max-width: 1000px) {
+      .hero, .why, .lead-row, .inst, .benefits, .grid, .steps { grid-template-columns: 1fr; }
+      .hero-shell { background-position: 72% center; height: 70vh; min-height: 520px; max-height: 640px; }
       .hero-shell::before {
         background: linear-gradient(180deg, rgba(7,26,51,.88) 0%, rgba(7,26,51,.72) 42%, rgba(7,26,51,.45) 100%);
       }
       .nav-mid, .nav-links { display: none; position: absolute; top: 62px; left: 8px; right: 8px; background: rgba(11,39,72,.92); flex-direction: column; padding: 12px; border-radius: 12px; }
       .nav-mid.show, .nav-links.show { display: flex; transform: none; }
       .nav-pill { display: none; }
-      .hero { min-height: 0; padding: 28px 0 48px; }
+      .hero { min-height: 0; padding: 0 0 40px; }
+      .hero-copy h1 { font-size: 40px; }
       .benefits { margin-top: 0; width: 100%; }
       .nav-right .ghost-link { display: none; }
       #landAuthSlot { min-width: 42px; }
@@ -338,6 +340,254 @@
       .nav-mid .land-m-auth a { color: #fff; }
       .menu-btn { display: block; }
       .benefit { border-right: 0; border-bottom: 1px solid #e8eef6; }
+    }
+    .cta-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center; }
+    @media (max-width: 480px) {
+      html { scroll-padding-top: 64px; }
+      body { padding-top: 64px; }
+      .hero-shell { margin-top: -64px; }
+      nav#siteNav, nav {
+        height: 64px; padding: 0 16px; gap: 8px;
+      }
+      .brand svg { width: 24px; height: 16px; }
+      .brand .ghz, .brand .acad { font-size: 20px; }
+      .nav-right { gap: 8px; height: 44px; }
+      #landAuthSlot { min-width: 0; min-height: 44px; height: 44px; }
+      .land-auth-login, .ghost-link { display: none !important; }
+      .btn-blue.land-auth-reg, .land-auth-reg {
+        height: 44px; padding: 0 14px; font-size: 14px;
+      }
+      .land-chip { height: 44px; max-width: 44px; padding: 0; }
+      .land-chip-txt { display: none !important; }
+      .land-out { display: none !important; }
+      .land-av { width: 44px; height: 44px; }
+      .menu-btn {
+        display: inline-flex !important; align-items: center; justify-content: center;
+        width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 0;
+        border-radius: 8px; border: 1px solid rgba(255,255,255,.35);
+        background: #2563EB; color: #fff; font-size: 0; line-height: 0;
+      }
+      .menu-btn svg { width: 24px; height: 24px; }
+      .nav-mid, .nav-links {
+        display: none; position: fixed; top: 64px; left: auto; right: 0; bottom: 0;
+        width: min(320px, 100%); background: #071a33; flex-direction: column;
+        padding: 20px 16px; border-radius: 0; z-index: 60; max-height: none;
+      }
+      .nav-mid.show, .nav-links.show { display: flex; }
+      .nav-mid a { min-height: 44px; display: flex; align-items: center; }
+      .hero-copy { padding: 88px 20px 32px; max-width: none; }
+      .hero-copy .kicker {
+        font-size: 11px; letter-spacing: .14em; color: #7DD3FC; white-space: nowrap;
+      }
+      .hero-copy h1 { font-size: 30px; line-height: 1.15; }
+      .hero-copy p { font-size: 16px; -webkit-line-clamp: unset; max-width: none; }
+      .cta { gap: 10px; }
+      .hero .cta .btn, .hero a.btn.hero-explore, .hero a.btn.hero-reg {
+        height: 48px; flex: 1 1 140px; min-width: 0;
+      }
+      .hero-shell::before {
+        background: linear-gradient(90deg, rgba(5,15,35,.92) 0%, rgba(5,15,35,.55) 58%, rgba(5,15,35,.12) 100%),
+          linear-gradient(180deg, rgba(5,15,35,.2) 0%, rgba(5,15,35,.75) 100%);
+      }
+      html, body { overflow-x: clip; max-width: 100%; }
+      .wrap { width: auto; max-width: 100%; margin: 0; padding: 0 20px; box-sizing: border-box; }
+      section, section#about, .cta-band { padding: 48px 0; }
+      .benefits { width: 100%; }
+      .benefit { padding: 20px; }
+      .lead-row, .inst { grid-template-columns: 1fr; }
+      .inst { padding: 20px; max-width: 100%; }
+      .photo-wrap, .inst img, .ring { width: 160px; height: 160px; max-width: 100%; }
+      .faq-item button { min-height: 44px; }
+      .cta-inner { display: flex !important; flex-direction: column; gap: 20px; align-items: stretch; }
+      #contact h2 { font-size: 28px; line-height: 1.25; }
+      #contact .sub { font-size: 16px; max-width: none; }
+      #interestForm {
+        width: 100%; max-width: 100%; padding: 20px; border-radius: 20px;
+        box-sizing: border-box;
+      }
+      #interestForm label { font-size: 14px; white-space: nowrap; }
+      #interestForm input, #interestForm select, #interestForm textarea {
+        width: 100%; max-width: 100%; height: 48px; font-size: 16px;
+        padding: 0 12px; box-sizing: border-box;
+      }
+      #interestForm select {
+        text-overflow: ellipsis; white-space: nowrap; overflow: hidden;
+      }
+      #interestForm textarea { height: 120px; padding: 12px; resize: none; }
+      #interestForm button[type="submit"] {
+        width: 100%; height: 48px; min-height: 48px; white-space: nowrap;
+      }
+      footer { padding: 24px 0; }
+      .foot { padding: 0; max-width: 100%; }
+      .foot-bottom {
+        margin-top: 24px; padding: 24px 0; text-align: center;
+        grid-template-columns: 1fr; justify-items: center;
+      }
+      .foot-bottom span { justify-self: center; text-align: center; max-width: 100%; }
+      .v2-wrap, .v2-grid, #courseGrid, .faq-more, .why, .why img { max-width: 100%; }
+    }
+  </style>
+  <link rel="stylesheet" href="./ghz-mobile.css" />
+  <style id="land-phone-contact">
+    @media (max-width: 480px) {
+      html, body { overflow-x: clip !important; max-width: 100%; }
+      .cta-inner { display: flex !important; flex-direction: column; gap: 20px; width: 100%; }
+      #contact .wrap { padding: 0 20px; max-width: 100%; }
+      #contact h2 { font-size: 28px !important; line-height: 1.25 !important; }
+      #contact .sub { font-size: 16px !important; }
+      #interestForm { width: 100%; padding: 20px; border-radius: 20px; }
+      #interestForm label { font-size: 14px; white-space: nowrap; }
+      #interestForm input, #interestForm select {
+        width: 100%; height: 48px; font-size: 16px !important; padding: 0 12px;
+      }
+      #interestForm select { text-overflow: ellipsis; }
+      #interestForm textarea { width: 100%; height: 120px; font-size: 16px !important; padding: 12px; }
+      #interestForm button[type="submit"] { width: 100%; height: 48px; white-space: nowrap; }
+      footer { padding: 24px 0 !important; }
+      .foot-bottom { margin: 24px 0 0; padding: 24px 0; text-align: center; justify-items: center; }
+      nav#siteNav.scrolled, nav#siteNav.menu-open, body.land-menu-open nav#siteNav {
+        background: #0F2747 !important; backdrop-filter: none !important;
+      }
+      .land-scrim {
+        display: none; position: fixed; inset: 0; top: 64px; background: rgba(0,0,0,.5);
+        z-index: 45;
+      }
+      body.land-menu-open .land-scrim { display: block; }
+      body.land-menu-open { overflow: hidden; }
+      #navLinks {
+        display: flex !important; flex-direction: column; align-items: stretch; gap: 0;
+        position: fixed; top: 64px; left: 0; right: 0; bottom: 0; width: 100%;
+        max-height: none; border-radius: 0; padding: 0 16px 24px;
+        background: #0F2747; z-index: 55;
+        transform: translateX(100%); transition: transform .2s ease;
+      }
+      #navLinks.show { transform: translateX(0); }
+      #navLinks .nav-pill { display: none; }
+      #navLinks li { list-style: none; border-bottom: 1px solid rgba(255,255,255,.12); margin: 0; }
+      #navLinks a {
+        display: flex; align-items: center; height: 56px; min-height: 56px;
+        font-size: 18px; padding: 0; color: #fff; text-align: left;
+      }
+      #navLinks a.on { color: #38BDF8; }
+      #navLinks .land-m-auth {
+        display: flex !important; flex-direction: column; gap: 10px; border: 0;
+        margin-top: auto; padding: 16px 0 8px;
+      }
+      #navLinks .land-m-auth a {
+        justify-content: center; height: 48px; border-radius: 10px; font-size: 16px; font-weight: 650;
+      }
+      #navLinks .land-m-auth a:first-child {
+        background: transparent; border: 1px solid rgba(255,255,255,.45); color: #fff;
+      }
+      #navLinks .land-m-auth a:last-child { background: #2563EB; color: #fff; border: 0; }
+    }
+  </style>
+  <style id="land-phone-sections">
+    @media (max-width: 767px) {
+      html, body { overflow-x: clip !important; max-width: 100%; }
+      .wrap { width: auto; max-width: 100%; margin: 0; padding: 0 20px; box-sizing: border-box; }
+      section#courses, section#approach, section#about, section#leadership, section#faq {
+        padding: 56px 0 !important;
+      }
+      #courses h2, #approach h2, #about h2, #leadership h2, #faq h2 {
+        font-size: 28px !important; line-height: 1.25;
+      }
+      #courses .sub, #approach .sub, #about .lede, #leadership .sub, #faq .sub {
+        font-size: 16px !important; max-width: none;
+      }
+      #courses .filters {
+        display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden;
+        gap: 8px; margin: 8px 0 20px; padding-bottom: 4px; -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      #courses .filters::-webkit-scrollbar { display: none; }
+      #courses .filters button {
+        flex: 0 0 auto; min-height: 44px; white-space: nowrap;
+      }
+      #courseGrid, #courseGrid.cc1-grid, #courses .v2-grid {
+        display: grid !important; grid-template-columns: 1fr !important;
+        gap: 16px; padding-inline: 0 !important; max-width: 100%;
+      }
+      #courses .v2-card, #courses .cc1-card {
+        width: 100%; max-width: 100%;
+      }
+      #courses .v2-card .cc1-cover, #courses .v2-card .ghz-cover {
+        aspect-ratio: 16/9; height: auto; width: 100%;
+      }
+      #courses .v2-card h3, #courses .cc1-card h3 { font-size: 18px !important; }
+      #courses .v2-facts { flex-direction: column !important; }
+      #courses .v2-facts > * { width: 100%; }
+      #courses .v2-card .card-view, #courses a.card-view, #courses .btn-card.card-view {
+        display: flex; width: 100%; height: 48px; min-height: 48px;
+        align-items: center; justify-content: center; box-sizing: border-box;
+      }
+      #approach .steps {
+        display: flex; flex-direction: column; gap: 0; position: relative;
+        margin-top: 28px; padding-left: 0;
+      }
+      #approach .step {
+        display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: start;
+        background: transparent; padding: 0 0 28px; position: relative;
+      }
+      #approach .step:last-child { padding-bottom: 0; }
+      #approach .step::before {
+        content: ""; position: absolute; left: 19px; top: 40px; bottom: 0;
+        width: 1px; background: rgba(255,255,255,.22);
+      }
+      #approach .step:last-child::before { display: none; }
+      #approach .step span {
+        grid-column: 2; grid-row: 1; margin: 0 0 6px; color: #7eb6ff; font-size: 15px;
+      }
+      #approach .step::after {
+        content: ""; grid-column: 1; grid-row: 1 / span 2; width: 40px; height: 40px;
+        border-radius: 50%; background: #0b2748; border: 1px solid rgba(126,182,255,.45);
+        display: grid; place-items: center; font-size: 12px; font-weight: 700; color: #7eb6ff;
+        position: relative; z-index: 1;
+      }
+      #approach .step:nth-child(1)::after { content: "01"; }
+      #approach .step:nth-child(2)::after { content: "02"; }
+      #approach .step:nth-child(3)::after { content: "03"; }
+      #approach .step:nth-child(4)::after { content: "04"; }
+      #approach .step p { grid-column: 2; grid-row: 2; margin: 0; font-size: 15px; line-height: 1.5; }
+      #about.why, #about .why, .why {
+        display: flex !important; flex-direction: column; gap: 20px;
+      }
+      #about .why img, .why img {
+        order: -1; width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover;
+      }
+      .why ul, .why-pills { display: flex; flex-direction: column; }
+      .lead-row { display: flex; flex-direction: column; gap: 20px; }
+      .inst {
+        display: flex; flex-direction: column; grid-template-columns: none;
+        width: 100%; padding: 20px; gap: 16px;
+      }
+      .photo-wrap {
+        width: min(220px, 70vw); height: auto; aspect-ratio: 1; margin: 0 auto;
+      }
+      .inst img, .ring {
+        width: 100%; height: 100%; border-radius: 16px; object-fit: cover;
+      }
+      .ring { border-radius: 16px; }
+      .mission p { min-height: 5.2em; }
+      .faq-item button {
+        min-height: 44px; font-size: 16px; font-weight: 700; padding: 12px 16px;
+      }
+      .faq-item .ans { font-size: 15px; }
+      .faq-more { flex-direction: column; align-items: stretch; }
+      .faq-more a.btn { min-height: 44px; }
+      footer { padding: 40px 0 24px; }
+      .foot, .foot-mid {
+        display: flex; flex-direction: column; align-items: center; text-align: center; gap: 24px;
+      }
+      .foot-brand, .foot-tag { max-width: 100%; }
+      .foot-col { width: 100%; }
+      .foot-col a {
+        display: flex; align-items: center; justify-content: center;
+        min-height: 44px; margin: 0;
+      }
+      .foot-bottom {
+        grid-template-columns: 1fr; text-align: center; font-size: 13px;
+      }
     }
   </style>
 </head>
@@ -350,7 +600,7 @@
     <ul class="nav-mid" id="navLinks">
       <span class="nav-pill" id="navPill" aria-hidden="true"></span>
       <li><a class="on" href="#home">Home</a></li>
-      <li><a href="./courses.html" target="_blank" rel="noopener noreferrer">Courses</a></li>
+      <li><a href="./courses.html" target="_blank" rel="noopener">Courses</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#leadership">Leadership</a></li>
       <li><a href="#faq">FAQ</a></li>
@@ -362,20 +612,19 @@
     </ul>
     <div class="nav-right">
       <div id="landAuthSlot" aria-live="polite"><div class="land-auth-ph" aria-hidden="true"></div></div>
-      <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+      <button class="menu-btn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     </div>
   </nav>
   <div class="hero-shell" id="home">
   <header class="hero">
     <div class="hero-copy">
-      <div class="kicker">TELECOM ENGINEERING TRAININGS ACADEMY</div>
-      <h1>Master the Engineering<br />Behind Modern<br /><em id="topicPhrase">Telecom Networks.</em></h1>
-      <p>Build practical expertise in RF engineering, LTE and 5G networks, wireless planning, and telecom infrastructure through focused, industry-relevant trainings.</p>
+      <div class="kicker">TELECOM TRAININGS ACADEMY</div>
+      <h1>Your gateway to telecom engineering, from LTE to 6G</h1>
+      <p>Learn from engineers who build and run live networks, and earn a verified certificate.</p>
       <div class="cta">
-        <a class="btn btn-blue hero-explore" href="./courses.html" target="_blank" rel="noopener noreferrer">Explore Courses →</a>
+        <a class="btn btn-blue hero-explore" href="./courses.html" target="_blank" rel="noopener noreferrer">Explore courses</a>
         <a id="heroReg" class="btn hero-reg" href="./login.html?tab=signup" target="_blank" rel="noopener noreferrer">Register</a>
       </div>
-      <div class="chips">Wireless Communications · RF Engineering · 4G & 5G · Telecom Infrastructure</div>
     </div>
   </header>
   </div>
@@ -400,6 +649,7 @@
         <button data-f="Closed" type="button">On going · Registration closed</button>
       </div>
       <div class="grid" id="courseGrid"></div>
+      <p class="view-all-wrap" style="text-align:center;margin:28px 0 0"><a class="btn btn-blue" href="./courses.html" target="_blank" rel="noopener">View all courses</a></p>
     </div>
   </section>
 
@@ -416,44 +666,25 @@
     </div>
   </section>
 
-  <section>
+  <section id="about">
     <div class="wrap why" id="whyGhz">
       <div class="why-copy">
         <div class="kicker">WHY GHZ ACADEMY</div>
-        <h2>Learn from Telecom Industry Experts</h2>
+        <h2>Learn from telecom industry experts</h2>
         <p class="lede">GHz Academy brings you trainers who have spent years working inside the world's leading telecom companies. They teach what they have actually built, planned and fixed in live networks, so you learn real engineering, not just theory.</p>
         <ul>
-          <li><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="9" fill="#e8f1fb"/><path d="M5 9.2l2.4 2.4L13 6.2" fill="none" stroke="#1d6fd6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Trainers with years of experience at leading telecom companies worldwide</li>
           <li><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="9" fill="#e8f1fb"/><path d="M5 9.2l2.4 2.4L13 6.2" fill="none" stroke="#1d6fd6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Engineering-focused curriculum</li>
-          <li><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="9" fill="#e8f1fb"/><path d="M5 9.2l2.4 2.4L13 6.2" fill="none" stroke="#1d6fd6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Practical technical learning</li>
+          <li><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="9" fill="#e8f1fb"/><path d="M5 9.2l2.4 2.4L13 6.2" fill="none" stroke="#1d6fd6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Hands-on labs first, slides second</li>
           <li><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="9" fill="#e8f1fb"/><path d="M5 9.2l2.4 2.4L13 6.2" fill="none" stroke="#1d6fd6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Relevant wireless and network technologies</li>
           <li><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="9" fill="#e8f1fb"/><path d="M5 9.2l2.4 2.4L13 6.2" fill="none" stroke="#1d6fd6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Clear learning outcomes</li>
         </ul>
-        <div class="why-card">
-          <strong>Our trainers are our strength</strong>
-          <p>We select only experienced engineers with years of hands-on work at leading telecom companies around the world.</p>
+        <div class="why-pills">
+          <span class="why-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2" stroke="#1d6fd6" stroke-width="1.5"/><path d="M5 8h6M5 11h4" stroke="#1d6fd6" stroke-width="1.5" stroke-linecap="round"/></svg>Hands-on labs</span>
+          <span class="why-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="5.5" r="2.2" stroke="#1d6fd6" stroke-width="1.5"/><path d="M3.5 13c.8-2.4 2.4-3.6 4.5-3.6S11.7 10.6 12.5 13" stroke="#1d6fd6" stroke-width="1.5" stroke-linecap="round"/></svg>Expert trainers</span>
+          <span class="why-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2l1.6 3.3 3.6.5-2.6 2.5.6 3.6L8 10.6 4.8 11.9l.6-3.6L2.8 5.8l3.6-.5L8 2z" stroke="#1d6fd6" stroke-width="1.4" stroke-linejoin="round"/></svg>Career-ready skills</span>
         </div>
       </div>
       <img src="./why-training-room.jpg" alt="Trainer teaching telecom engineers at GHz Academy" />
-    </div>
-  </section>
-
-  <section id="about">
-    <div class="wrap about" id="aboutGhz">
-      <div class="about-copy">
-        <div class="kicker">ABOUT</div>
-        <h2>Where telecom engineers are trained</h2>
-        <p class="sub">GHz Academy is a Telecom Trainings Academy for people who want to design, measure and operate real networks. We teach RF, 5G, antennas, fiber, network planning and microwave, with hands-on labs first and slides second. Our trainers bring years of experience from leading telecom companies, so every lesson comes straight from the field.</p>
-        <div class="about-pills">
-          <span class="about-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2" stroke="#1d6fd6" stroke-width="1.5"/><path d="M5 8h6M5 11h4" stroke="#1d6fd6" stroke-width="1.5" stroke-linecap="round"/></svg>Hands-on labs</span>
-          <span class="about-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="5.5" r="2.2" stroke="#1d6fd6" stroke-width="1.5"/><path d="M3.5 13c.8-2.4 2.4-3.6 4.5-3.6S11.7 10.6 12.5 13" stroke="#1d6fd6" stroke-width="1.5" stroke-linecap="round"/></svg>Expert trainers</span>
-          <span class="about-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2l1.6 3.3 3.6.5-2.6 2.5.6 3.6L8 10.6 4.8 11.9l.6-3.6L2.8 5.8l3.6-.5L8 2z" stroke="#1d6fd6" stroke-width="1.4" stroke-linejoin="round"/></svg>Career-ready skills</span>
-        </div>
-      </div>
-      <div class="about-media">
-        <img src="./about-training.jpg" alt="Instructor teaching a small group of engineers in a bright classroom" />
-        <div class="about-float">Hands-on labs</div>
-      </div>
     </div>
   </section>
 
@@ -461,7 +692,8 @@
     <div class="wrap">
       <div class="kicker">OUR TEAM</div>
       <h2>Leadership</h2>
-      <p class="sub">Meet the founder behind GHz Academy.</p>
+      <p class="sub">Meet the people behind GHz Academy.</p>
+      <div class="lead-row">
       <div class="inst" id="leadCard">
         <div class="photo-wrap">
           <span class="ring r1" aria-hidden="true"></span>
@@ -469,20 +701,33 @@
           <span class="ring r3" aria-hidden="true"></span>
           <img src="./ceo-photo.png" alt="Abbas Alattar, Founder and CEO of GHz Academy" />
         </div>
-        <div>
+        <div class="inst-body">
           <h3>Abbas Alattar</h3>
           <p class="tag">Founder and CEO</p>
-          <div class="gchips" aria-label="LTE to 6G">
-            <span class="gchip" id="chipLte">LTE</span><span class="garrow" aria-hidden="true">→</span>
-            <span class="gchip" id="chip5g">5G</span><span class="garrow" aria-hidden="true">→</span>
-            <span class="gchip" id="chip6g">6G</span>
-          </div>
           <p class="sub" style="margin-top:12px">MS in Computer and Communications Engineering. Tech researcher for the United Nations. Founded GHz Academy to train engineers in wireless communications, from LTE to 6G, the way operators actually run networks.</p>
           <div class="mission">
             <div class="kicker">MISSION</div>
-            <p id="missionText"></p>
+            <p><span class="quote-ghost">“Networks keep evolving, from LTE to 6G, and the engineers behind them must evolve faster. That is why I built GHz Academy.”</span><span class="quote-live" id="missionText"></span></p>
           </div>
         </div>
+      </div>
+      <div class="inst" id="leadCard2">
+        <div class="photo-wrap">
+          <span class="ring r1" aria-hidden="true"></span>
+          <span class="ring r2" aria-hidden="true"></span>
+          <span class="ring r3" aria-hidden="true"></span>
+          <img src="./issam-alattar.jpeg" alt="Issam Alattar, Chief of Training and Development at GHz Academy" width="160" height="160" loading="lazy" />
+        </div>
+        <div class="inst-body">
+          <h3>Issam Alattar</h3>
+          <p class="tag">Chief of Training and Development</p>
+          <p class="sub" style="margin-top:12px">Telecom engineer and consultant with deep expertise in Huawei LTE and 5G radio planning and optimization, cloud core solutions (CloudEPC, Cloud 5GC, Cloud IMS), and GPON FTTx design and operations. Leads the academy's Training and Development department.</p>
+          <div class="mission">
+            <div class="kicker">FOCUS</div>
+            <p><span class="quote-ghost">“Turning live-network experience into practical, hands-on courses.”</span><span class="quote-live" id="focusText"></span></p>
+          </div>
+        </div>
+      </div>
       </div>
     </div>
   </section>
@@ -576,7 +821,7 @@
   </script>
 
   <section class="cta-band" id="contact">
-    <div class="wrap" style="display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center">
+    <div class="wrap cta-inner">
       <div>
         <div class="kicker">NEXT STEP</div>
         <h2>Take the Next Step in Your Telecom Career</h2>
@@ -639,26 +884,66 @@
     </div>
   </footer>
   <script>
-    document.getElementById("menuBtn").onclick = () => document.getElementById("navLinks").classList.toggle("show");
-    const phrases = ["Telecom Networks.", "5G Radio Sites.", "Open RAN.", "Private 5G.", "Massive MIMO.", "Fiber Backhaul.", "Edge Cloud.", "Core & RAN."];
-    const topic = document.getElementById("topicPhrase");
-    let pi = 0, ci = phrases[0].length, typing = false;
-    const typeLoop = () => {
-      if (!topic) return;
-      const word = phrases[pi];
-      if (!typing) {
-        if (ci > 0) { ci -= 1; topic.textContent = word.slice(0, ci); setTimeout(typeLoop, 38); }
-        else { pi = (pi + 1) % phrases.length; typing = true; setTimeout(typeLoop, 280); }
-      } else {
-        const next = phrases[pi];
-        if (ci < next.length) { ci += 1; topic.textContent = next.slice(0, ci); setTimeout(typeLoop, 62); }
-        else { typing = false; setTimeout(typeLoop, 1800); }
+    (function phoneMenu() {
+      const btn = document.getElementById("menuBtn");
+      const drawer = document.getElementById("navLinks");
+      if (!btn || !drawer) return;
+      let scrim = document.querySelector(".land-scrim");
+      if (!scrim) {
+        scrim = document.createElement("div");
+        scrim.className = "land-scrim";
+        document.body.appendChild(scrim);
       }
-    };
-    if (topic && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) setTimeout(typeLoop, 1600);
+      const icoOpen = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+      const icoClose = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+      const phone = () => window.matchMedia("(max-width: 480px)").matches;
+      function isOpen() { return document.body.classList.contains("land-menu-open"); }
+      function closeMenu(fromPop) {
+        if (!isOpen()) return;
+        drawer.classList.remove("show");
+        nav.classList.remove("menu-open");
+        document.body.classList.remove("land-menu-open");
+        btn.innerHTML = icoOpen;
+        btn.setAttribute("aria-expanded", "false");
+        if (!fromPop && history.state && history.state.landMenu) history.back();
+      }
+      function openMenu() {
+        if (isOpen()) return;
+        drawer.classList.add("show");
+        nav.classList.add("menu-open");
+        document.body.classList.add("land-menu-open");
+        btn.innerHTML = icoClose;
+        btn.setAttribute("aria-expanded", "true");
+        if (!(history.state && history.state.landMenu)) history.pushState({ landMenu: 1 }, "", location.href);
+      }
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!phone()) { drawer.classList.toggle("show"); return; }
+        if (isOpen()) closeMenu();
+        else openMenu();
+      });
+      scrim.addEventListener("click", () => closeMenu());
+      drawer.addEventListener("click", (e) => {
+        const a = e.target.closest("a");
+        if (!a || !phone()) return;
+        const href = a.getAttribute("href") || "";
+        if (href.startsWith("#")) {
+          e.preventDefault();
+          closeMenu();
+          setTimeout(() => {
+            if (href === "#home") window.scrollTo({ top: 0, behavior: "smooth" });
+            else document.getElementById(href.slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 200);
+        } else {
+          closeMenu();
+        }
+      });
+      window.addEventListener("popstate", () => { if (isOpen()) closeMenu(true); });
+      window.addEventListener("orientationchange", () => closeMenu());
+    })();
     const nav = document.getElementById("siteNav");
     const pill = document.getElementById("navPill");
-    const links = [...document.querySelectorAll("#navLinks a")];
+    const links = [...document.querySelectorAll("#navLinks a")].filter((a) => !a.target && (a.getAttribute("href") || "").startsWith("#"));
     const movePill = (el) => {
       if (!el || window.matchMedia("(max-width: 900px)").matches) return;
       const wrap = document.getElementById("navLinks").getBoundingClientRect();
@@ -676,18 +961,37 @@
       a.addEventListener("click", () => setOn(a));
     });
     document.getElementById("navLinks").addEventListener("mouseleave", () => movePill(links.find((a) => a.classList.contains("on"))));
-    const ids = ["home","courses","about","leadership","faq","contact"];
+    const spy = [
+      { el: document.getElementById("home"), href: "#home" },
+      { el: document.getElementById("about"), href: "#about" },
+      { el: document.getElementById("leadership"), href: "#leadership" },
+      { el: document.getElementById("faq"), href: "#faq" },
+      { el: document.getElementById("contact"), href: "#contact" }
+    ];
     const onScroll = () => {
-      nav.classList.toggle("scrolled", window.scrollY > 24);
-      let current = links[0];
-      ids.forEach((id, i) => {
-        const sec = document.getElementById(id);
-        if (sec && sec.getBoundingClientRect().top <= 120) current = links[i];
+      nav.classList.toggle("scrolled", window.scrollY > 8);
+      let currentHref = "#home";
+      spy.forEach((s) => {
+        if (s.el && s.el.getBoundingClientRect().top <= 90) currentHref = s.href;
       });
+      const current = links.find((a) => a.getAttribute("href") === currentHref) || links[0];
       setOn(current);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
+    (function syncHeroReg() {
+      const a = document.getElementById("heroReg");
+      if (!a) return;
+      let role = "";
+      try {
+        const o = JSON.parse(localStorage.getItem("ghz-shell") || "");
+        role = String(o && o.role || "").toLowerCase();
+      } catch {}
+      if (role === "admin") { a.textContent = "Admin portal"; a.setAttribute("href", "./admin.html"); }
+      else if (role === "trainer") { a.textContent = "Trainer portal"; a.setAttribute("href", "./trainer.html"); }
+      else if (role === "student") { a.textContent = "My portal"; a.setAttribute("href", "./student.html"); }
+      else { a.textContent = "Register"; a.setAttribute("href", "./login.html?tab=signup"); }
+    })();
     window.addEventListener("resize", onScroll);
 
     const faqList = document.getElementById("faqList");
@@ -732,61 +1036,68 @@
       }
     };
     reveal(document.getElementById("whyGhz"));
-    reveal(document.getElementById("aboutGhz"));
     const lead = document.getElementById("leadCard");
     const missionFull = "\u201cNetworks keep evolving, from LTE to 6G, and the engineers behind them must evolve faster. That is why I built GHz Academy.\u201d";
-    const missionEl = document.getElementById("missionText");
-    let missionDone = false;
-    const typeMission = () => {
-      if (missionDone || !missionEl) return;
-      missionDone = true;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { missionEl.textContent = missionFull; return; }
-      const words = missionFull.split(" ");
-      let wi = 0;
-      const tick = () => {
-        wi += 1;
-        missionEl.textContent = words.slice(0, wi).join(" ");
-        if (wi < words.length) setTimeout(tick, 90);
-      };
-      tick();
+    const focusFull = "\u201cTurning live-network experience into practical, hands-on courses.\u201d";
+    let quotesDone = false;
+    const typeQuotes = () => {
+      if (quotesDone) return;
+      quotesDone = true;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      [{ el: document.getElementById("missionText"), full: missionFull }, { el: document.getElementById("focusText"), full: focusFull }].forEach((q) => {
+        if (!q.el) return;
+        if (reduce) { q.el.textContent = q.full; return; }
+        const words = q.full.split(" ");
+        let wi = 0;
+        const tick = () => {
+          wi += 1;
+          q.el.textContent = words.slice(0, wi).join(" ");
+          if (wi < words.length) setTimeout(tick, 90);
+        };
+        tick();
+      });
     };
-    if (lead) {
-      const showLead = () => { lead.classList.add("in"); typeMission(); };
+    const bindLead = (card) => {
+      if (!card) return;
+      const showLead = () => { card.classList.add("in"); typeQuotes(); };
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) showLead();
       else {
         const io = new IntersectionObserver((ents) => {
           ents.forEach((e) => { if (e.isIntersecting) { showLead(); io.disconnect(); } });
         }, { threshold: 0.28 });
-        io.observe(lead);
+        io.observe(card);
       }
       const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
       if (mq.matches) {
-        lead.addEventListener("mousemove", (e) => {
-          const r = lead.getBoundingClientRect();
+        card.addEventListener("mousemove", (e) => {
+          const r = card.getBoundingClientRect();
           const x = (e.clientX - r.left) / r.width - 0.5;
           const y = (e.clientY - r.top) / r.height - 0.5;
-          lead.style.transform = "perspective(900px) rotateY(" + (x * 8) + "deg) rotateX(" + (-y * 6) + "deg)";
+          card.style.transform = "perspective(900px) rotateY(" + (x * 8) + "deg) rotateX(" + (-y * 6) + "deg)";
         });
-        lead.addEventListener("mouseleave", () => { lead.style.transform = lead.classList.contains("in") ? "none" : "translateY(18px)"; });
+        card.addEventListener("mouseleave", () => { card.style.transform = card.classList.contains("in") ? "none" : "translateY(18px)"; });
+      }
+    };
+    const leadRow = document.querySelector(".lead-row");
+    bindLead(lead);
+    bindLead(document.getElementById("leadCard2"));
+    if (leadRow) {
+      const kick = () => { lead.classList.add("in"); const c2 = document.getElementById("leadCard2"); if (c2) c2.classList.add("in"); typeQuotes(); };
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) kick();
+      else {
+        const io = new IntersectionObserver((ents) => {
+          ents.forEach((e) => { if (e.isIntersecting) { kick(); io.disconnect(); } });
+        }, { threshold: 0.2 });
+        io.observe(leadRow);
       }
     }
-    const chips = [document.getElementById("chipLte"), document.getElementById("chip5g"), document.getElementById("chip6g")];
-    let ciChip = 0;
-    const cycleChips = () => {
-      chips.forEach((c, i) => {
-        if (!c) return;
-        c.classList.toggle("on", i === ciChip);
-        c.classList.toggle("glow", i === 2 && ciChip === 2);
-      });
-      ciChip = (ciChip + 1) % 3;
-    };
-    cycleChips();
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) setInterval(cycleChips, 1400);
 
   </script>
-  <script type="module" src="./landing-courses.js?v=8"></script>
+  <script src="./public-scroll.js"></script>
+  <script type="module" src="./landing-courses.js?v=11"></script>
   <script type="module" src="./landing-interest.js?v=6"></script>
-  <script type="module" src="./landing-header-auth.js?v=auth8"></script>
+  <script type="module" src="./landing-header-auth.js?v=auth11"></script>
+  <script src="./ghz-mobile.js"></script>
 </body>
 </html>
 

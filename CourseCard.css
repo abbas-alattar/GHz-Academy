@@ -23,11 +23,45 @@
   overflow: hidden;
   flex-shrink: 0;
 }
-.cc1-cover img, .cc1-cover svg {
+.cc1-cover img, .cc1-cover svg, .ghz-cover svg {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+.ghz-cover, .cc1-cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  background: #0B1B33;
+  border-radius: 12px;
+}
+.ghz-cover.ghz-cover-ph, .cc1-cover.ghz-cover-ph { background: #071a33; }
+.ghz-cover img, .cc1-cover img, .ghz-cover-photo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center; display: block;
+}
+.ghz-cover-photo { opacity: 0; transition: opacity 250ms ease; }
+.ghz-cover-photo.is-on { opacity: 1; }
+.ghz-cover.ghz-cover-light::before, .cc1-cover.ghz-cover-light::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: rgba(11, 27, 51, .25);
+  pointer-events: none; z-index: 1;
+}
+.ghz-cover-light .ghz-cover-photo { object-fit: contain; object-position: center; background: #071a33; }
+.ghz-cover::after, .cc1-cover::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 45%;
+  background: linear-gradient(to top, rgba(11, 27, 51, .55) 0%, transparent 100%);
+  pointer-events: none; z-index: 1;
+}
+@media (min-width: 1024px) and (hover: hover) {
+  .cc1-card .ghz-cover-photo, .cc1-cover .ghz-cover-photo {
+    transition: opacity 250ms ease, transform 300ms ease;
+  }
+  .cc1-card:hover .ghz-cover-photo.is-on { transform: scale(1.03); }
 }
 .cc1-tag {
   position: absolute; left: 12px; bottom: 10px;

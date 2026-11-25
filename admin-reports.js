@@ -1,4 +1,4 @@
-import { protect } from "./auth-guard.js?v=auth8";
+import { protect } from "./auth-guard.js?v=auth10";
 import { bootAdminSide } from "./admin-side.js";
 
 bootAdminSide("reports");

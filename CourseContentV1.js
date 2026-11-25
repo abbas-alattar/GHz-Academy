@@ -1,6 +1,6 @@
 import { createElement as e, useEffect, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { auth, db } from "./firebase-config.js?v=auth8";
+import { auth, db } from "./firebase-config.js?v=auth10";
 import {
   collection, query, where, getDocs, getDoc, doc, addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -8,6 +8,9 @@ import { ConfirmDialog, showNoticeDialog } from "./ConfirmDialog.js";
 import { formatCourseDate } from "./courseDates.js";
 import { courseStatusLabel } from "./courseStatusLabel.js";
 import { sessionStatus } from "./sessionStatus.js";
+import { formatGrade } from "./gradeCalc.js";
+import { getCourseResult } from "./student-dash-data.js?v=stu11";
+import { maybeShowCourseResult } from "./CourseResultBox.js?v=stu11";
 
 const roots = new WeakMap();
 const TYPES = [
@@ -613,6 +616,7 @@ function App({ opts }) {
   const [sessErr, setSessErr] = useState("");
   const [sessLoad, setSessLoad] = useState(true);
   const [denied, setDenied] = useState(false);
+  const [courseResult, setCourseResult] = useState({ status: "loading" });
   const bar = useRef(null);
   const ink = useRef(null);
   const completed = String(course?.status || "") === "Completed";
@@ -665,6 +669,12 @@ function App({ opts }) {
   };
   useEffect(() => { loadHead(); Promise.allSettled([loadMats(), loadSess()]); }, [courseId, role, uid]);
   useEffect(() => {
+    let live = true;
+    setCourseResult({ status: "loading" });
+    getCourseResult(courseId).then((r) => { if (live) setCourseResult(r || { status: "loading" }); }).catch(() => { if (live) setCourseResult({ status: "loading" }); });
+    return () => { live = false; };
+  }, [courseId]);
+  useEffect(() => {
     const barEl = bar.current;
     const on = barEl?.querySelector("button.on");
     const inkEl = ink.current;
@@ -685,6 +695,24 @@ function App({ opts }) {
     e("span", { className: "cc1-av" }, initials(displayTrainerName(p.name))),
     e("span", null, displayTrainerName(p.name)));
 
+  let resultBanner = null;
+  if (String(course?.status || "") === "Completed") {
+    const rec = courseResult || { status: "loading" };
+    if (rec.status === "loading") {
+      resultBanner = e("p", { className: "cc1-result pend", style: { margin: "8px 0 0", fontWeight: 650 } }, "Loading results…");
+    } else if (rec.status === "unpublished") {
+      resultBanner = e("p", { className: "cc1-result pend", style: { margin: "8px 0 0", fontWeight: 650 } }, "Results not published yet");
+    } else {
+      const txt = rec.passed
+        ? ("Passed " + formatGrade(rec.avg) + ", congratulations")
+        : ("Not passed, pass mark " + rec.pass);
+      resultBanner = e("p", {
+        className: "cc1-result " + (rec.passed ? "ok" : "no"),
+        style: { margin: "8px 0 0", fontWeight: 650, cursor: "pointer" },
+        onClick: () => maybeShowCourseResult({ uid, name: opts.name, forceCourseId: courseId })
+      }, txt);
+    }
+  }
   return e("div", { className: "cc1" },
     e("a", { className: "cc1-back", href: back }, "← Back to courses"),
     e("div", { className: "cc1-hero" },
@@ -692,6 +720,7 @@ function App({ opts }) {
       e("div", { className: "cc1-hero-row" },
         course ? e("span", { className: "cc1-st " + String(course.status || "").replace(/\s/g, "") }, courseStatusLabel(course)) : null
       ),
+      resultBanner,
       e("div", { className: "cc1-stats" }, (function () {
         const matTxt = matLoad ? "—" : (mats.length === 1 ? "1 material" : mats.length + " materials");
         const sesTxt = sessLoad ? "—" : (sess.length === 1 ? "1 session" : sess.length + " sessions");

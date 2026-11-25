@@ -39,3 +39,9 @@ export function startsEndsLine(c, lastSession) {
   if (b) parts.push("Ends " + b);
   return parts.join(" · ");
 }
+export function dateRangeLine(c, lastSession) {
+  const a = formatCourseDate(c?.startDate);
+  const b = courseEndLabel(c, lastSession, "");
+  if (a && b && a !== b) return a.replace(/ (\d{4})$/, "") + " – " + b;
+  return a || b || "TBC";
+}

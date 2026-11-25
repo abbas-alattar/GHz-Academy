@@ -1,5 +1,5 @@
-import { protect } from "./auth-guard.js?v=auth8";
-import { auth, db } from "./firebase-config.js?v=auth8";
+import { protect } from "./auth-guard.js?v=auth10";
+import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, setDoc, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { isCourseLocked, CompletedBanner, lockBtn, lockWriteMsg } from "./course-lock.js";
 

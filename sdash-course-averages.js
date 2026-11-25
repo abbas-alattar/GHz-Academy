@@ -1,5 +1,5 @@
-import { bound } from "./student-dash-data.js?v=stu7";
-import { db } from "./firebase-config.js?v=auth8";
+import { bound } from "./student-dash-data.js?v=stu11";
+import { db } from "./firebase-config.js?v=auth10";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { courseAverage, courseAttendancePct } from "./student-dash-average.js";
 
@@ -43,7 +43,7 @@ export function mountCourseAverages(el) {
           const avg = courseAverage(c.id, data);
           const att = courseAttendancePct(c.id, data);
           const col = color(avg.pct);
-          const label = avg.pct == null ? "—" : avg.pct.toFixed(1) + "%";
+          const label = avg.pct == null ? "—" : formatGrade(avg.pct) + "%";
           const based = avg.count ? `Based on ${avg.count} graded item${avg.count === 1 ? "" : "s"}` : "No graded items yet";
           const attLine = att == null ? "Attendance —" : `Attendance ${att}%`;
           return `<a class="sdash-avg-card ${courses.length === 1 ? "sdash-avg-large" : ""}" href="./student-grades.html">

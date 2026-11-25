@@ -92,7 +92,7 @@ export function renderCertificate(certData) {
         <div class="cv2-qrwrap">${qrSvg(vurl)}<p class="cv2-sl">Scan to verify</p></div>
         <div class="cv2-dright"><p class="cv2-sl">Date of issue</p><p class="cv2-dv">${esc(date)}</p></div>
       </div>
-      <p class="cv2-foot">Verify at ghz-academy.web.app/verify</p>
+      <p class="cv2-foot">Verify at ghzacademy.com/verify</p>
     </div>
   </div>`;
 }

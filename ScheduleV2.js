@@ -191,7 +191,11 @@ export function renderScheduleV2(opts) {
     const dated = filtered.filter(validDate);
     const nodate = filtered.filter((s) => !validDate(s));
     const t = todayStr();
-    const upcoming = dated.filter((s) => { const st = sessionStatus(s, new Date(), { attendance }); return st === "Upcoming" || st === "In progress"; }).sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.startTime||"").localeCompare(String(b.startTime||"")));
+    const doneIds = new Set((courses || []).filter((c) => String(c.status || "") === "Completed").map((c) => c.id));
+    const upcoming = dated.filter((s) => {
+      if (s.courseId && doneIds.has(s.courseId)) return false;
+      const st = sessionStatus(s, new Date(), { attendance }); return st === "Upcoming" || st === "In progress";
+    }).sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.startTime||"").localeCompare(String(b.startTime||"")));
     const past = dated.filter((s) => sessionStatus(s, new Date(), { attendance }) === "Completed").sort((a, b) => String(b.date).localeCompare(String(a.date)));
     const next = upcoming[0] || null;
     const byDay = {};

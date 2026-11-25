@@ -1,8 +1,8 @@
-import { protect } from "./auth-guard.js?v=auth8";
-import { auth, db } from "./firebase-config.js?v=auth8";
+import { protect } from "./auth-guard.js?v=auth10";
+import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { isCourseLocked, CompletedBanner } from "./course-lock.js";
-import { parseScore, computeAverage, computeStatus, gradeCalc, fmt1 } from "./gradeCalc.js";
+import { parseScore, computeAverage, computeStatus, gradeCalc, fmt1, kindFrom } from "./gradeCalc.js";
 
 const root = document.getElementById("root");
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
@@ -17,7 +17,7 @@ const toast = (m, k = "ok") => {
   t.className = "toast " + k;
   t.textContent = m;
 };
-const srcOf = (c) => (c.source === "attendance" || c.source === "homework" || c.source === "quiz" ? c.source : "manual");
+const srcOf = (c) => kindFrom(c);
 
 try {
   const { user } = await protect("trainer");

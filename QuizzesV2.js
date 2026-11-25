@@ -1,11 +1,11 @@
+const asArray = (x) => Array.isArray(x) ? x : [];
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
 const state = { tab: "active", q: "", status: "all", open: {} };
 
 function courseGroup(c) {
   const s = String(c?.status ?? "");
   if (s === "Completed") return "completed";
-  if (s === "Open" || s === "Closed") return "active";
-  return "other";
+  return "active";
 }
 
 function tsMs(v) {
@@ -191,9 +191,9 @@ export function renderQuizzesV2(opts) {
       host.innerHTML = `<div class="qz2-wrap"><div class="qz2-skel"></div><div class="qz2-skel"></div></div>`;
       return true;
     }
-    const courses = Array.isArray(opts.courses) ? opts.courses : [];
-    const quizzes = Array.isArray(opts.quizzes) ? opts.quizzes : [];
-    const attempts = Array.isArray(opts.attempts) ? opts.attempts : [];
+    const courses = asArray(opts.courses);
+    const quizzes = asArray(opts.quizzes);
+    const attempts = asArray(opts.attempts);
     const q = String(state.q || "").toLowerCase();
     const status = state.status || "all";
     const tab = state.tab === "completed" ? "completed" : "active";
@@ -205,7 +205,8 @@ export function renderQuizzesV2(opts) {
       ? `<div class="qz2-empty"><div>📡</div><p>No active courses</p></div>`
       : `<div class="qz2-empty"><div>🎓</div><p>No completed courses</p></div>`;
 
-    host.innerHTML = `<div class="qz2-wrap">
+    host.innerHTML = `<div class="qz2-wrap${opts.stale ? " is-stale" : ""}">
+      ${opts.stale ? `<p class="qz2-sub" style="opacity:.7">Updating quizzes…</p>` : ""}
       <div class="qz2-head">
         <h2>Quizzes</h2>
         <p class="qz2-sub">Your quizzes, grouped by course</p>

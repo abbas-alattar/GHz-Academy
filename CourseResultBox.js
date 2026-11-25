@@ -1,18 +1,11 @@
-import { gradeCalc } from "./gradeCalc.js";
-import { getStudentStore } from "./student-dash-data.js?v=stu7";
-import { db } from "./firebase-config.js?v=auth8";
+import { formatGrade } from "./gradeCalc.js";
+import { getStudentStore, getCourseResult } from "./student-dash-data.js?v=stu11";
+import { db } from "./firebase-config.js?v=auth10";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { loadSeenBoxes, baselineStudentSeen, markResultSeen, seenResult } from "./seenBoxes.js";
+import { loadSeenBoxes, baselineStudentSeen, markResultSeen, seenResult, completionRound } from "./seenBoxes.js";
 
 function atStamp(course) {
-  const t = course?.completedAt;
-  if (!t) return "0";
-  try {
-    if (typeof t.toMillis === "function") return String(t.toMillis());
-    if (t.seconds) return String(t.seconds * 1000);
-    const n = new Date(t).getTime();
-    return Number.isFinite(n) ? String(n) : String(t);
-  } catch { return "0"; }
+  return completionRound(course);
 }
 export function markCourseResultSeen(uid, courseId, at) {
   markResultSeen(uid, courseId, Number(at) || 0);
@@ -36,28 +29,47 @@ function ensureCss() {
   l.id = "rs-css"; l.rel = "stylesheet"; l.href = "./CourseResultBox.css";
   document.head.appendChild(l);
 }
-function passMarkOf(scheme) {
-  const n = Number(scheme?.passMark);
-  return Number.isFinite(n) ? n : 60;
-}
-function resultFor(uid, courseId, store) {
-  const course = store?.courses?.[courseId];
-  if (!course || String(course.status || "").trim().toLowerCase() !== "completed") return null;
-  const scheme = store.gradeSchemes?.[courseId];
-  const comps = Array.isArray(scheme?.components) ? scheme.components : [];
-  const raw = store.gradeScores?.[courseId] || {};
-  const scores = raw.scores || raw;
-  const pack = {
-    attendance: (store.attendance || []).filter((a) => a.courseId === courseId),
-    assignments: (store.assignments || []).filter((a) => a.courseId === courseId),
-    submissions: store.submissions || [],
-    quizzes: (store.quizzes || []).filter((q) => q.courseId === courseId),
-    quizAttempts: store.quizAttempts || []
-  };
-  const g = gradeCalc({ id: courseId, pack: { ...pack, scheme } }, scheme, { uid, scores, pack: { ...pack, scheme } });
-  const pass = passMarkOf(scheme);
-  if (g.failed) return { course, avg: null, pass, passed: null, title: course.title || "this course" };
-  return { course, avg: g.average, pass, passed: g.passed, title: course.title || "this course" };
+
+function paintBox(wrap, payload) {
+  const unpublished = payload.status === "unpublished" || payload.unpublished;
+  const loading = payload.status === "loading";
+  const pass = !unpublished && !loading && !!payload.passed;
+  const gradeTxt = unpublished || loading ? "" : formatGrade(payload.avg);
+  const confetti = pass && !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? Array.from({ length: 14 }, (_, i) => `<span class="rs-dot" style="left:${8 + i * 6}%;top:${4 + (i % 5) * 8}%;background:${["#FDE68A","#A7F3D0","#BFDBFE","#FBCFE8"][i % 4]}"></span>`).join("")
+    : "";
+  const ico = loading
+    ? `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>`
+    : pass
+    ? `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.5L7 22l5-2 5 2-1.5-8.5"/></svg>`
+    : `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>`;
+  const card = wrap.querySelector(".rs-card");
+  if (!card) return;
+  const headClass = loading ? "fail" : (pass ? "pass" : "fail");
+  const h3 = loading ? "Loading results" : unpublished ? "Results not published yet" : (pass ? (firstName(payload.name) ? "Congratulations, " + firstName(payload.name) + "!" : "Congratulations!") : "Course completed");
+  const p = loading ? "Fetching your published scores…" : unpublished ? "Your trainer has not published scores for " + payload.title + " yet." : (pass ? "You have successfully completed " + payload.title + "." : "You did not reach the pass mark for " + payload.title + " this time.");
+  card.innerHTML = `<button type="button" class="rs-x" aria-label="Close">×</button>
+    <div class="rs-head ${headClass}">${pass ? `<div class="rs-conf">${confetti}</div>` : ""}
+      <div class="rs-ico">${ico}</div>
+      <h3>${h3}</h3>
+      <p>${p}</p>
+    </div>
+    <div class="rs-body">
+      <div class="rs-row">
+        <span class="rs-grade">${loading || unpublished ? "—" : gradeTxt + "%"}</span>
+        ${loading ? `<span class="rs-pill no">Loading…</span>` : unpublished ? `<span class="rs-pill no">Results not published yet</span>` : `<span class="rs-pill ${pass ? "ok" : "no"}">${pass ? "Passed" : "Not passed"} · ${gradeTxt}% · Pass mark ${payload.pass}%</span>`}
+      </div>
+      <p class="rs-note">${loading ? "Please wait while we load the gradebook." : unpublished ? "Check back after your trainer publishes the gradebook." : (pass
+        ? "Your certificate will be available in your Certificates section once it is issued."
+        : "This is not the end. Review your grades to see where to improve, and contact your instructor or the academy to discuss your next steps.")}</p>
+      <div class="rs-acts">
+        ${!loading && !unpublished && pass ? (payload.hasCert
+          ? `<button type="button" class="rs-btn rs-pri" data-rs="cert">View certificate</button>`
+          : `<button type="button" class="rs-btn rs-pri" data-rs="certs">Go to Certificates</button>`) : ""}
+        <button type="button" class="rs-btn ${loading || unpublished || !pass ? "rs-pri" : "rs-ghost"}" data-rs="grades">View my grades</button>
+        ${loading || unpublished || !pass ? `<button type="button" class="rs-btn rs-ghost" data-rs="close">Close</button>` : ""}
+      </div>
+    </div>`;
 }
 
 export function showCourseResultBox(payload) {
@@ -66,39 +78,10 @@ export function showCourseResultBox(payload) {
   wrap.className = "rs-dim";
   wrap.setAttribute("role", "dialog");
   wrap.setAttribute("aria-modal", "true");
-  const pass = !!payload.passed;
-  const confetti = pass && !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ? Array.from({ length: 14 }, (_, i) => `<span class="rs-dot" style="left:${8 + i * 6}%;top:${4 + (i % 5) * 8}%;background:${["#FDE68A","#A7F3D0","#BFDBFE","#FBCFE8"][i % 4]}"></span>`).join("")
-    : "";
-  const ico = pass
-    ? `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.5L7 22l5-2 5 2-1.5-8.5"/></svg>`
-    : `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>`;
-  wrap.innerHTML = `<div class="rs-card">
-    <button type="button" class="rs-x" aria-label="Close">×</button>
-    <div class="rs-head ${pass ? "pass" : "fail"}">${pass ? `<div class="rs-conf">${confetti}</div>` : ""}
-      <div class="rs-ico">${ico}</div>
-      <h3>${pass ? (firstName(payload.name) ? "Congratulations, " + firstName(payload.name) + "!" : "Congratulations!") : "Course completed"}</h3>
-      <p>${pass ? "You have successfully completed " + payload.title + "." : "You did not reach the pass mark for " + payload.title + " this time."}</p>
-    </div>
-    <div class="rs-body">
-      <div class="rs-row">
-        <span class="rs-grade">${payload.avg}%</span>
-        ${pass ? `<span class="rs-pill ok">Passed</span>` : `<span class="rs-pill no">Your grade ${payload.avg}% · Pass mark ${payload.pass}%</span>`}
-      </div>
-      <p class="rs-note">${pass
-        ? "Your certificate will be available in your Certificates section once it is issued."
-        : "This is not the end. Review your grades to see where to improve, and contact your instructor or the academy to discuss your next steps."}</p>
-      <div class="rs-acts">
-        ${pass ? (payload.hasCert
-          ? `<button type="button" class="rs-btn rs-pri" data-rs="cert">View certificate</button>`
-          : `<button type="button" class="rs-btn rs-pri" data-rs="certs">Go to Certificates</button>`) : ""}
-        <button type="button" class="rs-btn ${pass ? "rs-ghost" : "rs-pri"}" data-rs="grades">View my grades</button>
-        ${pass ? "" : `<button type="button" class="rs-btn rs-ghost" data-rs="close">Close</button>`}
-      </div>
-    </div>
-  </div>`;
+  wrap.innerHTML = `<div class="rs-card"></div>`;
   document.body.appendChild(wrap);
-  markResultSeen(payload.uid, payload.courseId, Number(payload.at) || 0);
+  paintBox(wrap, payload);
+  if (payload.uid && payload.courseId && payload.status !== "loading") markResultSeen(payload.uid, payload.courseId, Number(payload.at) || 0);
   const close = () => {
     window.removeEventListener("keydown", onKey);
     wrap.remove();
@@ -112,28 +95,29 @@ export function showCourseResultBox(payload) {
   const onKey = (ev) => { if (ev.key === "Escape") close(); };
   window.addEventListener("keydown", onKey);
   wrap.addEventListener("click", (ev) => { if (ev.target === wrap) close(); });
-  wrap.querySelector(".rs-x").onclick = close;
-  wrap.querySelectorAll("[data-rs]").forEach((b) => {
-    b.onclick = () => {
-      const k = b.getAttribute("data-rs");
-      if (k === "close") close();
-      else if (k === "grades") go("grades");
-      else go("certificates");
-    };
+  wrap.addEventListener("click", (ev) => {
+    const b = ev.target?.closest?.("[data-rs],.rs-x");
+    if (!b) return;
+    if (b.classList.contains("rs-x") || b.getAttribute("data-rs") === "close") close();
+    else if (b.getAttribute("data-rs") === "grades") go("grades");
+    else if (b.getAttribute("data-rs")) go("certificates");
   });
-  wrap.querySelector(".rs-x").focus();
+  wrap._paint = (p) => paintBox(wrap, { ...payload, ...p });
+  wrap.querySelector(".rs-x")?.focus();
+  return wrap;
 }
 
 let showing = false;
+let watchBound = false;
 export async function maybeShowCourseResult({ uid, name, forceCourseId } = {}) {
   try {
     if (!uid || (showing && !forceCourseId)) return;
     const store = getStudentStore();
-    if (!store || store.status === "loading" || store.status === "error") return;
+    if (!store) return;
     const seen = await loadSeenBoxes(uid);
-    if (!seen.ok) return;
+    if (!seen.ok && !forceCourseId) return;
     const ids = store.courseIds || [];
-    if (seen.first) {
+    if (seen.first && !forceCourseId) {
       await baselineStudentSeen(uid, store.courses || {});
       return;
     }
@@ -147,20 +131,30 @@ export async function maybeShowCourseResult({ uid, name, forceCourseId } = {}) {
       return;
     }
     if (!pick) return;
-    const rec = resultFor(uid, pick, store);
-    if (!rec) return;
+    showing = true;
+    const wrap = showCourseResultBox({
+      uid, courseId: pick, name: name || store.name, title: store.courses?.[pick]?.title || "this course",
+      status: "loading", avg: null, pass: null, passed: null, unpublished: false, hasCert: false,
+      onClose: () => { showing = false; }
+    });
+    const rec = await getCourseResult(pick);
     let hasCert = false;
     try {
       const snap = await getDoc(doc(db, "certificates", uid + "_" + pick));
       hasCert = snap.exists() && String(snap.data()?.status || "") !== "revoked";
     } catch (_) {
-      hasCert = (store.certificates || []).some((x) => (x.courseId === pick || x.id === uid + "_" + pick) && String(x.status) !== "revoked");
+      hasCert = (getStudentStore()?.certificates || []).some((x) => (x.courseId === pick || x.id === uid + "_" + pick) && String(x.status) !== "revoked");
     }
-    showing = true;
-    showCourseResultBox({
-      uid, courseId: pick, at: atStamp(rec.course), name: name || store.name, title: rec.title,
-      avg: rec.avg, pass: rec.pass, passed: rec.passed, hasCert,
-      onClose: () => { showing = false; }
-    });
-  } catch (_) {}
+    const payload = {
+      uid, courseId: pick, at: atStamp(store.courses?.[pick] || rec.course), name: name || store.name, title: rec.title,
+      avg: rec.avg, pass: rec.pass, passed: rec.passed, unpublished: rec.unpublished, status: rec.status, hasCert
+    };
+    wrap._paint?.(payload);
+    if (rec.status !== "loading") markResultSeen(uid, pick, Number(payload.at) || 0);
+    if (!watchBound && uid) {
+      watchBound = true;
+      window.addEventListener("ghz-course-meta", () => { maybeShowCourseResult({ uid, name }); });
+    }
+  } catch (_) { showing = false; }
 }
+export { getCourseResult };

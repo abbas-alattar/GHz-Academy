@@ -1,10 +1,17 @@
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc, updateDoc, limit } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { gradeCalc } from "./gradeCalc.js";
+import { formatGrade, resultFromStored } from "./gradeCalc.js";
+import { completionRound } from "./seenBoxes.js";
+import {
+  asArray, asObject, getStudentStore, getCompletedCourses,
+  ensureEnrollments, ensureRegistrations, ensureAssignments, ensureQuizzes,
+  ensureSubmissions, ensureQuizAttempts, ensureAnnouncements, ensureCertificates, ensureCatalog
+} from "./student-dash-data.js?v=stu11";
 
 const TTL = 60000;
 const cache = new Map();
 let lastUid = "";
+let prefsCache = { uid: "", data: null };
 
 function msOf(t) {
   if (!t) return 0;
@@ -37,7 +44,135 @@ async function settled(step, fn) {
 }
 function rows(snap) { return snap && snap.docs ? snap.docs.map((d) => ({ id: d.id, ...d.data() })) : []; }
 
-export function clearNotifCache() { cache.clear(); lastUid = ""; }
+export function clearNotifCache() { cache.clear(); lastUid = ""; prefsCache = { uid: "", data: null }; }
+
+async function loadStudentPrefs(uid, force) {
+  if (!force && prefsCache.uid === uid && prefsCache.data) return prefsCache.data;
+  const userSnap = await settled("users", () => getDoc(doc(db, "users", uid)));
+  const profile = userSnap && userSnap.exists() ? userSnap.data() : {};
+  const data = {
+    seenAt: msOf(profile.notifSeenAt),
+    firstRun: !profile.notifSeenAt,
+    readIds: Array.isArray(profile.notifReadIds) ? profile.notifReadIds.slice() : [],
+    hiddenIds: Array.isArray(profile.notifHiddenIds) ? profile.notifHiddenIds.slice() : [],
+    muted: Array.isArray(profile.notifMuted) ? profile.notifMuted.slice() : []
+  };
+  prefsCache = { uid, data };
+  return data;
+}
+
+function arr(x) { return asArray ? asArray(x) : (Array.isArray(x) ? x : []); }
+function obj(x) { return asObject ? asObject(x) : (x && typeof x === "object" && !Array.isArray(x) ? x : {}); }
+
+function buildStudentItemsFromStore(uid, store) {
+  const items = [];
+  const keep = (n) => { if (n && n.time) items.push(n); };
+  const st = store || getStudentStore() || {};
+  const regs = arr(st.registrations);
+  const ensRaw = arr(st.enrollments);
+  const closed = new Set(regs.filter((r) => r.status === "cancelled" || r.status === "rejected").map((r) => r.courseId));
+  const ens = ensRaw.filter((e) => e.courseId && !closed.has(e.courseId));
+  const enrolledCourses = new Set(ens.map((e) => e.courseId).filter(Boolean));
+  const ids = [...new Set(ens.map((e) => e.courseId).filter(Boolean))];
+  const titles = {};
+  const courses = obj(st.courses);
+  const catalog = arr(st.catalog);
+  catalog.forEach((c) => { if (c.id) titles[c.id] = c.title || titles[c.id]; });
+  Object.keys(courses).forEach((id) => { titles[id] = courses[id]?.title || titles[id]; });
+  ens.forEach((e) => { titles[e.courseId] = titles[e.courseId] || e.courseTitle || e.courseId; });
+  const completedList = typeof getCompletedCourses === "function" ? getCompletedCourses(st) : [];
+  const completed = new Set(completedList.map((c) => c.id || c.courseId).filter(Boolean));
+  ids.forEach((id) => {
+    const c = courses[id];
+    if (c && String(c.status || "") === "Completed") completed.add(id);
+  });
+  const scores = obj(st.gradeScores);
+  const schemes = obj(st.gradeSchemes);
+
+  regs.forEach((r) => {
+    const t = r.courseTitle || titles[r.courseId] || r.courseId || "course";
+    const rid = encodeURIComponent(r.id);
+    const stt = String(r.status || "");
+    if (enrolledCourses.has(r.courseId) || stt === "confirmed" || r.confirmedAt) return;
+    if (stt === "pending_payment" || stt === "pending") {
+      keep(item("regReceived", r.id, msOf(r.createdAt), "Registration received", "Registration received for " + t + ". Complete your payment to confirm your seat.", t, "./student.html#regs?item=" + rid, { courseId: r.courseId, regId: r.id }));
+    } else if (stt === "payment_submitted") {
+      keep(item("payReview", r.id, msOf(r.paymentDate || r.updatedAt || r.createdAt), "Payment under review", "We received your payment details for " + t + ". The academy is confirming them.", t, "./student.html#regs?item=" + rid, { courseId: r.courseId, regId: r.id }));
+    } else if (stt === "rejected") {
+      keep(item("regRejected", r.id, msOf(r.updatedAt || r.rejectedAt || r.cancelledAt || r.createdAt), "Registration not approved", "Your registration for " + t + " was not approved.", t, "./student.html#regs?item=" + rid, { courseId: r.courseId, regId: r.id, tone: "red" }));
+    } else if (stt === "cancelled") {
+      keep(item("regRejected", r.id, msOf(r.cancelledAt || r.updatedAt || r.createdAt), "Registration cancelled", "Your registration for " + t + " was cancelled", t, "./student.html#regs?item=" + rid, { courseId: r.courseId, regId: r.id, tone: "red" }));
+    }
+  });
+  ens.forEach((e) => {
+    const t = titles[e.courseId] || e.courseTitle || e.courseId || "course";
+    keep(item("enrolled", e.id, msOf(e.enrolledAt || e.createdAt), "Enrollment confirmed", "You're enrolled in " + t + ". Welcome!", t, "./student.html#courses?course=" + encodeURIComponent(e.courseId || ""), { courseId: e.courseId, celebrate: true }));
+  });
+  completed.forEach((cid) => {
+    const c = courses[cid] || catalog.find((x) => x.id === cid) || {};
+    if (String(c.status || "") !== "Completed") return;
+    const round = completionRound(c);
+    const when = msOf(c.completedAt) || Date.now();
+    const t = c.title || titles[cid] || cid;
+    const gs = scores[cid] || scores[uid + "_" + cid] || {};
+    const scheme = schemes[cid] || {};
+    let passed = false, failed = false, avgTxt = "";
+    try {
+      const g = resultFromStored(scheme, gs, "Completed");
+      if (g && Number.isFinite(g.avg)) {
+        passed = g.passed === true;
+        failed = g.passed === false;
+        avgTxt = " · Average " + formatGrade(g.avg);
+      }
+    } catch (_) {}
+    const src = cid + "_r" + round;
+    const verdict = passed ? "Passed" : (failed ? "Failed" : "Completed");
+    keep(item(passed ? "coursePass" : (failed ? "courseFail" : "courseDone"), src, when, "Course completed: " + t, "Course completed: " + t + " · " + verdict + avgTxt, t, "./student.html#grades", { courseId: cid, pin: true, celebrate: passed, tone: failed ? "red" : undefined }));
+  });
+  arr(st.assignments).forEach((a) => {
+    if (a.status && a.status !== "Published") return;
+    const t = titles[a.courseId] || a.courseTitle || a.courseId || "course";
+    keep(item("hwPosted", a.id, msOf(a.publishedAt || a.createdAt), "Homework posted", "New homework: " + (a.title || "Homework"), t, "./student.html#homework?item=" + encodeURIComponent(a.id)));
+  });
+  arr(st.quizzes).forEach((q) => {
+    if (q.status && q.status !== "Published") return;
+    const t = titles[q.courseId] || q.courseTitle || q.courseId || "course";
+    keep(item("quizPosted", q.id, msOf(q.publishedAt || q.createdAt), "Quiz posted", "New quiz: " + (q.title || "Quiz"), t, "./student-quizzes.html?item=" + encodeURIComponent(q.id)));
+  });
+  arr(st.submissions).filter((s) => s.status === "graded").forEach((s) => {
+    const t = titles[s.courseId] || s.courseTitle || s.courseId || "course";
+    const title = s.assignmentTitle || "Homework";
+    const msg = s.grade != null ? (title + " graded: " + s.grade + "/100") : (title + " graded");
+    keep(item("hwGraded", s.id, msOf(s.gradedAt), "Homework graded", msg, t, "./student.html#homework/" + encodeURIComponent(s.assignmentId || "")));
+  });
+  arr(st.quizAttempts).filter((s) => s.status === "graded" || s.status === "partial").forEach((s) => {
+    const t = titles[s.courseId] || s.courseTitle || s.courseId || "course";
+    const msg = s.maxScore ? "Your quiz was graded: " + (s.score ?? "—") + "/" + s.maxScore : "Your quiz was graded";
+    keep(item("quizGraded", s.id, msOf(s.gradedAt), "Quiz graded", msg, t, "./student-quizzes.html?item=" + encodeURIComponent(s.quizId || s.id)));
+  });
+  arr(st.announcements).forEach((a) => {
+    const all = a.courseId === "all";
+    const t = all ? "All courses" : (titles[a.courseId] || a.courseTitle || a.courseId || "course");
+    keep(item("ann", a.id, msOf(a.createdAt), "Announcement", a.title || a.body || (all ? "Academy announcement" : "New announcement"), t, "./student-announcements.html?item=" + encodeURIComponent(a.id)));
+  });
+  arr(st.certificates).forEach((c) => {
+    const t = c.courseTitle || titles[c.courseId] || c.courseId || "your course";
+    const link = "./student-certificates.html?item=" + encodeURIComponent(c.id);
+    if (String(c.status) === "revoked") {
+      const when = msOf(c.revokedAt || c.updatedAt || c.issuedAt || c.createdAt);
+      keep(item("certRevoked", c.id, when, "Certificate revoked", "Your certificate for " + t + " was revoked." + (c.revokeReason ? " Reason: " + c.revokeReason : ""), t, link, { courseId: c.courseId, pin: true, tone: "red" }));
+    } else {
+      const when = msOf(c.issuedAt || c.createdAt);
+      keep(item("certIssued", c.id, when, "Certificate issued", "You received a certificate for " + t + ".", t, link, { courseId: c.courseId, pin: true, celebrate: true }));
+    }
+  });
+  items.sort((a, b) => b.time - a.time);
+  return items;
+}
+
+export function studentNotifsFromStore(uid, store) {
+  return buildStudentItemsFromStore(uid, store);
+}
 
 export async function loadNotifications({ role, uid, force }) {
   if (!uid) return { items: [], seenAt: 0, readIds: [], hiddenIds: [], muted: [] };
@@ -45,142 +180,22 @@ export async function loadNotifications({ role, uid, force }) {
   lastUid = uid;
   const hit = cache.get(uid);
   if (!force && hit && Date.now() - hit.at < TTL) return hit.data;
-  const userSnap = await settled("users", () => getDoc(doc(db, "users", uid)));
-  const profile = userSnap && userSnap.exists() ? userSnap.data() : {};
-  let seenAt = msOf(profile.notifSeenAt);
-  const firstRun = !profile.notifSeenAt;
-  let readIds = Array.isArray(profile.notifReadIds) ? profile.notifReadIds.slice() : [];
-  let hiddenIds = Array.isArray(profile.notifHiddenIds) ? profile.notifHiddenIds.slice() : [];
-  let muted = Array.isArray(profile.notifMuted) ? profile.notifMuted.slice() : [];
+  const prefs = await loadStudentPrefs(uid, force);
+  let seenAt = prefs.seenAt;
+  const firstRun = prefs.firstRun;
+  let readIds = prefs.readIds.slice();
+  let hiddenIds = prefs.hiddenIds.slice();
+  let muted = prefs.muted.slice();
   const items = [];
   const keep = (n) => { if (n && n.time) items.push(n); };
 
   if (role === "student") {
-    const ensRaw = rows(await settled("enrollments", () => getDocs(query(collection(db, "enrollments"), where("uid", "==", uid)))));
-    const regs = rows(await settled("registrations", () => getDocs(query(collection(db, "registrations"), where("uid", "==", uid)))));
-    const closed = new Set(regs.filter((r) => r.status === "cancelled" || r.status === "rejected").map((r) => r.courseId));
-    const ens = ensRaw.filter((e) => !closed.has(e.courseId));
-    const enrolledCourses = new Set(ens.map((e) => e.courseId).filter(Boolean));
-    const ids = [...new Set(ens.map((e) => e.courseId).filter(Boolean))];
-    const titles = {};
-    ens.forEach((e) => { titles[e.courseId] = e.courseTitle || e.courseId; });
-    const courseSnaps = await Promise.all(ids.map((id) => settled("course/" + id, () => getDoc(doc(db, "courses", id)))));
-    const completed = new Set();
-    courseSnaps.forEach((s, i) => {
-      if (s && s.exists()) {
-        const c = s.data();
-        titles[ids[i]] = c.title || titles[ids[i]];
-        if (c.status === "Completed") completed.add(ids[i]);
-      }
-    });
-    const jobs = [];
-    regs.forEach((r) => {
-      const t = r.courseTitle || titles[r.courseId] || r.courseId || "course";
-      const rid = encodeURIComponent(r.id);
-      const st = String(r.status || "");
-      if (enrolledCourses.has(r.courseId) || st === "confirmed" || r.confirmedAt) return;
-      if (st === "pending_payment" || st === "pending") {
-        keep(item("regReceived", r.id, msOf(r.createdAt), "Registration received", "Registration received for " + t + ". Complete your payment to confirm your seat.", t, "./student.html#regs?item=" + rid, { courseId: r.courseId, regId: r.id }));
-      } else if (st === "payment_submitted") {
-        keep(item("payReview", r.id, msOf(r.paymentDate || r.updatedAt || r.createdAt), "Payment under review", "We received your payment details for " + t + ". The academy is confirming them.", t, "./student.html#regs?item=" + rid, { courseId: r.courseId, regId: r.id }));
-      } else if (st === "rejected") {
-        keep(item("regRejected", r.id, msOf(r.updatedAt || r.rejectedAt || r.cancelledAt || r.createdAt), "Registration not approved", "Your registration for " + t + " was not approved.", t, "./student.html#regs?item=" + rid, { courseId: r.courseId, regId: r.id, tone: "red" }));
-      } else if (st === "cancelled") {
-        keep(item("regRejected", r.id, msOf(r.cancelledAt || r.updatedAt || r.createdAt), "Registration cancelled", "Your registration for " + t + " was cancelled", t, "./student.html#regs?item=" + rid, { courseId: r.courseId, regId: r.id, tone: "red" }));
-      }
-    });
-    ens.forEach((e) => {
-      const t = titles[e.courseId] || e.courseTitle || e.courseId || "course";
-      keep(item("enrolled", e.id, msOf(e.enrolledAt || e.createdAt), "Enrollment confirmed", "You're enrolled in " + t + ". Welcome!", t, "./student.html#courses?course=" + encodeURIComponent(e.courseId || ""), { courseId: e.courseId, celebrate: true }));
-    });
-    courseSnaps.forEach((s, i) => {
-      if (!s || !s.exists()) return;
-      const c = s.data();
-      if (c.status !== "Completed") return;
-      const when = msOf(c.completedAt || c.updatedAt);
-      if (!when) return;
-      const t = c.title || titles[ids[i]] || ids[i];
-      jobs.push(settled("passFail/" + ids[i], async () => {
-        const gs = await getDoc(doc(db, "gradeScores", uid + "_" + ids[i]));
-        const sch = await getDoc(doc(db, "gradeSchemes", ids[i]));
-        const scores = gs.exists() ? (gs.data().scores || gs.data()) : {};
-        const scheme = sch.exists() ? sch.data() : {};
-        const cid = ids[i];
-        const names = ["assignments", "submissions", "quizzes", "quizAttempts", "attendance", "sessions"];
-        const pack = { courseId: cid, scheme, errors: {} };
-        await Promise.all(names.map(async (n) => {
-          try {
-            const snap = await getDocs(query(collection(db, n), where("courseId", "==", cid)));
-            pack[n] = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-          } catch { pack[n] = []; pack.errors[n] = true; }
-        }));
-        const g = gradeCalc({ id: cid, pack }, scheme, { uid, scores, pack });
-        const passed = !g.failed && g.passed;
-        const failed = !g.failed && !g.passed;
-        if (passed) {
-          keep(item("coursePass", ids[i] + "_" + when, when, "Congratulations", "Congratulations for passing the " + t + " course", t, "./student-grades.html?course=" + encodeURIComponent(ids[i]), { courseId: ids[i], pin: true, celebrate: true }));
-        } else if (failed) {
-          keep(item("courseFail", ids[i] + "_" + when, when, "Course not passed", "You did not pass the " + t + " course", t, "./student-grades.html?course=" + encodeURIComponent(ids[i]), { courseId: ids[i], pin: true, tone: "red" }));
-        } else {
-          keep(item("courseDone", ids[i] + "_" + when, when, "Course completed", t + " was marked completed. Your final grade is available.", t, "./student-grades.html?course=" + encodeURIComponent(ids[i]), { courseId: ids[i], pin: true }));
-        }
-      }));
-    });
-    ids.forEach((cid) => {
-      const t = titles[cid] || cid;
-      jobs.push(settled("assignments/" + cid, async () => {
-        const snap = await getDocs(query(collection(db, "assignments"), where("courseId", "==", cid), where("status", "==", "Published")));
-        rows(snap).forEach((a) => keep(item("hwPosted", a.id, msOf(a.publishedAt || a.createdAt), "Homework posted", "New homework: " + (a.title || "Homework"), t, "./student.html#homework?item=" + encodeURIComponent(a.id))));
-      }));
-      jobs.push(settled("quizzes/" + cid, async () => {
-        const snap = await getDocs(query(collection(db, "quizzes"), where("courseId", "==", cid), where("status", "==", "Published")));
-        rows(snap).forEach((q) => keep(item("quizPosted", q.id, msOf(q.publishedAt || q.createdAt), "Quiz posted", "New quiz: " + (q.title || "Quiz"), t, "./student-quizzes.html?item=" + encodeURIComponent(q.id))));
-      }));
-      jobs.push(settled("submissions/" + cid, async () => {
-        const snap = await getDocs(query(collection(db, "submissions"), where("uid", "==", uid), where("courseId", "==", cid)));
-        rows(snap).filter((s) => s.status === "graded").forEach((s) => {
-          const title = s.assignmentTitle || "Homework";
-          const msg = s.grade != null ? (title + " graded: " + s.grade + "/100") : (title + " graded");
-          keep(item("hwGraded", s.id, msOf(s.gradedAt), "Homework graded", msg, t, "./student.html#homework/" + encodeURIComponent(s.assignmentId || "")));
-        });
-      }));
-      jobs.push(settled("quizAttempts/" + cid, async () => {
-        const snap = await getDocs(query(collection(db, "quizAttempts"), where("uid", "==", uid), where("courseId", "==", cid)));
-        rows(snap).filter((s) => s.status === "graded" || s.status === "partial").forEach((s) => {
-          const msg = s.maxScore ? "Your quiz was graded: " + (s.score ?? "—") + "/" + s.maxScore : "Your quiz was graded";
-          keep(item("quizGraded", s.id, msOf(s.gradedAt), "Quiz graded", msg, t, "./student-quizzes.html?item=" + encodeURIComponent(s.quizId || s.id)));
-        });
-      }));
-      jobs.push(settled("ann/" + cid, async () => {
-        const snap = await getDocs(query(collection(db, "announcements"), where("courseId", "==", cid)));
-        rows(snap).forEach((a) => keep(item("ann", a.id, msOf(a.createdAt), "Announcement", a.title || a.body || "New announcement", t, "./student-announcements.html?item=" + encodeURIComponent(a.id))));
-      }));
-      if (completed.has(cid)) {
-        jobs.push(settled("gradeScores/" + cid, async () => {
-          const gs = await getDoc(doc(db, "gradeScores", uid + "_" + cid));
-          if (gs.exists()) keep(item("finalGrade", gs.id, msOf(gs.data().updatedAt), "Final grade updated", "Your course grade was updated", t, "./student-grades.html?course=" + encodeURIComponent(cid)));
-        }));
-      }
-    });
-    jobs.push(settled("certificates", async () => {
-      const snap = await getDocs(query(collection(db, "certificates"), where("uid", "==", uid)));
-      rows(snap).forEach((c) => {
-        const t = c.courseTitle || titles[c.courseId] || c.courseId || "your course";
-        const link = "./student-certificates.html?item=" + encodeURIComponent(c.id);
-        if (String(c.status) === "revoked") {
-          const when = msOf(c.revokedAt || c.updatedAt || c.issuedAt || c.createdAt);
-          keep(item("certRevoked", c.id, when, "Certificate revoked", "Your certificate for " + t + " was revoked." + (c.revokeReason ? " Reason: " + c.revokeReason : ""), t, link, { courseId: c.courseId, pin: true, tone: "red" }));
-        } else {
-          const when = msOf(c.issuedAt || c.createdAt);
-          keep(item("certIssued", c.id, when, "Certificate issued", "You received a certificate for " + t + ".", t, link, { courseId: c.courseId, pin: true, celebrate: true }));
-        }
-      });
-    }));
-    jobs.push(settled("annAll", async () => {
-      const snap = await getDocs(query(collection(db, "announcements"), where("courseId", "==", "all")));
-      rows(snap).forEach((a) => keep(item("ann", a.id, msOf(a.createdAt), "Announcement", a.title || a.body || "Academy announcement", "All courses", "./student-announcements.html?item=" + encodeURIComponent(a.id))));
-    }));
-    await Promise.allSettled(jobs);
+    await Promise.all([
+      ensureEnrollments(), ensureRegistrations(), ensureCatalog(),
+      ensureAssignments(), ensureQuizzes(), ensureSubmissions(),
+      ensureQuizAttempts(), ensureAnnouncements(), ensureCertificates()
+    ]);
+    buildStudentItemsFromStore(uid, getStudentStore()).forEach(keep);
   } else if (role === "trainer") {
     const cs = rows(await settled("courses", () => getDocs(query(collection(db, "courses"), where("trainerIds", "array-contains", uid)))));
     cs.forEach((c) => {

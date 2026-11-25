@@ -1,6 +1,6 @@
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { auth, db, roleHome } from "./firebase-config.js?v=auth8";
+import { auth, db, roleHome } from "./firebase-config.js?v=auth10";
 import { ensureLocalPersistence, broadcastLogout, watchCrossTab, performLogout } from "./auth-sync.js?v=auth8";
 
 const PORTALS = {
@@ -31,29 +31,51 @@ function esc(s) {
   });
 }
 
+function isInnerPublic() {
+  return document.body.classList.contains("pc1-page");
+}
+
 function guestHtml() {
   const slot = document.getElementById("landAuthSlot");
-  const label = (slot && slot.getAttribute("data-login-label")) || "Login";
-  return `<a class="ghost-link land-auth-login" href="./login.html" target="_blank" rel="noopener noreferrer">${esc(label)}</a>
-      <a class="btn btn-blue land-auth-reg" href="./login.html?tab=signup" target="_blank" rel="noopener noreferrer">Register</a>`;
+  const label = (slot && slot.getAttribute("data-login-label")) || (isInnerPublic() ? "Log in" : "Login");
+  const tgt = isInnerPublic() ? "" : " target=\"_blank\" rel=\"noopener noreferrer\"";
+  return `<a class="ghost-link land-auth-login" href="./login.html"${tgt}>${esc(label)}</a>
+      <a class="btn btn-blue land-auth-reg" href="./login.html?tab=signup"${tgt}>Register</a>`;
+}
+
+function portalLabel(role) {
+  const r = String(role || "").toLowerCase();
+  if (r === "admin") return "Admin portal";
+  if (r === "trainer") return "Trainer portal";
+  return "My portal";
 }
 
 function chipHtml({ name, role, showPill }) {
   const meta = roleMeta(role);
-  const pill = showPill
-    ? `<span class="land-chip-pill land-pill-${meta.key}">${meta.label}</span>`
-    : "";
-  return `<div class="land-user" id="landUser">
+  const shown = showPill !== false;
+  const outIco = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 7V5a2 2 0 0 1 2-2h7v18h-7a2 2 0 0 1-2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 12h11M12 8l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  if (!isInnerPublic()) {
+    return `<div class="land-user" id="landUser">
     <a class="land-chip" id="landChip" href="${meta.href}" target="_blank" rel="noopener noreferrer" title="Open my portal">
       <span class="land-av" aria-hidden="true">${esc(initials(name))}</span>
       <span class="land-chip-txt">
         <strong class="land-chip-name">${esc(name)}</strong>
-        ${pill}
+        ${shown ? `<span class="land-chip-pill land-pill-${meta.key}">${meta.label}</span>` : ""}
       </span>
     </a>
-    <button type="button" class="land-out" id="landSignOut" title="Sign out" aria-label="Sign out">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 7V5a2 2 0 0 1 2-2h7v18h-7a2 2 0 0 1-2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 12h11M12 8l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
+    <button type="button" class="land-out" id="landSignOut" title="Sign out" aria-label="Sign out">${outIco}</button>
+  </div>`;
+  }
+  return `<div class="land-user" id="landUser">
+    <a class="land-portal" href="${meta.href}">${esc(portalLabel(role))}</a>
+    <div class="land-chip" id="landChip" title="${esc(name)}">
+      <span class="land-av" aria-hidden="true">${esc(initials(name))}</span>
+      <span class="land-chip-txt">
+        <strong class="land-chip-name">${esc(name)}</strong>
+        ${shown ? `<span class="land-chip-pill land-pill-${meta.key}">${meta.label}</span>` : ""}
+      </span>
+    </div>
+    <button type="button" class="land-out" id="landSignOut" title="Log out" aria-label="Log out">${outIco}<span class="land-out-txt">Log out</span></button>
   </div>`;
 }
 
@@ -86,15 +108,58 @@ function bindOut(slot) {
     out.disabled = true;
     broadcastLogout();
     try { await signOut(auth); } catch { out.disabled = false; }
+    paint(slot, guestHtml());
+    setMobileGuest(true);
+    setFaqRegCta(false);
   });
+}
+
+function readSavedProfile() {
+  try {
+    const o = JSON.parse(localStorage.getItem("ghz-shell") || "");
+    if (!o || typeof o !== "object") return null;
+    const name = String(o.name || "").trim();
+    const role = String(o.role || "").toLowerCase();
+    if (!name && !role) return null;
+    return { name: name || "Account", role: role || "student" };
+  } catch {
+    return null;
+  }
+}
+
+function placeSlot() {
+  const slot = document.getElementById("landAuthSlot");
+  const mid = document.getElementById("navLinks");
+  const right = document.querySelector(".nav-right");
+  if (!slot || !mid || !right) return;
+  if (window.matchMedia("(max-width: 900px)").matches) {
+    if (slot.parentElement !== mid) mid.appendChild(slot);
+  } else {
+    const btn = right.querySelector(".menu-btn");
+    if (slot.parentElement !== right) right.insertBefore(slot, btn || null);
+  }
 }
 
 function boot() {
   const slot = document.getElementById("landAuthSlot");
   if (!slot) return;
   ensureLocalPersistence();
-  paint(slot, `<div class="land-auth-ph" aria-hidden="true"></div>`);
-  const paintGuest = () => { paint(slot, guestHtml()); setMobileGuest(true); };
+  if (isInnerPublic()) {
+    placeSlot();
+    window.addEventListener("resize", placeSlot);
+  }
+  const saved = readSavedProfile();
+  if (saved) {
+    paint(slot, chipHtml({ name: saved.name, role: saved.role, showPill: true }));
+    setMobileGuest(false);
+    setFaqRegCta(true);
+    bindOut(slot);
+  } else {
+    paint(slot, guestHtml());
+    setMobileGuest(true);
+    setFaqRegCta(false);
+  }
+  const paintGuest = () => { paint(slot, guestHtml()); setMobileGuest(true); setFaqRegCta(false); };
   watchCrossTab({ onLogout: paintGuest });
   onAuthStateChanged(auth, async (user) => {
     if (!user || !user.emailVerified) {
@@ -116,7 +181,7 @@ function boot() {
       name = user.email || "Account";
       showPill = false;
     }
-    paint(slot, chipHtml({ name, role, showPill }));
+    paint(slot, chipHtml({ name, role, showPill: true }));
     setMobileGuest(false);
     setFaqRegCta(true);
     bindOut(slot);

@@ -1,8 +1,10 @@
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { parseScore, computeAverage, fmt1, gradeCalc, averageTip } from "./gradeCalc.js";
+import { parseScore, computeAverage, fmt1, gradeCalc, averageTip, scoresFromDoc, resultFromStored } from "./gradeCalc.js";
+import { getCourseResult } from "./student-dash-data.js?v=stu11";
 import { exportStudentGradesPdf } from "./AdminPdfExport.js";
 
+const asArray = (x) => Array.isArray(x) ? x : [];
 const roots = new WeakMap();
 const printState = { popup: "" };
 
@@ -41,6 +43,11 @@ function dateMs(raw) {
   const n = Date.parse(s);
   return Number.isFinite(n) ? n : 0;
 }
+function fmtWhen(raw) {
+  const ms = dateMs(raw);
+  if (!ms) return "";
+  try { return new Date(ms).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }); } catch { return ""; }
+}
 function icoPrint() {
   return e("svg", { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", "aria-hidden": true },
     e("path", { d: "M6 9V2h12v7" }),
@@ -60,8 +67,22 @@ function studentMeta(opts) {
   };
 }
 function trainerLabel(c) {
-  if (Array.isArray(c.trainerNames) && c.trainerNames.length) return c.trainerNames.filter(Boolean).join(", ");
-  return c.trainerName || c.instructor || "—";
+  const raw = Array.isArray(c.trainerNames) && c.trainerNames.length ? c.trainerNames : [c.trainerName || c.instructor];
+  const seen = new Set();
+  const out = [];
+  raw.forEach((n) => {
+    const t = String(n || "").trim();
+    const k = t.toLowerCase();
+    if (t && !seen.has(k)) { seen.add(k); out.push(t); }
+  });
+  return out.join(", ") || "—";
+}
+function componentLabel(title) {
+  const t = String(title || "").toLowerCase();
+  if (/attend/.test(t)) return "Attendance";
+  if (/home|hw/.test(t)) return "Homework";
+  if (/quiz/.test(t)) return "Quizzes";
+  return String(title || "Component");
 }
 function tone(v) {
   if (v == null) return "na";
@@ -70,14 +91,12 @@ function tone(v) {
   return "lo";
 }
 function liveGrade(course) {
+  if (!isCompleted(course)) return { avg: null, passed: null, values: {}, unpublished: true, status: "In progress" };
   const scheme = course.scheme;
-  if (!scheme) return { avg: null, passed: false, values: course.vals || {} };
-  const pack = course.pack || {};
-  const g = gradeCalc({ id: course.id, pack: { ...pack, scheme } }, scheme, { uid: course.uid, scores: course.scores || {}, pack: { ...pack, scheme } });
-  if (!g.failed) return { avg: g.average, passed: g.passed, values: g.values, tip: g.tip || averageTip(scheme, g.values) };
-  const vals = course.vals || {};
-  const avg = computeAverage(scheme, vals);
-  return { avg, passed: avg != null && avg >= passMarkOf(scheme), values: vals };
+  if (!scheme) return { avg: null, passed: null, values: {}, unpublished: false, status: "loading" };
+  const res = resultFromStored(scheme, course.gradeDoc, course.status);
+  if (res.unpublished || res.missing) return { avg: null, passed: null, values: res.values || {}, unpublished: true, status: "Not saved yet" };
+  return { avg: res.avg, passed: res.passed, values: res.values || {}, unpublished: false, status: res.status, pass: res.pass };
 }
 function rowsForCourse(course) {
   const scheme = course.scheme;
@@ -86,7 +105,7 @@ function rowsForCourse(course) {
   const vals = live.values || course.vals || {};
   const pass = passMarkOf(scheme);
   const avg = live.avg;
-  const passed = !!live.passed;
+  const passed = live.unpublished ? null : live.passed;
   const tip = live.tip || averageTip(scheme, vals);
   const rows = comps.map((c) => {
     const w = Number(c.weight) || 0;
@@ -98,10 +117,10 @@ function rowsForCourse(course) {
     section: "Final average",
     weight: "100%",
     score: avg == null ? "—" : fmt1(avg),
-    weighted: passed ? "Passed" : "Failed",
-    result: passed ? "Passed" : "Failed"
+    weighted: passed == null ? "—" : (passed ? "Passed" : "Failed"),
+    result: passed == null ? "—" : (passed ? "Passed" : "Failed")
   });
-  return { rows, avg, passed, pass, comps, values: vals, tip };
+  return { rows, avg, passed: live.unpublished ? null : live.passed, pass, comps, values: vals, tip: live.tip, unpublished: !!live.unpublished, status: live.status };
 }
 async function printCourses(opts, list) {
   const preview = window.open("", "_blank");
@@ -116,14 +135,17 @@ async function printCourses(opts, list) {
   const done = (list || []).filter(isCompleted);
   const courses = done.map((c) => {
     const pack = rowsForCourse(c);
-    const comps = pack.rows.slice(0, -1).map((r) => ({ section: r.section, weight: r.weight, score: r.score, weighted: r.weighted }));
-    comps.push({ section: "Final average", weight: "100%", score: pack.avg == null ? "—" : fmt1(pack.avg), weighted: pack.passed ? "Passed" : "Failed" });
-    return { title: c.title || "Course", trainer: trainerLabel(c), rows: comps, avg: pack.avg, passed: pack.passed, pass: pack.pass };
+    const comps = pack.rows.slice(0, -1).map((r) => ({ section: componentLabel(r.section), weight: r.weight, score: r.score, weighted: r.weighted }));
+    return { title: c.title || "Course", trainer: trainerLabel(c), rows: comps, avg: pack.avg, passed: pack.passed, pass: pack.pass, completed: true };
   });
-  const one = done.length === 1 ? done[0] : null;
-  const filters = meta.who + (one ? " · " + (one.title || "") : " · All completed courses");
+  const s = opts.student || {};
   try {
-    await exportStudentGradesPdf({ courses, filters, preparedBy: meta.who, previewWin: preview });
+    await exportStudentGradesPdf({
+      courses,
+      studentName: s.name || "Student",
+      studentId: s.studentId || s.id7 || "",
+      previewWin: preview
+    });
   } catch (err) {
     printState.popup = String(err?.message || err);
     try { if (!preview.closed) preview.close(); } catch (_) {}
@@ -170,11 +192,11 @@ function CompletedCard({ course, opts, onPopup }) {
         e("h3", null, course.title || "Course"),
         e("p", { className: "sg4-meta" }, "Completed · pass mark " + pass)
       ),
-      e("span", { className: "sg4-pill " + (ok ? "sg4-pill-pass" : "sg4-pill-fail") }, ok ? "Passed" : "Failed"),
+      e("span", { className: "sg4-pill " + (pack.passed == null ? "sg4-pill-mid" : (ok ? "sg4-pill-pass" : "sg4-pill-fail")) }, pack.passed == null ? "—" : (ok ? "Passed" : "Failed")),
       e("button", { type: "button", className: "sg4-print", title: "Print", "aria-label": "Print this course", onClick: async () => { const okp = await printCourses(opts, [course]); onPopup(printState.popup); if (!okp) return; } }, icoPrint())
     ),
     course.schemeErr ? e("p", { className: "sg4-err" }, "Could not load " + course.schemeErr) : null,
-    avg != null ? e("div", { className: "sg4-avg " + (ok ? "sg4-pass" : "sg4-fail"), title: pack.tip || "" }, fmt1(avg), e("span", null, "/ 100 · " + deltaTxt)) : null,
+    pack.unpublished ? e("p", { className: "sg4-sub" }, "Not published yet") : (avg != null ? e("div", { className: "sg4-avg " + (ok ? "sg4-pass" : "sg4-fail"), title: pack.tip || "" }, fmt1(avg), e("span", null, "/ 100" + (deltaTxt ? " · " + deltaTxt : ""))) : e("div", { className: "sg4-avg" }, "—")),
     comps.length ? e("div", { className: "sg4-tiles" }, comps.map((c, i) => e(Tile, { key: String(c.id || c.title || i), name: c.title || "Section", weight: Number(c.weight) || 0, score: parseScore((pack.values || course.vals || {})[c.id]) }))) : null,
     e("button", { type: "button", className: "sg4-more", onClick: () => setOpen(!open) }, open ? "Hide breakdown" : "View full breakdown ›"),
     open ? e("table", { className: "sg4-table" },
@@ -210,7 +232,7 @@ function ProgressCard({ course }) {
 
 function App({ opts }) {
   const [popup, setPopup] = useState(printState.popup);
-  const courses = Array.isArray(opts.courses) ? opts.courses : [];
+  const courses = asArray(opts.courses);
   const done = useMemo(() => {
     const rank = (c) => {
       const t = String(c.title || "").toLowerCase();
@@ -224,8 +246,8 @@ function App({ opts }) {
   const open = useMemo(() => courses.filter((c) => !isCompleted(c)).slice().sort((a, b) => dateMs(a.startDate || a.start || a.startOn) - dateMs(b.startDate || b.start || b.startOn)), [courses]);
   const avgs = done.map((c) => liveGrade(c).avg).filter((n) => n != null);
   const overall = avgs.length ? Math.round((avgs.reduce((s, n) => s + n, 0) / avgs.length) * 10) / 10 : null;
-  const passedN = done.filter((c) => liveGrade(c).passed).length;
-  const failedN = done.length - passedN;
+  const passedN = done.filter((c) => liveGrade(c).passed === true).length;
+  const failedN = done.filter((c) => liveGrade(c).passed === false).length;
   const mismatch = done.length !== passedN + failedN;
   useEffect(() => {
     courses.forEach((c) => {
@@ -248,6 +270,7 @@ function App({ opts }) {
   }
 
   return e("div", { className: "sg4" },
+    opts.stale ? e("p", { className: "sg4-sub", style: { opacity: 0.7 } }, "Updating grades…") : null,
     e("div", { className: "sg4-head" },
       e("div", null, e("h2", null, "Grades"), e("p", { className: "sg4-sub" }, "Your results per course")),
       e("div", { className: "sg4-head-actions" },

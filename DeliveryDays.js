@@ -85,33 +85,58 @@ function formatTimeRange(raw) {
 }
 
 export function formatSchedule(course) {
-  const { codes, invalidLetterString, raw } = tokensFromDays(course?.days);
-  const { time, zone } = formatTimeRange(course?.sessionTime);
-  const order = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const daysLine = codes.length ? order.filter((d) => codes.includes(d)).join(" · ") : "";
-  return {
-    daysLine,
-    timeLine: time,
-    zone,
-    invalidLetterString: !!invalidLetterString,
-    rawDays: raw || course?.days,
-    codes
-  };
+  try {
+    const { codes, invalidLetterString, raw } = tokensFromDays(course?.days);
+    const { time, zone } = formatTimeRange(course?.sessionTime);
+    const order = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const daysLine = codes.length ? order.filter((d) => codes.includes(d)).join(" · ") : "";
+    return {
+      daysLine,
+      timeLine: time,
+      zone,
+      invalidLetterString: !!invalidLetterString,
+      rawDays: raw || course?.days,
+      codes
+    };
+  } catch (e) {
+    return { daysLine: "", timeLine: "", zone: "Beirut time", invalidLetterString: false, rawDays: "", codes: [] };
+  }
+}
+
+export function sessionsPerWeekWords(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v) || v <= 0) return "To be announced";
+  const k = Math.round(v);
+  if (k === 1) return "Once a week";
+  if (k === 2) return "Twice a week";
+  if (k === 3) return "Three times a week";
+  if (k === 4) return "Four times a week";
+  if (k === 5) return "Five times a week";
+  return k + " times a week";
 }
 
 export function formatDuration(course) {
-  const d = String(course?.duration || "").trim();
-  if (d && !/^to be announced$/i.test(d) && d !== "—") return d;
-  const a = course?.startDate, b = course?.endDate;
-  const ms = (v) => {
-    try { if (v && typeof v.toDate === "function") return v.toDate().getTime(); } catch {}
-    const t = Date.parse(v || "");
-    return Number.isFinite(t) ? t : NaN;
-  };
-  const x = ms(a), y = ms(b);
-  if (!Number.isFinite(x) || !Number.isFinite(y) || y <= x) return "";
-  const weeks = Math.max(1, Math.round((y - x) / (7 * 24 * 3600 * 1000)));
-  return weeks + (weeks === 1 ? " week" : " weeks");
+  const d = String(course?.duration || "").trim().replace(/,\s*\d+\s+sessions?\s+a week/i, "").trim();
+  const codes = tokensFromDays(course?.days).codes || [];
+  const n = Number(course?.sessionsPerWeek) || codes.length || 0;
+  const sess = n ? sessionsPerWeekWords(n) : "";
+  let weeks = d;
+  if (!weeks || /^to be announced$/i.test(weeks) || weeks === "—") {
+    weeks = "";
+    const a = course?.startDate, b = course?.endDate;
+    const ms = (v) => {
+      try { if (v && typeof v.toDate === "function") return v.toDate().getTime(); } catch {}
+      const t = Date.parse(v || "");
+      return Number.isFinite(t) ? t : NaN;
+    };
+    const x = ms(a), y = ms(b);
+    if (Number.isFinite(x) && Number.isFinite(y) && y > x) {
+      const w = Math.max(1, Math.round((y - x) / (7 * 24 * 3600 * 1000)));
+      weeks = w + (w === 1 ? " week" : " weeks");
+    }
+  }
+  if (weeks && sess) return weeks + " · " + sess;
+  return weeks || sess || "";
 }
 
 export function formatPrice(course) {
@@ -140,7 +165,7 @@ export function deliveryDaysHtml(course, opts = {}) {
       ? `<div class="dd-line">${cal}<span>${esc(sch.daysLine)}</span></div>`
       : "";
     const timeRow = sch.timeLine
-      ? `<div class="dd-line">${clk}<span>${esc(sch.timeLine)}${sch.zone ? ` <span class="dd-zone">${esc(sch.zone)}</span>` : ""}</span></div>`
+      ? `<div class="dd-line ghz-tz-wrap">${clk}<span class="ghz-tz-stack"><span class="ghz-tz-main">${esc((sch.daysLine || "").replace(/ · /g, ", ") + (sch.daysLine && sch.timeLine ? " · " : "") + sch.timeLine)}</span><span class="ghz-tz-sub">Beirut time</span></span><button type="button" class="ghz-tz-info" aria-label="Time zone info">i</button></div>`
       : "";
     return `<div class="dd-wrap dd-sched">${dayRow}${timeRow}</div>`;
   } catch {

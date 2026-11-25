@@ -1,6 +1,7 @@
 import { createElement as e, useState } from "https://esm.sh/react@18.3.1";
 import { showConfirmDialog } from "./ConfirmDialog.js";
 import { courseStatusLabel } from "./courseStatusLabel.js";
+import { formatGrade } from "./gradeCalc.js";
 
 const JSPDF = "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js";
 const AUTO = "https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js";
@@ -27,27 +28,97 @@ async function ensureLibs() {
   return libs;
 }
 
+async function loadLogoUrl(path) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  const url = new URL(path, location.href).href;
+  await new Promise((ok, err) => { img.onload = ok; img.onerror = err; img.src = url; });
+  const nw = img.naturalWidth || 260;
+  const nh = img.naturalHeight || 70;
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, nw);
+  c.height = Math.max(1, nh);
+  const ctx = c.getContext("2d");
+  ctx.clearRect(0, 0, c.width, c.height);
+  ctx.drawImage(img, 0, 0, c.width, c.height);
+  return { data: c.toDataURL("image/png"), nw, nh };
+}
+
 async function logoPng() {
   if (logoCache !== undefined) return logoCache;
   logoCache = null;
-  try {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    const url = new URL("./pdf-logo.png", location.href).href;
-    await new Promise((ok, err) => { img.onload = ok; img.onerror = err; img.src = url; });
-    const nw = img.naturalWidth || 212;
-    const nh = img.naturalHeight || 42;
-    const c = document.createElement("canvas");
-    c.width = Math.max(1, nw * 2);
-    c.height = Math.max(1, nh * 2);
-    const ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, c.width, c.height);
-    ctx.drawImage(img, 0, 0, c.width, c.height);
-    logoCache = c.toDataURL("image/png");
-  } catch {
-    logoCache = null;
+  for (const path of ["./logo-mark.png", "./pdf-logo.png", "./logo.png"]) {
+    try {
+      logoCache = await loadLogoUrl(path);
+      if (logoCache?.data) return logoCache;
+    } catch (_) {}
   }
+  logoCache = null;
   return logoCache;
+}
+
+let gradesLogoCache = undefined;
+async function gradesPdfLogo() {
+  if (gradesLogoCache !== undefined) return gradesLogoCache;
+  gradesLogoCache = null;
+  for (const path of ["./grades-pdf-logo.png", "./logo-mark.png", "./logo.png"]) {
+    try {
+      gradesLogoCache = await loadLogoUrl(path);
+      if (gradesLogoCache?.data) return gradesLogoCache;
+    } catch (_) {}
+  }
+  gradesLogoCache = null;
+  return gradesLogoCache;
+}
+
+function logoBox(logo) {
+  const nw = logo?.nw || 260;
+  const nh = logo?.nh || 70;
+  const lw = 46;
+  const lh = Math.max(8, lw * (nh / nw));
+  return { lw, lh };
+}
+
+function paintModernHeader(doc, logo, title, who, when) {
+  const w = doc.internal.pageSize.getWidth();
+  const h = doc.internal.pageSize.getHeight();
+  doc.setFillColor(15, 39, 71);
+  doc.rect(0, 0, w, 28, "F");
+  doc.setFillColor(37, 99, 235);
+  doc.rect(0, 28, w, 1.6, "F");
+  if (logo?.data) {
+    try {
+      const { lw, lh } = logoBox(logo);
+      doc.addImage(logo.data, "PNG", 12, 8, lw, lh);
+    } catch (_) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.setTextColor(255, 255, 255);
+      doc.text("GHz Academy", 14, 17);
+    }
+  } else {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(255, 255, 255);
+    doc.text("GHz Academy", 14, 17);
+  }
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.setTextColor(255, 255, 255);
+  doc.text(String(title || "Report"), w - 14, 12, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(186, 206, 232);
+  doc.text(when + " (Beirut)", w - 14, 17.5, { align: "right" });
+  doc.text("Prepared by " + who, w - 14, 22.5, { align: "right" });
+  doc.setFillColor(248, 250, 252);
+  doc.rect(0, h - 14, w, 14, "F");
+  doc.setDrawColor(226, 232, 240);
+  doc.setLineWidth(0.3);
+  doc.line(0, h - 14, w, h - 14);
+  doc.setFontSize(8);
+  doc.setTextColor(100, 116, 139);
+  doc.text("GHz Academy  ·  Confidential", 14, h - 6);
 }
 
 function beirutNow() {
@@ -167,38 +238,9 @@ export async function exportAdminPdf({
   const drawChrome = (data) => {
     const w = doc.internal.pageSize.getWidth();
     const h = doc.internal.pageSize.getHeight();
-    if (logo) {
-      try {
-        const lw = 40;
-        const lh = 40 * (42 / 212);
-        doc.addImage(logo, "PNG", 14, 8, lw, lh);
-      } catch (_) {}
-    } else {
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      doc.setTextColor(15, 39, 71);
-      doc.text("GHz Academy", 14, 18);
-    }
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(15, 39, 71);
-    doc.text(title, w - 14, 12, { align: "right" });
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(100, 116, 139);
-    doc.text(when + " (Beirut)", w - 14, 17, { align: "right" });
-    doc.text("Prepared by " + who, w - 14, 21, { align: "right" });
-    doc.setDrawColor(37, 99, 235);
-    doc.setLineWidth(0.4);
-    doc.line(14, 26, w - 14, 26);
-    doc.setDrawColor(203, 213, 225);
-    doc.setLineWidth(0.3);
-    doc.line(14, h - 12, w - 14, h - 12);
-    doc.setFontSize(8);
-    doc.setTextColor(100, 116, 139);
-    doc.text("GHz Academy · Confidential", 14, h - 7);
+    paintModernHeader(doc, logo, title, who, when);
     const pages = doc.internal.getNumberOfPages();
-    doc.text("Page " + data.pageNumber + " of " + pages, w - 14, h - 7, { align: "right" });
+    doc.text("Page " + data.pageNumber + " of " + pages, w - 14, h - 6, { align: "right" });
   };
 
   const head = [cols.map((c) => c.label)];
@@ -210,8 +252,8 @@ export async function exportAdminPdf({
   doc.autoTable({
     head,
     body,
-    startY: 42,
-    margin: { top: 32, left: 14, right: 14, bottom: 16 },
+    startY: 48,
+    margin: { top: 36, left: 14, right: 14, bottom: 18 },
     styles: { fontSize: 9, cellPadding: 3, overflow: "linebreak", valign: "middle", textColor: [15, 39, 71] },
     columnStyles: Object.fromEntries(cols.map((c, i) => /student/i.test(c.label) ? [i, { cellWidth: 48, overflow: "linebreak", fontStyle: "normal" }] : []).filter((x) => x.length)),
     headStyles: { fillColor: [15, 39, 71], textColor: [255, 255, 255], fontStyle: "bold", valign: "middle" },
@@ -223,8 +265,8 @@ export async function exportAdminPdf({
         doc.setFontSize(9);
         doc.setTextColor(71, 85, 105);
         const line = (filters ? filters + " · " : "") + rows.length + " row" + (rows.length === 1 ? "" : "s");
-        doc.text(line, 14, 32);
-        if (summary) doc.text(String(summary), 14, 37);
+        doc.text(line, 14, 38);
+        if (summary) doc.text(String(summary), 14, 43);
       }
     },
     didParseCell: (data) => {
@@ -271,8 +313,8 @@ export async function exportStudentProfilePdf({
   const name = student.name || "Student";
   const sid = student.studentId || "—";
   doc.autoTable({
-    startY: 42,
-    margin: { top: 32, left: 14, right: 14, bottom: 16 },
+    startY: 40,
+    margin: { top: 36, left: 14, right: 14, bottom: 18 },
     body: [[name], ["ID " + sid], ["Printed " + when]],
     theme: "plain",
     styles: { fontSize: 11, textColor: [15, 39, 71], cellPadding: 1 },
@@ -292,7 +334,7 @@ export async function exportStudentProfilePdf({
     head: [["Student details", "", "", ""]],
     body: pairs.length ? pairs : [["—", "—", "", ""]],
     startY: (doc.lastAutoTable?.finalY || 50) + 6,
-    margin: { top: 32, left: 14, right: 14, bottom: 16 },
+    margin: { top: 36, left: 14, right: 14, bottom: 18 },
     styles: { fontSize: 9, cellPadding: 3, textColor: [15, 39, 71] },
     headStyles: { fillColor: [15, 39, 71], textColor: [255, 255, 255], fontStyle: "bold" },
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 38 }, 2: { fontStyle: "bold", cellWidth: 38 } },
@@ -302,7 +344,7 @@ export async function exportStudentProfilePdf({
     head: [["#", "Course", "Trainer(s)", "Enrolled on", "Status"]],
     body: (courses || []).map((c, i) => [String(i + 1), c.title || "—", c.trainers || "—", c.enrolled || "—", courseStatusLabel(c) || "IP"]),
     startY: (doc.lastAutoTable?.finalY || 80) + 8,
-    margin: { top: 32, left: 14, right: 14, bottom: 16 },
+    margin: { top: 36, left: 14, right: 14, bottom: 18 },
     styles: { fontSize: 9, cellPadding: 3, textColor: [15, 39, 71] },
     headStyles: { fillColor: [15, 39, 71], textColor: [255, 255, 255], fontStyle: "bold" },
     didDrawPage: (data) => {
@@ -328,193 +370,247 @@ function chromeDrawer(doc, logo, title, who, when) {
   return (data) => {
     const w = doc.internal.pageSize.getWidth();
     const h = doc.internal.pageSize.getHeight();
-    if (logo) {
-      try {
-        const lw = 40;
-        const lh = 40 * (42 / 212);
-        doc.addImage(logo, "PNG", 14, 8, lw, lh);
-      } catch (_) {}
-    } else {
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      doc.setTextColor(15, 39, 71);
-      doc.text("GHz Academy", 14, 18);
+    paintModernHeader(doc, logo, title, who, when);
+    const pages = doc.internal.getNumberOfPages();
+    doc.text("Page " + data.pageNumber + " of " + pages, w - 14, h - 6, { align: "right" });
+  };
+}
+function paintGradeHeader(doc, logo, when) {
+  const w = doc.internal.pageSize.getWidth();
+  doc.setFillColor(1, 18, 46);
+  doc.rect(0, 0, w, 28, "F");
+  doc.setFillColor(37, 99, 235);
+  doc.rect(0, 28, w, 1.6, "F");
+  if (logo?.data) {
+    try {
+      const nw = logo.nw || 260, nh = logo.nh || 70;
+      const lh = 14;
+      const lw = Math.max(18, lh * (nw / Math.max(1, nh)));
+      doc.addImage(logo.data, "PNG", 12, (28 - lh) / 2, lw, lh);
+    } catch (_) {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(255, 255, 255);
+      doc.text("GHz Academy", 14, 17);
     }
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(15, 39, 71);
-    doc.text(title, w - 14, 12, { align: "right" });
+  } else {
+    doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(255, 255, 255);
+    doc.text("GHz Academy", 14, 17);
+  }
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(255, 255, 255);
+  doc.text("Grade report", w - 14, 13, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(186, 206, 232);
+  doc.text(String(when || "") + " (Beirut)", w - 14, 20, { align: "right" });
+}
+function paintGradeFooter(doc) {
+  const pages = doc.internal.getNumberOfPages();
+  const w = doc.internal.pageSize.getWidth();
+  const h = doc.internal.pageSize.getHeight();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
-    doc.text(when + " (Beirut)", w - 14, 17, { align: "right" });
-    doc.text("Prepared by " + who, w - 14, 21, { align: "right" });
-    doc.setDrawColor(37, 99, 235);
-    doc.setLineWidth(0.4);
-    doc.line(14, 26, w - 14, 26);
-    doc.setDrawColor(203, 213, 225);
-    doc.setLineWidth(0.3);
-    doc.line(14, h - 12, w - 14, h - 12);
-    doc.setFontSize(8);
-    doc.setTextColor(100, 116, 139);
-    doc.text("GHz Academy · Confidential", 14, h - 7);
-    const pages = doc.internal.getNumberOfPages();
-    doc.text("Page " + data.pageNumber + " of " + pages, w - 14, h - 7, { align: "right" });
-  };
+    doc.text("GHz Academy  ·  ghzacademy.com", 14, h - 8);
+    doc.text("Page " + i + " of " + pages, w - 14, h - 8, { align: "right" });
+  }
+}
+function uniqueTrainer(name) {
+  const parts = String(name || "").split(/\s*,\s*/).map((s) => s.trim()).filter(Boolean);
+  const seen = new Set();
+  const out = [];
+  parts.forEach((p) => {
+    const k = p.toLowerCase();
+    if (!seen.has(k)) { seen.add(k); out.push(p); }
+  });
+  return out.join(", ") || "—";
 }
 
 export async function exportStudentGradesPdf({
   courses = [],
-  filters = "",
-  preparedBy,
+  studentName = "",
+  studentId = "",
   previewWin = null
 } = {}) {
   const pack = await ensureLibs();
   const jsPDF = pack.jsPDF || pack.default || window.jspdf?.jsPDF;
   if (!jsPDF) throw new Error("jsPDF missing");
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  const logo = await logoPng();
-  const who = preparedBy || adminName();
+  const logo = await gradesPdfLogo();
   const when = beirutNow();
-  const title = "Grade report";
-  const drawChrome = chromeDrawer(doc, logo, title, who, when);
   const pageH = doc.internal.pageSize.getHeight();
   const pageW = doc.internal.pageSize.getWidth();
-  const bottom = pageH - 16;
-  const barH = 14;
-  const headH = 8;
-  const rowH = 8;
-  const introY = 42;
+  const bottom = pageH - 18;
+  const list = (courses || []).filter((c) => c && c.completed !== false && c.passed != null);
+  paintGradeHeader(doc, logo, when);
 
-  const paintIntro = () => {
-    doc.setFontSize(9);
-    doc.setTextColor(71, 85, 105);
-    doc.text(String(filters || "All completed courses"), 14, 32);
-    doc.text(courses.length + " completed course" + (courses.length === 1 ? "" : "s"), 14, 37);
+  const idTxt = studentId ? String(studentId).padStart(7, "0").slice(-7) : "—";
+  let y = 38;
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(226, 232, 240);
+  doc.roundedRect(14, y, pageW - 28, 22, 2, 2, "FD");
+  const meta = [
+    ["Student name", studentName || "Student", "Report date", when],
+    ["Student ID", idTxt, "Courses count", String(list.length)]
+  ];
+  meta.forEach((row, i) => {
+    const yy = y + 7 + i * 8;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(100, 116, 139);
+    doc.text(row[0], 18, yy - 2.5);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(15, 39, 71);
+    doc.text(String(row[1]), 18, yy + 1.5);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(100, 116, 139);
+    doc.text(row[2], pageW / 2 + 4, yy - 2.5);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(15, 39, 71);
+    doc.text(String(row[3]), pageW / 2 + 4, yy + 1.5);
+  });
+  y += 30;
+
+  const chipH = 7.4;
+  const chipPadX = 3.7;
+  const drawChip = (label, rgb, rightX, midY) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    const tw = doc.getTextWidth(label);
+    const cw = tw + chipPadX * 2;
+    const cx = rightX - cw;
+    const cy = midY - chipH / 2;
+    doc.setFillColor(rgb[0], rgb[1], rgb[2]);
+    doc.roundedRect(cx, cy, cw, chipH, 1.4, 1.4, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.text(label, cx + cw / 2, cy + chipH / 2, { align: "center", baseline: "middle" });
+    return cw;
   };
 
-  const ensureSpace = (y, need) => {
-    if (y + need > bottom) {
-      doc.addPage();
-      return introY;
-    }
-    return y;
-  };
-
-  let y = introY;
-  paintIntro();
-
-  courses.forEach((course, idx) => {
+  list.forEach((course) => {
     const bodyRows = (course.rows || []).map((r) => [
       r.section == null ? "—" : String(r.section),
       r.weight == null ? "—" : String(r.weight),
       r.score == null ? "—" : String(r.score),
       r.weighted == null ? "—" : String(r.weighted)
     ]);
-    const need = barH + headH + Math.max(1, bodyRows.length) * rowH + 4;
-    y = idx === 0 ? y : (doc.lastAutoTable ? doc.lastAutoTable.finalY + 14 : y + 14);
-    y = ensureSpace(y, need);
-
-    doc.setFillColor(219, 234, 254);
-    doc.roundedRect(14, y, pageW - 28, barH, 1.5, 1.5, "F");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(15, 39, 71);
-    doc.text(String(course.title || "Course"), 17, y + 5.5);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(51, 65, 85);
-    const sub = [course.trainer || "—", "Completed"].filter(Boolean).join(" · ");
-    doc.text(sub, 17, y + 11);
-
-    const tableStart = y + barH + 1;
+    bodyRows.push([
+      "Final average",
+      "100%",
+      course.avg == null ? "—" : formatGrade(course.avg),
+      course.passed ? "Passed" : "Failed"
+    ]);
+    const cardH = 18 + 8 + Math.max(1, bodyRows.length) * 8 + 10;
+    if (y + cardH > bottom) {
+      doc.addPage();
+      y = 16;
+    }
+    const x = 14, w = pageW - 28;
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(x, y, w, cardH, 2, 2, "S");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(15, 39, 71);
+    doc.text(String(course.title || "Course"), x + 4, y + 7);
+    drawChip("Completed", [15, 39, 71], x + w - 4, y + 6.5);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(71, 85, 105);
+    doc.text(uniqueTrainer(course.trainer), x + 4, y + 13);
+    const tableStart = y + 16;
+    const tableW = w - 4;
+    const numW = tableW * 0.18;
+    const padR = 4.23;
+    const rowH = 8;
     doc.autoTable({
       head: [["Component", "Weight", "Score", "Weighted"]],
-      body: bodyRows.length ? bodyRows : [["—", "—", "—", "—"]],
+      body: bodyRows,
       startY: tableStart,
-      margin: { top: 32, left: 14, right: 14, bottom: 16 },
-      styles: { fontSize: 9, cellPadding: 3, overflow: "linebreak", valign: "middle", textColor: [15, 39, 71] },
-      headStyles: { fillColor: [15, 39, 71], textColor: [255, 255, 255], fontStyle: "bold", valign: "middle" },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
-      rowPageBreak: "avoid",
-      didDrawPage: (data) => {
-        drawChrome(data);
-        if (data.pageNumber === 1) paintIntro();
+      margin: { left: 16, right: 16, bottom: 16, top: tableStart },
+      tableWidth: tableW,
+      styles: {
+        font: "helvetica",
+        fontSize: 9,
+        cellPadding: { top: 1.8, bottom: 1.8, left: 2, right: padR },
+        minCellHeight: rowH,
+        overflow: "linebreak",
+        valign: "middle",
+        textColor: [15, 39, 71],
+        halign: "left"
       },
+      columnStyles: {
+        0: { halign: "left", cellPadding: { top: 1.8, bottom: 1.8, left: 2.2, right: padR } },
+        1: { halign: "right", cellWidth: numW, cellPadding: { top: 1.8, bottom: 1.8, left: 2, right: padR } },
+        2: { halign: "right", cellWidth: numW, cellPadding: { top: 1.8, bottom: 1.8, left: 2, right: padR } },
+        3: { halign: "right", cellWidth: numW, cellPadding: { top: 1.8, bottom: 1.8, left: 2, right: padR } }
+      },
+      headStyles: {
+        fillColor: [241, 245, 249],
+        textColor: [71, 85, 105],
+        fontStyle: "bold",
+        valign: "middle",
+        fontSize: 9,
+        minCellHeight: rowH
+      },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      pageBreak: "avoid",
+      rowPageBreak: "avoid",
       didParseCell: (data) => {
+        if (data.section === "head") {
+          data.cell.styles.halign = data.column.index === 0 ? "left" : "right";
+          data.cell.styles.cellPadding = data.column.index === 0
+            ? { top: 1.8, bottom: 1.8, left: 2.2, right: padR }
+            : { top: 1.8, bottom: 1.8, left: 2, right: padR };
+          return;
+        }
         if (data.section !== "body") return;
         const last = data.row.index === bodyRows.length - 1;
         if (last) {
           data.cell.styles.fontStyle = "bold";
           data.cell.styles.fillColor = [241, 245, 249];
           if (data.column.index === 3) {
-            data.cell.styles.textColor = statusColor(data.cell.raw);
+            data.cell.styles.textColor = [255, 255, 255];
+            data.cell.text = [""];
           }
         }
+      },
+      didDrawCell: (data) => {
+        if (data.section !== "body") return;
+        if (data.row.index !== bodyRows.length - 1 || data.column.index !== 3) return;
+        const pass = /passed/i.test(String(data.cell.raw));
+        const label = pass ? "Passed" : "Failed";
+        const rgb = pass ? [22, 163, 74] : [185, 28, 28];
+        drawChip(label, rgb, data.cell.x + data.cell.width - 1.2, data.cell.y + data.cell.height / 2);
       }
     });
+    y = (doc.lastAutoTable ? doc.lastAutoTable.finalY : tableStart) + 8;
   });
 
-  const summaryStart = (doc.lastAutoTable ? doc.lastAutoTable.finalY : y) + 14;
-  const sumNeed = headH + (courses.length + 1) * rowH + 10;
-  const sy = ensureSpace(summaryStart, sumNeed);
-  const withAvg = courses.filter((c) => c.avg != null);
-  const overallN = withAvg.length
-    ? (Math.round((withAvg.reduce((s, c) => s + Number(c.avg), 0) / withAvg.length) * 10) / 10)
-    : null;
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(15, 39, 71);
-  doc.text("Summary", 14, sy - 2);
-
-  const sumBody = courses.map((c) => [
+  const sumNeed = 12 + (list.length + 1) * 8 + 8;
+  if (y + sumNeed > bottom) { doc.addPage(); y = 16; }
+  doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(15, 39, 71);
+  doc.text("Summary", 14, y);
+  y += 3;
+  const sumBody = list.map((c) => [
     String(c.title || "Course"),
-    c.avg == null ? "—" : Number(c.avg).toFixed(1),
+    c.avg == null ? "—" : formatGrade(c.avg),
     c.passed ? "Passed" : "Failed"
   ]);
-  sumBody.push([
-    "Overall average",
-    overallN == null ? "—" : overallN.toFixed(1),
-    ""
-  ]);
-
   doc.autoTable({
     head: [["Course", "Average", "Result"]],
     body: sumBody,
-    startY: sy + 2,
-    margin: { top: 32, left: 14, right: 14, bottom: 16 },
-    styles: { fontSize: 9, cellPadding: 3, overflow: "linebreak", valign: "middle", textColor: [15, 39, 71] },
+    startY: y,
+    margin: { left: 14, right: 14, bottom: 16 },
+    styles: { font: "helvetica", fontSize: 9, cellPadding: 2.4, overflow: "linebreak", valign: "middle", textColor: [15, 39, 71] },
+    columnStyles: { 1: { halign: "right" }, 2: { halign: "center" } },
     headStyles: { fillColor: [15, 39, 71], textColor: [255, 255, 255], fontStyle: "bold" },
     alternateRowStyles: { fillColor: [248, 250, 252] },
+    pageBreak: "avoid",
     rowPageBreak: "avoid",
-    didDrawPage: (data) => {
-      drawChrome(data);
-      if (data.pageNumber === 1) paintIntro();
-    },
     didParseCell: (data) => {
       if (data.section !== "body") return;
       if (data.column.index === 2) {
         data.cell.styles.fontStyle = "bold";
-        data.cell.styles.textColor = statusColor(data.cell.raw);
-      }
-      if (data.row.index === sumBody.length - 1) {
-        data.cell.styles.fontStyle = "bold";
-        data.cell.styles.fillColor = [219, 234, 254];
+        data.cell.styles.textColor = /passed/i.test(String(data.cell.raw)) ? [22, 163, 74] : [185, 28, 28];
       }
     }
   });
 
-  const pages = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= pages; i++) {
-    doc.setPage(i);
-    const w = doc.internal.pageSize.getWidth();
-    const h = doc.internal.pageSize.getHeight();
-    doc.setFontSize(8);
-    doc.setTextColor(100, 116, 139);
-    doc.text("Page " + i + " of " + pages, w - 14, h - 7, { align: "right" });
-  }
-
+  paintGradeFooter(doc);
   const blob = doc.output("blob");
   openPdfInTab(blob, previewWin);
 }
@@ -615,25 +711,18 @@ export async function exportAttendanceSessionPdf({
   const drawChrome = (data) => {
     const w = doc.internal.pageSize.getWidth();
     const h = doc.internal.pageSize.getHeight();
-    if (logo) { try { doc.addImage(logo, "PNG", 14, 8, 40, 40 * (42 / 212)); } catch (_) {} }
-    else { doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(15, 39, 71); doc.text("GHz Academy", 14, 18); }
-    doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(15, 39, 71);
-    doc.text("Attendance report", w - 14, 12, { align: "right" });
-    doc.setFont("helvetica", "normal"); doc.setFontSize(10);
-    doc.text(String(session.title || "Session"), w - 14, 17, { align: "right" });
-    doc.setFontSize(8); doc.setTextColor(100, 116, 139);
-    doc.text("Prepared by " + who, w - 14, 22, { align: "right" });
-    doc.text(when + " (Beirut)", w - 14, 26, { align: "right" });
-    doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.4); doc.line(14, 30, w - 14, 30);
-    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.3); doc.line(14, h - 12, w - 14, h - 12);
-    doc.setFontSize(8); doc.setTextColor(100, 116, 139);
-    doc.text("GHz Academy · " + when + " (Beirut)", 14, h - 7);
+    paintModernHeader(doc, logo, "Attendance report", who, when);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(186, 206, 232);
+    doc.text(String(session.title || "Session"), w - 14, 26.2, { align: "right" });
     const pages = doc.internal.getNumberOfPages();
-    doc.text("Page " + data.pageNumber + " of " + pages, w - 14, h - 7, { align: "right" });
+    doc.setTextColor(100, 116, 139);
+    doc.text("Page " + data.pageNumber + " of " + pages, w - 14, h - 6, { align: "right" });
   };
   const loc = session.meetingLink || session.notes || "—";
   doc.autoTable({
-    startY: 36, margin: { top: 34, left: 14, right: 14, bottom: 18 }, theme: "plain",
+    startY: 36, margin: { top: 36, left: 14, right: 14, bottom: 18 }, theme: "plain",
     body: [
       ["Course", course.title || "—", "Trainer(s)", trainers || "—"],
       ["Session date", session.fullDate || session.date || "—", "Time", session.timeLine || "—"],
@@ -700,7 +789,7 @@ export async function exportAttendanceMatrixPdf({
   const trainers = Array.isArray(course.trainerNames) ? course.trainerNames.join(", ") : (course.trainerName || who);
   const drawChrome = chromeDrawer(doc, logo, "Attendance report", who, when);
   doc.autoTable({
-    startY: 36, margin: { top: 34, left: 14, right: 14, bottom: 16 }, theme: "plain",
+    startY: 36, margin: { top: 36, left: 14, right: 14, bottom: 18 }, theme: "plain",
     body: [["Course", course.title || "—", "Trainer(s)", trainers || "—"], ["Status", courseStatusLabel(course), "Sessions", String(sessions.length)]],
     styles: { fontSize: 8, cellPadding: 2.2, fillColor: [248, 250, 252], textColor: [15, 39, 71] },
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 32, textColor: [100, 116, 139] }, 2: { fontStyle: "bold", cellWidth: 32, textColor: [100, 116, 139] } },
@@ -711,7 +800,7 @@ export async function exportAttendanceMatrixPdf({
   const nameW = Math.min(58, Math.max(42, Math.max(...body.map((b) => String(b[0] || "").length), 12) * 1.7));
   doc.autoTable({
     head: [head], body, startY: (doc.lastAutoTable?.finalY || 50) + 4,
-    margin: { top: 34, left: 14, right: 14, bottom: 16 },
+    margin: { top: 36, left: 14, right: 14, bottom: 18 },
     styles: { fontSize: 7.5, cellPadding: 2, textColor: [15, 39, 71], halign: "center", overflow: "linebreak" },
     columnStyles: { 0: { halign: "left", cellWidth: nameW, fontStyle: "normal", overflow: "linebreak" } },
     headStyles: { fillColor: [15, 39, 71], textColor: [255, 255, 255], fontStyle: "bold", valign: "middle" },

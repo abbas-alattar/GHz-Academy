@@ -1,4 +1,4 @@
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { doc, getDoc, updateDoc, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 function cacheKey(uid) { return "ghz-seenBoxes-" + uid; }
@@ -17,7 +17,15 @@ const mem = {};
 
 export function assignedBoxKey(courseId) { return "assigned_" + courseId; }
 export function completedBoxKey(courseId) { return "completed_" + courseId; }
-export function resultBoxKey(courseId) { return "result_" + courseId; }
+export function resultBoxKey(courseId, round) {
+  const n = Number(round);
+  const r = Number.isFinite(n) ? n : 0;
+  return String(courseId) + "_r" + r;
+}
+export function completionRound(c) {
+  const n = Number(c?.completionRound);
+  return Number.isFinite(n) ? n : 0;
+}
 export function reopenedBoxKey(courseId) { return "reopened_" + courseId; }
 
 export async function loadSeenBoxes(uid) {
@@ -107,11 +115,12 @@ export async function markCompletedSeen(uid, courseId, atMs) {
 }
 
 export async function markResultSeen(uid, courseId, atMs) {
-  const k = resultBoxKey(courseId);
-  const v = Number(atMs) || 0;
+  const round = Number(atMs);
+  const r = Number.isFinite(round) ? round : 0;
+  const k = resultBoxKey(courseId, r);
   const cur = mem[uid]?.map || readCache(uid) || {};
-  if (String(cur[k]) === String(v)) return true;
-  return patchSeenBoxes(uid, { [k]: v });
+  if (cur[k] != null) return true;
+  return patchSeenBoxes(uid, { [k]: r });
 }
 
 export async function dropAssignedSeen(uid, courseId) {
@@ -173,14 +182,8 @@ export async function baselineStudentSeen(uid, coursesById) {
   Object.keys(coursesById || {}).forEach((id) => {
     const c = coursesById[id];
     if (String(c?.status || "").toLowerCase() !== "completed") return;
-    const t = c.completedAt;
-    let ms = 0;
-    try {
-      if (t?.toMillis) ms = t.toMillis();
-      else if (t?.seconds) ms = t.seconds * 1000;
-      else ms = Number(new Date(t).getTime()) || 0;
-    } catch { ms = 0; }
-    patch[resultBoxKey(id)] = ms;
+    const round = completionRound(c);
+    patch[resultBoxKey(id, round)] = round;
   });
   if (!Object.keys(patch).length) {
     try {
@@ -206,5 +209,10 @@ export function seenCompleted(map, courseId, atMs) {
 }
 export function seenResult(map, courseId, atMs) {
   if (!map) return false;
-  return String(map[resultBoxKey(courseId)] ?? "") === String(Number(atMs) || 0);
+  const round = Number(atMs);
+  const r = Number.isFinite(round) ? round : 0;
+  const k = resultBoxKey(courseId, r);
+  if (Object.prototype.hasOwnProperty.call(map, k)) return true;
+  if (r === 0 && (map["result_" + courseId] != null || map["result_" + courseId + "_0"] != null)) return true;
+  return false;
 }

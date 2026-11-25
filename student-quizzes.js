@@ -1,8 +1,8 @@
 import { bootStudentNav } from "./student-nav.js";
-import { protect } from "./auth-guard.js?v=auth8";
-import { db } from "./firebase-config.js?v=auth8";
+import { protect } from "./auth-guard.js?v=auth10";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { loadStudentDash, whenStudentStore } from "./student-dash-data.js?v=stu7";
+import { loadStudentDash, whenStudentStore } from "./student-dash-data.js?v=stu11";
 import { renderQuizzesV2 } from "./QuizzesV2.js";
 import { renderQuizResultV2, closeQuizResultV2 } from "./QuizResultV2.js";
 import { renderQuizStartV2, renderQuizTakeV2, renderQuizDoneV2, updateQuizTakeClock } from "./QuizTakeV2.js";

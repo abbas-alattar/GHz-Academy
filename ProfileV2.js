@@ -181,21 +181,44 @@ function docBox(kind, rec, label, accept) {
   </div>`;
 }
 
+function roleLabel(role) {
+  const r = String(role || "").toLowerCase();
+  if (r === "trainer") return "Trainer";
+  if (r === "admin") return "Admin";
+  return "Student";
+}
 function paint(host, opts) {
   const f = state.form;
+  const role = String(opts?.role || state.role || "student").toLowerCase();
+  const isStudent = role === "student";
   const { n, t } = filledCount(f);
   const pct = Math.round((n / t) * 100);
   const av = f.photoDataUrl
     ? `<div class="pv2-av"><img alt="Your photo" src="${esc(f.photoDataUrl)}" /></div>`
     : `<div class="pv2-av" aria-hidden="true">${esc(initials(f.name))}</div>`;
+  const sidLine = isStudent
+    ? `<p class="pv2-sid">${state.studentId ? "ID " + esc(state.studentId) : "ID Not assigned yet"}${state.studentId ? ` <button type="button" class="pv2-ghost" data-pv2-copyid>Copy</button>` : ""}</p>`
+    : "";
+  const hint = isStudent
+    ? "Complete your profile to speed up certificates and registration"
+    : "Complete your profile so students can see your name and photo";
+  const extraStu = isStudent ? `
+        ${field("studentId","Student ID",`<p class="pv2-sid"><input value="${esc(state.studentId || "Not assigned yet")}" readonly />${state.studentId ? `<button type="button" class="pv2-ghost" data-pv2-copyid>Copy</button>` : ""}</p>`)}
+        ${field("dateOfBirth","Date of birth",`<input type="date" data-pv2-k="dateOfBirth" value="${esc(f.dateOfBirth)}" />`, state.errs.dateOfBirth)}
+        ${field("gender","Gender (optional)",`<select data-pv2-k="gender"><option value="">Prefer not to say</option><option${f.gender==="Female"?" selected":""}>Female</option><option${f.gender==="Male"?" selected":""}>Male</option><option${f.gender==="Other"?" selected":""}>Other</option></select>`)}
+        ${field("nationality","Nationality",`<select data-pv2-k="nationality">${countryOpts(f.nationality)}</select>`)}
+        ${field("countryOfResidence","Country of residence",`<select data-pv2-k="countryOfResidence">${countryOpts(f.countryOfResidence)}</select>`)}
+        ${field("cityOfResidence","City of residence",`<input data-pv2-k="cityOfResidence" value="${esc(f.cityOfResidence)}" />`)}
+        ${field("address","Address (optional)",`<input data-pv2-k="address" value="${esc(f.address)}" />`)}` : `
+        ${f.bio ? field("bio","Short bio",`<textarea data-pv2-k="bio" maxlength="300" rows="3">${esc(f.bio)}</textarea><div class="pv2-count">${String(f.bio||"").length}/300</div>`, state.errs.bio) : ""}`;
   host.innerHTML = `<div class="pv2-wrap">
     <div class="pv2-card pv2-head">
       ${av}
       <div style="flex:1;min-width:0">
         <h2 class="pv2-name">${esc(f.name || "Your name")}</h2>
-        <p class="pv2-sid">${state.studentId ? "ID " + esc(state.studentId) : "ID Not assigned yet"}${state.studentId ? ` <button type="button" class="pv2-ghost" data-pv2-copyid>Copy</button>` : ""}</p>
-        <p class="pv2-mail">${esc(state.email)} <span class="pv2-ok">Verified</span> <span class="pv2-role">Student</span></p>
-        <p class="pv2-hint">Complete your profile to speed up certificates and registration</p>
+        ${sidLine}
+        <p class="pv2-mail">${esc(state.email)} <span class="pv2-ok">Verified</span> <span class="pv2-role">${esc(roleLabel(role))}</span></p>
+        <p class="pv2-hint">${esc(hint)}</p>
         <div class="pv2-bar" aria-label="Profile completion ${pct}%"><i style="width:${pct}%"></i></div>
         <div class="pv2-photo"><button type="button" class="pv2-ghost" data-pv2-photo>Upload photo</button>
         <input type="file" accept="image/jpeg,image/png" hidden data-pv2-photo-file /></div>
@@ -205,17 +228,10 @@ function paint(host, opts) {
       <h3 class="pv2-h">Personal information</h3>
       <div class="pv2-grid">
         ${field("name","Full name",`<input data-pv2-k="name" value="${esc(f.name)}" />`, state.errs.name)}
-        ${field("studentId","Student ID",`<div class="pv2-idrow"><input value="${esc(state.studentId || "Not assigned yet")}" readonly />${state.studentId ? `<button type="button" class="pv2-ghost" data-pv2-copyid>Copy</button>` : ""}</div>`)}
-        ${field("phone","Mobile number", phonePickerHtml(f), state.errs.phone)}
-        ${field("dateOfBirth","Date of birth",`<input type="date" data-pv2-k="dateOfBirth" value="${esc(f.dateOfBirth)}" />`, state.errs.dateOfBirth)}
-        ${field("gender","Gender (optional)",`<select data-pv2-k="gender"><option value="">Prefer not to say</option><option${f.gender==="Female"?" selected":""}>Female</option><option${f.gender==="Male"?" selected":""}>Male</option><option${f.gender==="Other"?" selected":""}>Other</option></select>`)}
-        ${field("nationality","Nationality",`<select data-pv2-k="nationality">${countryOpts(f.nationality)}</select>`)}
-        ${field("countryOfResidence","Country of residence",`<select data-pv2-k="countryOfResidence">${countryOpts(f.countryOfResidence)}</select>`)}
-        ${field("cityOfResidence","City of residence",`<input data-pv2-k="cityOfResidence" value="${esc(f.cityOfResidence)}" />`)}
-        ${field("address","Address (optional)",`<input data-pv2-k="address" value="${esc(f.address)}" />`)}
+        ${field("phone","Mobile number", phonePickerHtml(f), state.errs.phone)}${extraStu}
       </div>
     </div>
-    <div class="pv2-card">
+    ${isStudent ? `<div class="pv2-card">
       <h3 class="pv2-h">Professional background</h3>
       <div class="pv2-grid">
         ${field("education","Education level",`<select data-pv2-k="education"><option value="">Select</option>${["High school","Diploma","Bachelor's","Master's","Doctorate","Other"].map((x)=>`<option${f.education===x?" selected":""}>${x}</option>`).join("")}</select>`)}
@@ -239,7 +255,7 @@ function paint(host, opts) {
         ${docBox("id", state.idf, "ID or Passport", "image/jpeg,image/png,application/pdf")}
       </div>
       <p class="pv2-lock">Only you and the academy admin can see your documents.</p>
-    </div>
+    </div>` : ""}
     <div class="pv2-sticky">
       <button type="button" class="pv2-ghost" data-pv2-discard ${state.dirty?"":"disabled"}>Discard</button>
       <button type="button" class="pv2-pri" data-pv2-save ${state.saving?"disabled":""}>${state.saving?"Saving…":"Save changes"}</button>
@@ -293,6 +309,7 @@ export async function renderProfileV2(opts) {
     state.form = form;
     state.snap = { ...form };
     state.email = String(opts.email || u.email || "");
+    state.role = String(opts.role || u.role || "student");
     state.studentId = String(u.studentId || "");
     const loadFile = async (type) => {
       try {
@@ -375,7 +392,15 @@ export async function renderProfileV2(opts) {
           const payload = {};
           for (const k of KEYS) payload[k] = state.form[k] || "";
           payload.profileUpdatedAt = serverTimestamp();
+          payload.fullName = payload.name || "";
+          payload.displayName = payload.name || "";
+          payload.nameUpdatedAt = Date.now();
           await updateDoc(doc(db, "users", uid), payload);
+          try {
+            const { updateProfile } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js");
+            const { auth } = await import("./firebase-config.js?v=auth10");
+            if (auth?.currentUser && payload.name) await updateProfile(auth.currentUser, { displayName: payload.name });
+          } catch (_) {}
           try { window.__ghzPingActivity?.(); } catch (_) {}
           const shown = String(state.form.name || "").trim();
           let nameNote = "Profile saved";

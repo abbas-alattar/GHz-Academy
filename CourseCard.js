@@ -1,6 +1,7 @@
 import { deliveryDaysHtml, formatDuration, formatPrice } from "./DeliveryDays.js";
 import { startsEndsLine } from "./courseDates.js";
 import { statusLabel, statusChipKind, canRegisterForCourse } from "./courseStatusLabel.js";
+import { coverMarkup } from "./coverFor.js?v=stu11";
 
 export function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (ch) => {
@@ -87,14 +88,7 @@ function artSvg(kind) {
 }
 
 export function coverHtml(c) {
-  const cover = String(c.coverImage || c.cover || "").trim();
-  const title = c.title || "Course";
-  if (cover.startsWith("data:image") || /^https?:\/\//.test(cover) || cover.startsWith("./")) {
-    return `<div class="cc1-cover"><img src="${esc(cover)}" alt="${esc(title)}" /></div>`;
-  }
-  const kind = theme(title);
-  const tag = String(title).trim().split(/\s+/)[0] || "";
-  return `<div class="cc1-cover cc1-art" data-kind="${esc(kind)}">${artSvg(kind)}<span class="cc1-tag">${esc(tag)}</span></div>`;
+  return coverMarkup(c, "cc1-cover");
 }
 
 function priceLine(c) {

@@ -1,8 +1,9 @@
-import { protect } from "./auth-guard.js?v=auth8";
-import { auth, db } from "./firebase-config.js?v=auth8";
+import { protect } from "./auth-guard.js?v=auth10";
+import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { isCourseLocked, CompletedBanner } from "./course-lock.js";
 import { parseScore, averageOf, statusOf } from "./grade-sheet-math.js";
+import { formatGrade } from "./gradeCalc.js";
 
 const root = document.getElementById("gsRoot");
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
@@ -91,7 +92,7 @@ try {
                 }).join("");
                 return `<tr>
                   <td>${esc(r.name)}</td>
-                  <td data-avg="${i}" style="font-weight:700">${avg.toFixed(1)}/100</td>
+                  <td data-avg="${i}" style="font-weight:700">${formatGrade(avg)}/100</td>
                   ${cells}
                   <td data-st="${i}"><span class="badge" style="background:${st.bg};color:${st.color}">${esc(st.label)}</span></td>
                   <td>${locked ? "" : `<button class="btn btn-sm" type="button" data-save="${i}">Save</button>`}</td>
@@ -118,7 +119,7 @@ try {
             const st = statusOf(r.scores, components, passMark, avg);
             const avgEl = root.querySelector(`[data-avg="${i}"]`);
             const stEl = root.querySelector(`[data-st="${i}"]`);
-            if (avgEl) avgEl.textContent = avg.toFixed(1) + "/100";
+            if (avgEl) avgEl.textContent = formatGrade(avg) + "/100";
             if (stEl) stEl.innerHTML = `<span class="badge" style="background:${st.bg};color:${st.color}">${esc(st.label)}</span>`;
           };
 

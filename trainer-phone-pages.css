@@ -1,0 +1,254 @@
+body.portal-trainer .topbar-mobile { display: none; }
+@media (max-width: 767px) {
+  body.portal-trainer .topbar-desktop,
+  body.trainer-portal .topbar-desktop { display: none !important; }
+  body.portal-trainer .topbar-mobile,
+  body.trainer-portal .topbar-mobile {
+    display: flex;
+    position: sticky; top: 0; z-index: 60;
+    height: 56px; width: 100%; box-sizing: border-box;
+    padding: 0 8px 0 12px;
+    background: #fff; border-bottom: 1px solid #E2E8F0;
+    align-items: center; gap: 4px;
+  }
+  body.portal-trainer .topbar-mobile .tm-btn {
+    width: 44px; height: 44px; border: 0; background: transparent; border-radius: 12px;
+    display: grid; place-items: center; color: #0F2747; flex: none;
+  }
+  body.portal-trainer .topbar-mobile .tm-title {
+    flex: 1; min-width: 0; margin: 0 0 0 4px;
+    font-size: 18px; font-weight: 700; color: #0F2747;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  body.portal-trainer .topbar-mobile .tm-avatar {
+    width: 36px; height: 36px; border-radius: 50%; border: 0;
+    background: #0F2747; color: #fff; font-size: 13px; font-weight: 700;
+    flex: none; margin-left: 4px; display: grid; place-items: center;
+  }
+  body.portal-trainer .topbar-mobile .tm-bell,
+  body.trainer-portal .topbar-mobile .tm-bell { position: relative; display: flex; align-items: center; }
+  body.portal-trainer .topbar-mobile .nv2-slot .nv2-bell,
+  body.trainer-portal .topbar-mobile .nv2-slot .nv2-bell { width: 44px; height: 44px; }
+  body.portal-trainer .topbar-mobile .tm-dot {
+    position: absolute; top: 10px; right: 10px; width: 8px; height: 8px;
+    background: #ef4444; border-radius: 50%; display: none;
+  }
+  body.portal-trainer .topbar-mobile .tm-dot:not([hidden]) { display: block; }
+  body.trainer-portal .content {
+    width: 100%; padding: 0 16px; box-sizing: border-box;
+  }
+  body.trainer-portal .th2-hgrid, body.trainer-portal .th2-qgrid {
+    display: flex !important; flex-direction: column; gap: 10px; padding: 0;
+  }
+  body.trainer-portal .th2-rh { display: none !important; }
+  body.trainer-portal .th2-rr {
+    display: flex !important; flex-direction: column; align-items: stretch; gap: 8px;
+    background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 14px; margin: 0;
+    writing-mode: horizontal-tb; white-space: normal;
+  }
+  body.trainer-portal .th2-rr * { writing-mode: horizontal-tb; }
+  body.trainer-portal .th2-kpis, body.trainer-portal .th2-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  body.trainer-portal .th2-kpi, body.trainer-portal .th2-stat {
+    height: 96px; min-height: 96px; max-height: 96px; overflow: hidden;
+    background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; position: relative;
+  }
+  body.trainer-portal .th2-att .th2-kpi .ico,
+  body.trainer-portal .th2-att .th2-kpi svg { display: none !important; }
+  body.trainer-portal .th2-att .th2-rh,
+  body.trainer-portal .th2-att thead,
+  body.trainer-portal .th2-att .th2-hact,
+  body.trainer-portal .th2-att .th2-hmenu { display: none !important; }
+  body.trainer-portal #view-attendance .th2-create { display: none !important; }
+  body.trainer-portal .th2-empty-sess {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    height: 140px; min-height: 140px; gap: 6px; color: #64748B;
+  }
+  body.trainer-portal .th2-empty-sess p { margin: 0; font-size: 16px; font-weight: 700; color: #0F2747; }
+  body.trainer-portal .th2-empty-sess span { font-size: 13px; max-width: 260px; }
+  body.trainer-portal .ghz-legal {
+    text-align: center; font-size: 13px; margin: 24px 0 16px; padding: 0 !important;
+  }
+  body.trainer-portal .topbar-mobile { left: 0; right: 0; width: 100%; margin: 0; }
+  body.trainer-portal .content { width: 100%; padding-left: 16px !important; padding-right: 16px !important; box-sizing: border-box; }
+  body.trainer-portal #view-homework,
+  body.trainer-portal #view-announcements,
+  body.trainer-portal #view-quizzes { padding-bottom: 96px; }
+  body.trainer-portal .th2-selwrap, body.trainer-portal .th2-selbtn { width: 100%; height: 48px; }
+  body.trainer-portal .th2-fchips { display: flex; overflow-x: auto; flex-wrap: nowrap; gap: 8px; scrollbar-width: none; }
+  body.trainer-portal .th2-fchip { height: 40px; flex: none; white-space: nowrap; }
+  body.trainer-portal .content,
+  body.trainer-portal .ghz-scroll,
+  body.trainer-portal .main { padding-left: 16px !important; padding-right: 16px !important; max-width: 100%; overflow-x: hidden; box-sizing: border-box; }
+  body.trainer-portal { font-size: 14px; }
+  body.trainer-portal .tr2-h, body.trainer-portal .tr2-sub,
+  body.trainer-portal .th2-head h2, body.trainer-portal .th2-head p,
+  body.trainer-portal .av2-head, body.trainer-portal h2.tr2-h { display: none !important; }
+  body.trainer-portal button, body.trainer-portal .btn, body.trainer-portal select, body.trainer-portal a.btn { min-height: 44px; }
+  body.trainer-portal .tr2-courses, body.trainer-portal .tr2 { width: 100%; max-width: 100%; box-sizing: border-box; }
+  body.trainer-portal .tr2-kpis { grid-template-columns: 1fr 1fr !important; gap: 12px; }
+  body.trainer-portal .tr2-kpi {
+    height: 96px !important; min-height: 96px !important; max-height: 96px; padding: 14px;
+    overflow: hidden; align-items: center;
+  }
+  body.trainer-portal .tr2-kpi .tr2-ico { width: 36px; height: 36px; border-radius: 10px; }
+  body.trainer-portal .tr2-kpi .tr2-wm { display: none !important; }
+  body.trainer-portal .tr2-kpi strong { font-size: 26px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  body.trainer-portal .tr2-kpi > div > span:first-child { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  body.trainer-portal .tr2-tabs { display: flex; width: 100%; gap: 0; }
+  body.trainer-portal .tr2-tab { flex: 1; height: 44px; min-height: 44px; padding: 0; text-align: center; }
+  body.trainer-portal .tr2-grid { grid-template-columns: 1fr !important; }
+  body.trainer-portal .tr2-card { min-height: 0; width: 100%; }
+  body.trainer-portal .tr2-band h3 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  body.trainer-portal .tr2-card .tr2-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; padding-bottom: 8px; }
+  body.trainer-portal .tr2-card .tr2-acts button, body.trainer-portal .tr2-card .tr2-acts a {
+    min-height: 44px; height: 44px; white-space: nowrap; overflow: hidden; font-size: 13px;
+  }
+  body.trainer-portal .tr2-grid .tr2-card:last-child { margin-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  body.trainer-portal .tr2-tz { display: block; font-size: 12px; color: #64748B; }
+  body.trainer-portal table { display: block; }
+  body.trainer-portal thead { display: none; }
+  body.trainer-portal tbody, body.trainer-portal tr { display: block; width: 100%; }
+  body.trainer-portal tr { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 12px; margin-bottom: 10px; }
+  body.trainer-portal td { display: flex; justify-content: space-between; gap: 8px; }
+  body.trainer-portal select { width: 100%; height: 48px; font-size: 16px; }
+  body.trainer-portal #view-homework .th2-create,
+  body.trainer-portal #view-announcements .th2-create,
+  body.trainer-portal #view-quizzes .th2-create,
+  body.trainer-portal [data-new-hw] {
+    position: fixed; right: 16px; bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    width: 56px; height: 56px; border-radius: 50%; z-index: 80; padding: 0;
+  }
+  body.trainer-portal .sticky-save, body.trainer-portal .th2-save {
+    position: sticky; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); width: 100%; min-height: 48px;
+  }
+  body.trainer-portal .m-tabs { display: flex !important; }
+  body.trainer-portal .cr1-hero h2 { display: none !important; }
+  body.trainer-portal .cr1-table, body.trainer-portal .cr1-table table { min-width: 0 !important; overflow: visible; }
+  body.trainer-portal .cr1-table table { display: block; }
+  body.trainer-portal .cr1-stats { grid-template-columns: 1fr 1fr !important; }
+  body.trainer-portal .cr1-bar { flex-direction: column; align-items: stretch; }
+  body.trainer-portal .cr1-bar input { width: 100%; min-height: 44px; }
+  body.trainer-portal .cc1-title { display: none !important; }
+  body.trainer-portal .th2-create { font-size: 0; color: transparent; overflow: hidden; }
+  body.trainer-portal .th2-create svg { font-size: 24px; color: #fff; }
+  body.trainer-portal .an2-head h2 { display: none !important; }
+  body.trainer-portal #view-attendance .th2-head,
+  body.trainer-portal #view-attendance .th2-kpis,
+  body.trainer-portal #view-attendance .th2-attbar { display: none !important; }
+  body.trainer-portal .att3 { padding-bottom: 88px; }
+  body.trainer-portal .att3-course { width: 100%; height: 48px; font-size: 16px; border: 1px solid #E2E8F0; border-radius: 12px; padding: 0 12px; background: #fff; }
+  body.trainer-portal .att3-chips {
+    display: flex; gap: 8px; overflow-x: auto; margin: 12px 0 4px; padding-bottom: 4px; scrollbar-width: none;
+  }
+  body.trainer-portal .att3-chip {
+    flex: none; height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid #E2E8F0;
+    background: #fff; display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 13px; color: #0F2747;
+  }
+  body.trainer-portal .att3-chip.on { border-color: #2563EB; background: #EFF6FF; }
+  body.trainer-portal .att3-dot { width: 8px; height: 8px; border-radius: 50%; background: #94A3B8; }
+  body.trainer-portal .att3-dot.taken { background: #16A34A; }
+  body.trainer-portal .att3-dot.today { background: #2563EB; }
+  body.trainer-portal .att3-tz { margin: 0 0 12px; font-size: 12px; color: #64748B; }
+  body.trainer-portal .att3-sum {
+    position: sticky; top: 56px; z-index: 20; background: #fff; padding: 8px 0 10px;
+    border-bottom: 1px solid #E2E8F0;
+  }
+  body.trainer-portal .att3-counts { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; font-weight: 600; }
+  body.trainer-portal .att3-counts .c-p { color: #16A34A; }
+  body.trainer-portal .att3-counts .c-l { color: #EA580C; }
+  body.trainer-portal .att3-counts .c-a { color: #DC2626; }
+  body.trainer-portal .att3-counts .c-n { color: #64748B; }
+  body.trainer-portal .att3-bar { height: 6px; background: #E2E8F0; border-radius: 99px; margin-top: 8px; overflow: hidden; }
+  body.trainer-portal .att3-bar i { display: block; height: 100%; background: #2563EB; }
+  body.trainer-portal .att3-acts { display: flex; gap: 8px; margin: 12px 0; }
+  body.trainer-portal .att3-out {
+    flex: 1; height: 44px; border-radius: 12px; border: 1px solid #CBD5E1; background: #fff; font-weight: 600; color: #0F2747;
+  }
+  body.trainer-portal .att3-row {
+    display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 8px 0; border-bottom: 1px solid #F1F5F9;
+  }
+  body.trainer-portal .att3-av {
+    width: 40px; height: 40px; border-radius: 50%; background: #0F2747; color: #fff; display: grid; place-items: center;
+    font-size: 12px; font-weight: 700; flex: none;
+  }
+  body.trainer-portal .att3-meta { flex: 1; min-width: 0; }
+  body.trainer-portal .att3-meta strong {
+    display: block; font-size: 16px; font-weight: 700; color: #0F2747; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  body.trainer-portal .att3-meta > span { font-size: 12px; color: #64748B; }
+  body.trainer-portal .att3-note { border: 0; background: none; color: #2563EB; font-size: 12px; padding: 0; height: 24px; }
+  body.trainer-portal .att3-note-in { width: 100%; height: 36px; margin-top: 4px; font-size: 14px; border: 1px solid #E2E8F0; border-radius: 8px; }
+  body.trainer-portal .att3-seg { display: flex; gap: 4px; flex: none; }
+  body.trainer-portal .att3-segb {
+    width: 44px; height: 44px; border-radius: 10px; border: 1px solid #CBD5E1; background: #fff; font-weight: 700; color: #64748B;
+  }
+  body.trainer-portal .att3-segb.ok.on { background: #16A34A; border-color: #16A34A; color: #fff; }
+  body.trainer-portal .att3-segb.warn.on { background: #EA580C; border-color: #EA580C; color: #fff; }
+  body.trainer-portal .att3-segb.bad.on { background: #DC2626; border-color: #DC2626; color: #fff; }
+  body.trainer-portal .att3-savebar {
+    position: fixed; left: 0; right: 0; bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    height: 64px; z-index: 35; background: #fff; border-top: 1px solid #E2E8F0;
+    display: flex; align-items: center; padding: 0 16px; box-sizing: border-box;
+  }
+  body.trainer-portal #view-grades .th2-grd-table,
+  body.trainer-portal #view-grades .th2-grd-wrap,
+  body.trainer-portal #view-grades table { display: none !important; }
+  body.trainer-portal .gb { width: 100%; padding-bottom: 96px; box-sizing: border-box; }
+  body.trainer-portal .gb-top { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  body.trainer-portal .gb-back { height: 44px; border: 0; background: none; font-weight: 600; color: #0F2747; flex: none; }
+  body.trainer-portal .gb-title { flex: 1; min-width: 0; margin: 0; font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  body.trainer-portal .gb-more { width: 44px; height: 44px; border: 0; background: none; font-size: 22px; }
+  body.trainer-portal .gb-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  body.trainer-portal .gb-kpi {
+    height: 96px; overflow: hidden; background: #fff; border: 1px solid #E2E8F0; border-radius: 16px;
+    padding: 14px; display: flex; flex-direction: column; justify-content: center;
+  }
+  body.trainer-portal .gb-kpi span { font-size: 12px; color: #64748B; white-space: nowrap; }
+  body.trainer-portal .gb-kpi strong { font-size: 26px; color: #0F2747; line-height: 1.1; }
+  body.trainer-portal .gb-lockline { margin: 0 0 12px; font-size: 12px; color: #64748B; }
+  body.trainer-portal .gb-lockb { font-style: normal; font-size: 11px; color: #64748B; margin-left: 4px; }
+  body.trainer-portal .gb-inwrap.lock span { font-size: 10px; }
+  body.trainer-portal .gb-search { width: 100%; height: 48px; border: 1px solid #E2E8F0; border-radius: 12px; padding: 0 12px; font-size: 16px; margin-bottom: 8px; }
+  body.trainer-portal .gb-seg { display: flex; height: 44px; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+  body.trainer-portal .gb-seg button { flex: 1; border: 0; background: #fff; font-weight: 600; color: #64748B; }
+  body.trainer-portal .gb-seg button.on { background: #0F2747; color: #fff; }
+  body.trainer-portal .gb-cats { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 8px; }
+  body.trainer-portal .gb-chip { flex: none; height: 40px; padding: 0 12px; border-radius: 999px; border: 1px solid #E2E8F0; background: #fff; }
+  body.trainer-portal .gb-chip.on { background: #EFF6FF; border-color: #2563EB; }
+  body.trainer-portal .gb-cavg { font-size: 13px; color: #64748B; }
+  body.trainer-portal .gb-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 12px; margin-bottom: 10px; }
+  body.trainer-portal .gb-head { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: none; text-align: left; }
+  body.trainer-portal .gb-av { width: 40px; height: 40px; border-radius: 50%; background: #0F2747; color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: none; }
+  body.trainer-portal .gb-meta { flex: 1; min-width: 0; }
+  body.trainer-portal .gb-meta strong { display: block; font-size: 16px; font-weight: 700; color: #0F2747; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  body.trainer-portal .gb-meta span { font-size: 12px; color: #64748B; }
+  body.trainer-portal .gb-right { text-align: right; }
+  body.trainer-portal .gb-right b { display: block; font-size: 20px; color: #0F2747; }
+  body.trainer-portal .gb-st { font-size: 11px; font-style: normal; font-weight: 700; }
+  body.trainer-portal .gb-st.ok { color: #16A34A; }
+  body.trainer-portal .gb-st.risk { color: #EA580C; }
+  body.trainer-portal .gb-st.pend { color: #64748B; }
+  body.trainer-portal .gb-catrow { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+  body.trainer-portal .gb-inwrap { position: relative; width: 84px; flex: none; }
+  body.trainer-portal .gb-inwrap.ch { border-left: 3px solid #2563EB; padding-left: 4px; }
+  body.trainer-portal .gb-in { width: 84px; height: 48px; font-size: 16px; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0 28px 0 8px; }
+  body.trainer-portal .gb-inwrap span { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #94A3B8; }
+  body.trainer-portal .gb-dot { width: 8px; height: 8px; border-radius: 50%; background: #CBD5E1; }
+  body.trainer-portal .gb-dot.on { background: #16A34A; }
+  body.trainer-portal .gb-savebar {
+    position: fixed; left: 0; right: 0; bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    z-index: 35; background: #fff; padding: 8px 16px; border-top: 1px solid #E2E8F0; display: flex; gap: 8px;
+  }
+  body.trainer-portal .gb-save { flex: 1; height: 52px; border: 0; border-radius: 12px; background: #2563EB; color: #fff; font-weight: 700; }
+  body.trainer-portal .gb-disc { height: 52px; border: 1px solid #E2E8F0; border-radius: 12px; background: #fff; padding: 0 14px; }
+  body.trainer-portal .gb-toast { position: fixed; left: 16px; right: 16px; bottom: calc(128px + env(safe-area-inset-bottom, 0px)); padding: 12px; border-radius: 12px; z-index: 40; }
+  body.trainer-portal .gb-toast.ok { background: #DCFCE7; color: #166534; }
+  body.trainer-portal .gb-toast.bad { background: #FEE2E2; color: #991B1B; }
+  body.trainer-portal .gb-sheet { position: fixed; inset: 0; z-index: 210; }
+  body.trainer-portal .gb-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.45); }
+  body.trainer-portal .gb-menu { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 20px 20px 0 0; padding: 16px; }
+  body.trainer-portal .gb-menu button { display: block; width: 100%; height: 52px; border: 0; background: none; text-align: left; font-size: 16px; }
+  body.trainer-portal .att3-save {
+    width: 100%; height: 48px; border: 0; border-radius: 12px; background: #0F2747; color: #fff; font-weight: 700; font-size: 16px;
+  }
+}

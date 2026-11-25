@@ -1,8 +1,9 @@
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import {
   collection, query, where, getDocs, writeBatch
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { applyDisplayName } from "./auth-guard.js?v=auth8";
+import { applyDisplayName } from "./auth-guard.js?v=auth10";
+import { getDisplayName } from "./displayName.js";
 
 const NAME_COLS = [
   ["registrations", "studentName"],
@@ -13,9 +14,7 @@ const NAME_COLS = [
 ];
 
 export function liveStudentName(profile, user) {
-  const n = String(profile?.name || "").trim();
-  if (n) return n;
-  return String(user?.displayName || "").trim() || (user?.email || "").split("@")[0] || "Student";
+  return getDisplayName({ ...profile, displayName: profile?.displayName || user?.displayName, email: profile?.email || user?.email }) || "Student";
 }
 
 function fail(collection, field, e) {

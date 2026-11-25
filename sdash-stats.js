@@ -1,4 +1,4 @@
-import { bound } from "./student-dash-data.js?v=stu7";
+import { bound } from "./student-dash-data.js?v=stu11";
 
 function animate(el, target) {
   if (target === "—" || target == null) { el.textContent = "—"; return; }

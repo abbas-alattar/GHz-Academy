@@ -1,4 +1,5 @@
-import { loadNotifications, saveSeen, clearNotifCache } from "./useNotifications.js";
+import { loadNotifications, saveSeen, clearNotifCache, studentNotifsFromStore } from "./useNotifications.js";
+import { onDashData, getStudentStore, datasetsReady } from "./student-dash-data.js?v=stu11";
 import { NotificationBell } from "./NotificationBell.js";
 import { NotificationPanel } from "./NotificationPanel.js";
 import { NotificationToast, pushNotificationToast } from "./NotificationToast.js";
@@ -156,7 +157,15 @@ export function bootNotificationsV2({ role, uid, host }) {
       onQuery: (q) => { state.query = q; paint(); },
       onMore: () => { state.pageLimit += 30; paint(); }
     };
-    if (state.open) ph.replaceChildren(create(h(NotificationPanel, props)));
+    const phoneSheet = window.matchMedia("(max-width: 639px)").matches;
+    const closeSheet = () => {
+      state.open = false;
+      document.body.classList.remove("nt2-noscroll");
+      paint();
+    };
+    if (phoneSheet && state.open) document.body.classList.add("nt2-noscroll");
+    else document.body.classList.remove("nt2-noscroll");
+    if (state.open) ph.replaceChildren(create(h(NotificationPanel, { ...props, sheet: phoneSheet, role, onClose: closeSheet })));
     else ph.replaceChildren();
     const pageHost = document.getElementById("nt2PageRoot");
     if (pageHost) {
@@ -267,24 +276,52 @@ export function bootNotificationsV2({ role, uid, host }) {
   });
   window.addEventListener("ghz-trainer-courses", () => { if (role === "trainer") refresh(true); });
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(false); });
-  document.addEventListener("click", (e) => {
+  const outsideClose = (e) => {
     if (!state.open && !state.settings) return;
     const t = e.target;
-    if (host.contains(t) || (t && t.closest && t.closest(".nv2-slot, .nv2-root, .nv2-bell, .nv2-panel, .nv2-page, .nt2-panel, .nt2-page, #nt2-portal"))) return;
-    state.open = false; state.settings = false; paint();
-  }, true);
+    if (t && t.closest && t.closest(".nv2-bell, .nv2-root")) return;
+    if (t && t.closest && t.closest(".nt2-sheet, .nt2-panel, .nt2-page")) return;
+    state.open = false; state.settings = false; document.body.classList.remove("nt2-noscroll"); paint();
+  };
+  document.addEventListener("pointerdown", outsideClose, true);
+  document.addEventListener("click", outsideClose, true);
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") { state.open = false; state.page = false; state.settings = false; paint(); }
+    if (e.key === "Escape") { state.open = false; state.page = false; state.settings = false; document.body.classList.remove("nt2-noscroll"); paint(); }
   });
   window.addEventListener("ghz-logout", () => { clearNotifCache(); clearInterval(timer); });
   if (/#notifications/.test(location.hash)) state.page = true;
   window.addEventListener("hashchange", () => {
     const on = /#notifications/.test(location.hash);
-    if (state.page !== on) { state.page = on; if (on) state.open = false; paint(); }
+    if (state.page !== on) { state.page = on; if (on) state.open = false; document.body.classList.remove("nt2-noscroll"); paint(); }
+    else if (state.open) { state.open = false; document.body.classList.remove("nt2-noscroll"); paint(); }
   });
   timer = setInterval(() => { if (document.visibilityState === "visible") refresh(false); }, 90000);
   paint();
+  if (role === "student") {
+    const fromStore = (st) => {
+      const items = studentNotifsFromStore(uid, st || getStudentStore());
+      const ready = datasetsReady(["enrollments", "assignments", "quizzes", "submissions", "quizAttempts", "announcements", "certificates", "registrations"]);
+      apply({
+        items,
+        seenAt: state.seenAt,
+        readIds: state.readIds,
+        hiddenIds: state.hidden,
+        muted: state.muted
+      }, false);
+      state.loading = !ready && !items.length;
+      if (!state.loading) paint();
+    };
+    onDashData((st) => fromStore(st));
+    fromStore(getStudentStore());
+  }
   refresh(true);
+  window.__ghzNv2 = {
+    getState: () => state,
+    markAll,
+    markOne,
+    openItem,
+    refresh
+  };
   return true;
 }
 

@@ -40,6 +40,45 @@ function ago(ms) {
   return Math.round(s / 86400000) + "d";
 }
 function fullDate(ms) { return ms ? new Date(ms).toLocaleString() : "—"; }
+function fmtStamp(v) {
+  const ms = tsMs(v);
+  if (!ms) return "—";
+  const p = dateParts(ms);
+  return p.d + (p.t ? " " + p.t : "");
+}
+function isDateOnly(v) {
+  return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.trim());
+}
+function unpackPay(r) {
+  const raw = String(r?.paymentRef || "").trim();
+  let conf = raw, ghz = String(r?.paymentReference || "").trim(), sender = String(r?.paymentSender || "").trim(), note = String(r?.paymentNote || "").trim(), mid = String(r?.paymentMethodId || "").trim(), at = "";
+  if (raw.startsWith("{") && raw.endsWith("}")) {
+    try {
+      const o = JSON.parse(raw);
+      if (o && typeof o === "object") {
+        conf = String(o.conf || o.paymentRef || "");
+        ghz = String(o.ghz || o.paymentReference || ghz);
+        sender = String(o.sender || o.paymentSender || sender);
+        note = String(o.note || o.paymentNote || note);
+        mid = String(o.mid || o.paymentMethodId || mid);
+        at = String(o.at || "");
+      }
+    } catch (_) {}
+  }
+  return { conf, ghz, sender, note, mid, at };
+}
+function submittedLabel(r) {
+  if (r?.paymentSubmittedAt) return fmtStamp(r.paymentSubmittedAt);
+  const packed = unpackPay(r).at;
+  if (packed) return fmtStamp(packed);
+  const d = r?.paymentDate;
+  if (!d) return "—";
+  if (isDateOnly(d)) {
+    const [y, m, day] = d.trim().split("-");
+    return day + "/" + m + "/" + y;
+  }
+  return fmtStamp(d);
+}
 function dateParts(ms) {
   if (!ms) return { d: "—", t: "" };
   const d = new Date(ms);
@@ -51,8 +90,26 @@ function dateParts(ms) {
   return { d: dd + "/" + mm + "/" + yyyy, t: hh + ":" + mi };
 }
 function labelOf(st) {
-  return ({ pending_payment: "Awaiting payment", payment_submitted: "Payment submitted – review", enrolled: "Confirmed", confirmed: "Confirmed", cancelled: "Cancelled", rejected: "Rejected" })[st] || st;
+  return ({ pending_payment: "Awaiting payment", payment_submitted: "Needs review", paid: "Paid", enrolled: "Confirmed", confirmed: "Confirmed", cancelled: "Cancelled", rejected: "Rejected", expired: "Expired", refunded: "Refunded" })[st] || st;
 }
+function activityMs(r) {
+  const p = unpackPay(r);
+  return tsMs(r.paymentSubmittedAt) || tsMs(p.at) || tsMs(r.updatedAt) || tsMs(r.createdAt);
+}
+function methodMeta(r) {
+  const p = unpackPay(r);
+  const id = String(p.mid || r.paymentMethodId || "").toLowerCase();
+  const lab = String(r.paymentMethod || "");
+  const byId = { wu: { src: "./pay-wu.png", name: "Western Union" }, whish: { src: "./pay-whish.png", name: "Whish Money" }, omt: { src: "./pay-omt.png", name: "OMT" }, payoneer: { src: "./pay-payoneer.png", name: "Payoneer" }, card: { src: "./pay-visa.png", name: "Card" } };
+  if (byId[id]) return byId[id];
+  const l = lab.toLowerCase();
+  if (/western|wu/.test(l)) return byId.wu;
+  if (/whish/.test(l)) return byId.whish;
+  if (/omt/.test(l)) return byId.omt;
+  if (/payoneer/.test(l)) return byId.payoneer;
+  return { src: "", name: lab || "—" };
+}
+function csvEscape(v) { return '"' + String(v ?? "").replace(/"/g, '""') + '"'; }
 function pillClass(st) {
   if (st === "payment_submitted") return "review";
   if (st === "pending_payment") return "wait";
@@ -87,6 +144,15 @@ function Page({ regs, courses, error, loading, onRetry, onConfirm, onReject, onC
   const [picked, setPicked] = useState({});
   const [busy, setBusy] = useState(false);
   const [fixedN, setFixedN] = useState(0);
+  const [rejectWhy, setRejectWhy] = useState("");
+  const [rejectOther, setRejectOther] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const n = regs.find((x) => x.id === open.id);
+    if (n) setOpen(n);
+  }, [regs]);
 
   useEffect(() => {
     const quiet = () => onRefresh?.();
@@ -110,6 +176,8 @@ function Page({ regs, courses, error, loading, onRetry, onConfirm, onReject, onC
     return { review, wait, ok, cancel, all: review + wait + ok + cancel };
   }, [regs]);
 
+  const courseTitle = (r) => r.courseTitle || (courses.find((c) => c.id === r.courseId) || {}).title || "Course";
+
   const rows = useMemo(() => {
     const qq = q.trim().toLowerCase();
     const list = regs.filter((r) => {
@@ -118,11 +186,12 @@ function Page({ regs, courses, error, loading, onRetry, onConfirm, onReject, onC
       if (!qq) return true;
       return [r.studentName, r.studentEmail, r.courseTitle].join(" ").toLowerCase().includes(qq);
     });
-    const rank = (r) => bucket(r.status) === "review" ? 0 : bucket(r.status) === "wait" ? 1 : 2;
-    return [...list].sort((a, b) => rank(a) - rank(b) || tsMs(b.createdAt) - tsMs(a.createdAt));
-  }, [regs, tab, cid, q]);
-
-  const courseTitle = (r) => r.courseTitle || (courses.find((c) => c.id === r.courseId) || {}).title || "Course";
+    return [...list].sort((a, b) => {
+      const cmp = activityMs(b) - activityMs(a);
+      if (cmp !== 0) return cmp;
+      return String(a.id || "").localeCompare(String(b.id || ""));
+    });
+  }, [regs, tab, cid, q, courses]);
 
   const stOf = (r) => String(r.status || "");
   const isOk = (r) => stOf(r) === "enrolled" || stOf(r) === "confirmed";
@@ -136,12 +205,12 @@ function Page({ regs, courses, error, loading, onRetry, onConfirm, onReject, onC
     }
     if (isOk(r)) {
       return e("div", { className: "arv2-acts", onClick: stop },
-        e("button", { type: "button", className: "arv2-no", onClick: () => setAsk(r) }, "Cancel registration")
+        e("button", { type: "button", className: "arv2-no arv2-actw", onClick: () => setAsk(r) }, "Cancel")
       );
     }
     if (isClosed(r)) {
       return e("div", { className: "arv2-acts", onClick: stop },
-        e("button", { type: "button", className: "arv2-ok", onClick: () => onConfirm(r) }, "Re-confirm")
+        e("button", { type: "button", className: "arv2-ok arv2-actw", onClick: () => onConfirm(r) }, "Re-confirm")
       );
     }
     return e("div", { className: "arv2-acts", onClick: stop }, e("button", { type: "button", className: "arv2-view", onClick: () => setOpen(r) }, "View"));
@@ -164,13 +233,13 @@ function Page({ regs, courses, error, loading, onRetry, onConfirm, onReject, onC
         ],
         rows: rows.map((r) => ({
           student: r.studentName || "Student", email: r.studentEmail || "—", course: courseTitle(r),
-          amount: (r.amount || 0) + " " + (r.currency || ""), status: labelOf(r.status), method: r.paymentMethod || "—", date: fmtPdfDate(r.createdAt)
+          amount: (r.amount || 0) + " " + (r.currency || ""), status: labelOf(r.status), method: r.paymentMethod || "—", date: submittedLabel(r)
         }))
       }) })
     ),
     e("div", { className: "arv2-stats" },
       [
-        { k: "review", n: counts.review, label: "Needs review", cls: counts.review ? " amber" : "" },
+        { k: "review", n: counts.review, label: "Pending payments", cls: counts.review ? " amber" : "" },
         { k: "wait", n: counts.wait, label: "Awaiting payment", cls: "" },
         { k: "ok", n: counts.ok, label: "Confirmed", cls: "" },
         { k: "cancel", n: counts.cancel, label: "Cancelled / rejected", cls: "" }
@@ -195,47 +264,88 @@ function Page({ regs, courses, error, loading, onRetry, onConfirm, onReject, onC
       } }, busy ? "Checking…" : "Check enrollments")
     ),
     e("div", { className: "arv2-card" },
-      e("div", { className: "arv2-th" }, e("div", null, "Student"), e("div", null, "Course"), e("div", null, "Amount"), e("div", null, "Status"), e("div", null, "Payment"), e("div", null, "Date"), e("div", null, "Actions")),
+      e("div", { className: "arv2-th" }, e("div", null, "Student"), e("div", null, "Course"), e("div", null, "Amount"), e("div", null, "Status"), e("div", { className: "arv2-paycol" }, "Payment"), e("div", null, "Date"), e("div", null, "Actions")),
       loading ? [1, 2, 3].map((i) => e("div", { className: "arv2-row", key: i }, e("div", { className: "arv2-sk" }))) :
       !regs.length ? e("div", { className: "arv2-empty" }, e("p", null, "No registrations yet")) :
       !rows.length ? e("div", { className: "arv2-empty" }, e("p", null, "No registrations match"), e("button", { type: "button", className: "arv2-view", onClick: () => { setTab("all"); setCid(""); setQ(""); } }, "Clear filters")) :
       rows.map((r) => {
-        const ms = tsMs(r.createdAt);
+        const sub = submittedLabel(r);
         const stop = (ev) => ev.stopPropagation();
         return e("div", { className: "arv2-row", key: r.id, onClick: () => setOpen(r) },
           e("div", { className: "arv2-edge", style: { background: hue(r.courseId) } }),
           e("div", { className: "arv2-stu" },
             e("div", { className: "arv2-av", style: { background: avBg(r.studentName) } }, initials(r.studentName || r.studentEmail)),
-            e("div", null, e("p", null, r.studentName || "Student"), e("small", null, r.studentEmail || ""))
+            e("div", { className: "arv2-stu-txt" }, e("p", { title: r.studentName || "Student" }, r.studentName || "Student"), e("small", { title: r.studentEmail || "" }, r.studentEmail || ""))
           ),
-          e("div", null, courseTitle(r)),
-          e("div", { style: { fontWeight: 700 } }, (r.amount || 0) + " " + (r.currency || "")),
-          e("div", null, e("span", { className: "arv2-st " + pillClass(r.status) }, labelOf(r.status))),
-          e("div", { style: { color: "#64748B", fontSize: 12.5 } }, [r.paymentMethod, r.paymentRef].filter(Boolean).join(" · ") || "—"),
-          e("div", { className: "arv2-date", title: fullDate(ms) }, e("span", { className: "arv2-date-d" }, dateParts(ms).d), dateParts(ms).t ? e("span", { className: "arv2-date-t" }, dateParts(ms).t) : null),
+          e("div", { className: "arv2-course", title: courseTitle(r) }, courseTitle(r)),
+          e("div", { className: "arv2-amt" }, (r.amount || 0) + " " + (r.currency || "")),
+          e("div", { className: "arv2-stcell" }, e("span", { className: "arv2-st " + pillClass(r.status) }, labelOf(r.status)), e("span", { className: "arv2-payunder" }, [r.paymentMethod, unpackPay(r).conf].filter(Boolean).join(" · ") || "—")),
+          e("div", { className: "arv2-paycol" }, [r.paymentMethod, unpackPay(r).conf].filter(Boolean).join(" · ") || "—"),
+          e("div", { className: "arv2-date", title: sub }, e("span", { className: "arv2-date-d" }, sub.split(" ")[0] || "—"), sub.includes(" ") ? e("span", { className: "arv2-date-t" }, sub.split(" ")[1]) : null),
           acts(r, stop)
         );
       })
     ),
-    open ? e("div", { className: "arv2-dim", onClick: () => setOpen(null) }) : null,
-    open ? e("aside", { className: "arv2-draw" },
-      e("h3", null, open.studentName || "Student"),
-      e("p", null, open.studentEmail || ""),
-      open.phone ? e("p", null, open.phone) : null,
-      e("p", null, courseTitle(open)),
-      e("p", null, (open.amount || 0) + " " + (open.currency || "")),
-      e("p", null, labelOf(open.status)),
-      e("p", null, "Method: " + (open.paymentMethod || "—")),
-      e("p", null, "Reference: " + (open.paymentRef || "—")),
-      e("p", null, "Date: " + fullDate(tsMs(open.createdAt))),
-      stOf(open) === "payment_submitted" ? e("div", { className: "arv2-acts", style: { marginTop: 16 } },
-        e("button", { type: "button", className: "arv2-ok", onClick: () => onConfirm(open) }, "Confirm"),
-        e("button", { type: "button", className: "arv2-no", onClick: () => onReject(open) }, "Reject")
-      ) : isOk(open) ? e("button", { type: "button", className: "arv2-no", style: { marginTop: 16 }, onClick: () => setAsk(open) }, "Cancel registration")
-      : isClosed(open) ? e("button", { type: "button", className: "arv2-ok", style: { marginTop: 16 }, onClick: () => onConfirm(open) }, "Re-confirm")
-      : null,
-      e("button", { type: "button", className: "arv2-ok", style: { marginTop: 16 }, onClick: () => setOpen(null) }, "Close")
-    ) : null,
+    open ? e("div", { className: "arv2-dim", onClick: () => { setOpen(null); setRejectWhy(""); setRejectOther(""); } }) : null,
+    open ? (() => {
+      const pay = unpackPay(open);
+      const amt = (open.amount || 0) + " " + (open.currency || "USD");
+      const row = (lab, val, extra) => e("div", { className: "arv2-kv" }, e("span", { className: "arv2-k" }, lab), e("span", { className: extra || "arv2-v" }, val || "—"));
+      const ghz = pay.ghz || "—";
+      return e("aside", { className: "arv2-draw", role: "dialog", "aria-label": "Registration details" },
+        e("header", { className: "arv2-dhead" },
+          e("div", { className: "arv2-av", style: { background: avBg(open.studentName) } }, initials(open.studentName || open.studentEmail)),
+          e("div", { className: "arv2-dwho" },
+            e("h3", null, open.studentName || "Student"),
+            e("span", { className: "arv2-st " + pillClass(open.status) }, labelOf(open.status))
+          ),
+          e("button", { type: "button", className: "arv2-x", "aria-label": "Close", onClick: () => { setOpen(null); setRejectWhy(""); } }, "×")
+        ),
+        e("div", { className: "arv2-dbody" },
+          e("p", { className: "arv2-g" }, "Payment"),
+          row("Course", courseTitle(open)),
+          row("Amount", amt),
+          row("Payment method", open.paymentMethod || "—"),
+          e("div", { className: "arv2-kv" },
+            e("span", { className: "arv2-k" }, "Reference"),
+            e("span", { className: "arv2-v arv2-mono" }, ghz,
+              ghz !== "—" ? e("button", { type: "button", className: "arv2-copy", onClick: async (ev) => {
+                ev.stopPropagation();
+                try { await navigator.clipboard.writeText(ghz); setCopied(true); setTimeout(() => setCopied(false), 1400); } catch (_) {}
+              } }, copied ? "Copied" : "Copy") : null
+            )
+          ),
+          row("Confirmation number", pay.conf, "arv2-v arv2-mono"),
+          row("Sender name", pay.sender),
+          row("Student note", pay.note),
+          row("Submitted at", submittedLabel(open)),
+          e("p", { className: "arv2-g" }, "Student"),
+          row("Student", (open.studentName || "Student") + (open.studentEmail ? " · " + open.studentEmail : "")),
+          row("Registered at", fmtStamp(open.createdAt)),
+          rejectWhy !== "" || stOf(open) === "payment_submitted" ? (rejectWhy !== "" ? e("div", { className: "arv2-rejbox" },
+            e("p", { className: "arv2-g" }, "Reject reason"),
+            ["Wrong amount", "Unclear receipt", "Could not find payment", "Duplicate", "Other"].map((lab) =>
+              e("label", { key: lab, className: "arv2-rlab" },
+                e("input", { type: "radio", name: "arv2rej", checked: rejectWhy === lab, onChange: () => setRejectWhy(lab) }),
+                lab
+              )
+            ),
+            rejectWhy === "Other" ? e("textarea", { className: "arv2-tarea", value: rejectOther, onChange: (ev) => setRejectOther(ev.target.value), placeholder: "Add a short note" }) : null
+          ) : null) : null
+        ),
+        e("footer", { className: "arv2-dfoot" },
+          stOf(open) === "payment_submitted" ? e("button", { type: "button", className: "arv2-ok arv2-confirm", onClick: () => onConfirm(open) }, "Confirm payment") : null,
+          stOf(open) === "payment_submitted" ? e("button", { type: "button", className: "arv2-no", onClick: async () => {
+            if (!rejectWhy) { setRejectWhy("Wrong amount"); return; }
+            const note = rejectWhy === "Other" ? (rejectOther.trim() || "Other") : rejectWhy;
+            await onReject(open, note);
+            setRejectWhy(""); setRejectOther(""); setOpen(null);
+          } }, rejectWhy ? "Save rejection" : "Reject") : null,
+          isOk(open) ? e("button", { type: "button", className: "arv2-no", onClick: () => setAsk(open) }, "Cancel registration") : null,
+          isClosed(open) ? e("button", { type: "button", className: "arv2-ok arv2-confirm", onClick: () => onConfirm(open) }, "Re-confirm") : null
+        )
+      );
+    })() : null,
     e(ConfirmDialog, {
       open: !!ask,
       title: "Cancel this registration?",

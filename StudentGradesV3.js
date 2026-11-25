@@ -1,6 +1,6 @@
 import { createElement as e, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { parseScore, computeAverage } from "./gradeCalc.js";
+import { parseScore, computeAverage, formatGrade } from "./gradeCalc.js";
 import { exportStudentGradesPdf } from "./AdminPdfExport.js";
 
 const roots = new WeakMap();
@@ -79,9 +79,9 @@ function rowsForCourse(course) {
     const w = Number(c.weight) || 0;
     const v = parseScore(vals[c.id]);
     const pts = ((v == null ? 0 : v) * w) / 100;
-    return { section: c.title || "Section", weight: w + "%", score: v == null ? "—" : String(v), result: pts.toFixed(1) };
+    return { section: c.title || "Section", weight: w + "%", score: v == null ? "—" : String(v), result: formatGrade(pts) };
   });
-  rows.push({ section: "Final average", weight: "100%", score: avg == null ? "—" : Number(avg).toFixed(1), result: passed ? "Passed" : "Failed" });
+  rows.push({ section: "Final average", weight: "100%", score: avg == null ? "—" : formatGrade(avg), result: passed ? "Passed" : "Failed" });
   return { rows, avg, passed, pass };
 }
 async function printCourses(opts, list) {
@@ -109,7 +109,7 @@ async function printCourses(opts, list) {
     comps.push({
       section: "Final average",
       weight: "100%",
-      score: pack.avg == null ? "—" : Number(pack.avg).toFixed(1),
+      score: pack.avg == null ? "—" : formatGrade(pack.avg),
       weighted: pack.passed ? "Passed" : "Failed"
     });
     return {
@@ -177,15 +177,15 @@ function Breakdown({ course }) {
               e("td", null, c.title || "Section"),
               e("td", { className: "num" }, e("span", { className: "sg3-w" }, w + "%")),
               e("td", { className: "num" }, e("span", { className: "sg3-sc " + scoreTone(v) }, v == null ? "—" : String(v))),
-              e("td", { className: "num" }, pts.toFixed(1)),
+              e("td", { className: "num" }, formatGrade(pts)),
               e("td", { className: "num" }, String(w))
             );
           }),
           e("tr", { className: "sg3-final " + (passed ? "ok" : "bad") },
             e("td", null, "Final average"),
             e("td", { className: "num" }, e("span", { className: "sg3-w" }, "100%")),
-            e("td", { className: "num" }, avg == null ? "—" : avg.toFixed(1)),
-            e("td", { className: "num" }, avg == null ? "—" : avg.toFixed(1)),
+            e("td", { className: "num" }, avg == null ? "—" : formatGrade(avg)),
+            e("td", { className: "num" }, avg == null ? "—" : formatGrade(avg)),
             e("td", { className: "num" }, "100")
           )
         )
@@ -212,7 +212,7 @@ function App({ opts }) {
     avgSum += avg;
     avgN++;
   }
-  const overall = avgN ? (Math.round((avgSum / avgN) * 10) / 10).toFixed(1) : "—";
+  const overall = avgN ? formatGrade(avgSum / avgN) : "—";
 
   function row(course, locked) {
     const doneC = !locked;
@@ -244,7 +244,7 @@ function App({ opts }) {
           e("p", { className: "sg3-cname" }, course.title || "Course"),
           e("p", { className: "sg3-cmeta" }, meta)
         ),
-        e("div", { className: "sg3-avgnum" }, doneC && avg != null ? avg.toFixed(1) : "—"),
+        e("div", { className: "sg3-avgnum" }, doneC && avg != null ? formatGrade(avg) : "—"),
         pill,
         printBtn,
         e("span", { className: "sg3-chev" + (open && !locked ? " open" : "") }, locked ? "" : "▾")

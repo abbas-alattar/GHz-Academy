@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Course — GHz Academy</title>
   <link rel="icon" type="image/png" href="./favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -15,6 +15,7 @@
     .meta { display:flex; gap:12px; flex-wrap:wrap; color:var(--muted); margin:12px 0 18px; }
     ol { padding-left:20px; color:var(--muted); line-height:1.7; }
   </style>
+  <link rel="stylesheet" href="./ghz-mobile.css" />
 </head>
 <body>
   <nav class="pub">
@@ -23,7 +24,7 @@
   </nav>
   <main class="pub" id="box">Loading course…</main>
   <script type="module">
-    import { auth, db } from "./firebase-config.js?v=auth8";
+    import { auth, db } from "./firebase-config.js?v=auth10";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { isPublicCourse, unavailableHtml } from "./public-course.js";
@@ -119,6 +120,7 @@
       }
     }
   </script>
+  <script src="./ghz-mobile.js"></script>
 </body>
 </html>
 

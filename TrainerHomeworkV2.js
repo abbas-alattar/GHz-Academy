@@ -1,7 +1,7 @@
 import { createElement as e, useEffect, useLayoutEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { addDoc, collection, deleteDoc, doc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { HomeworkFormV2, AssignmentFilesCards } from "./HomeworkFormV2.js";
 import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTrainerStore, setTrainerCourseId, resolveTrainerCourseId } from "./TrainerStore.js";
@@ -217,11 +217,11 @@ export function CourseSelect({ courses, cid, counts, countNoun, onPick, hideAll,
   useLayoutEffect(() => {
     if (!open || !btnRef.current) return;
     const r = btnRef.current.getBoundingClientRect();
-    const w = 400;
+    const w = Math.max(r.width, 280);
     let left = r.left;
     if (left + w > window.innerWidth - 8) left = Math.max(8, window.innerWidth - w - 8);
     let top = r.bottom + 8;
-    if (top + 360 > window.innerHeight - 8) top = Math.max(8, r.top - 368);
+    if (top + 328 > window.innerHeight - 8) top = Math.max(8, r.top - 328);
     setPos({ top, left, width: w });
   }, [open, q]);
   const pickIt = (id, locked) => {
@@ -517,6 +517,11 @@ function Page({ uid, go, assignmentId, courseId }) {
   const overdueMiss = assigns.filter((a) => dueKind(a).overdue && ens.some((en) => en.courseId === a.courseId && !subs.find((s) => s.assignmentId === a.id && s.uid === en.uid && s.status !== "not_submitted"))).length;
   const gradedSubs = subs.filter((s) => s.status === "graded" && assignsAll.some((a) => a.id === s.assignmentId && (!cid || a.courseId === cid)));
   const avgAll = gradedSubs.length ? Math.round(gradedSubs.reduce((n, s) => n + Number(s.grade || 0), 0) / gradedSubs.length) : "—";
+  useEffect(() => {
+    try {
+      if (window.matchMedia("(max-width: 767px)").matches) console.log("[ghz-homework-phone]", cid || "all", assignsAll.filter((a) => !cid || a.courseId === cid).length, ens.filter((en) => !cid || en.courseId === cid).length);
+    } catch (_) {}
+  }, [cid, assignsAll, ens]);
 
   if (assignmentId) {
     if (!pack) return e("div", { className: "th2" }, e("div", { className: "th2-skline" }));
@@ -558,18 +563,18 @@ function Page({ uid, go, assignmentId, courseId }) {
     if (pack?.hwErr && pack?.extrasReady) {
       return e("div", { className: "th2-err" }, pack.hwErr, " ", e("button", { className: "th2-btn", onClick: () => refreshTrainerStore(uid) }, "Try again"));
     }
+    const hHead = e("div", { className: "th2-rh th2-hgrid" },
+      e("div", null, "Homework"), e("div", null, "Due"), e("div", null, "Attempts"), e("div", { className: "th2-hvis" }, "Visibility"), e("div", null, "Status"), e("div", { className: "th2-hact" }, "Actions"), e("div", { className: "th2-hmenu", "aria-hidden": true }, "\u00a0")
+    );
     if (!pack || !pack.extrasReady) {
-      return e("table", { className: "th2-table th2-htable" }, e("colgroup", null, ["c-main","c-due","c-att","c-vis","c-st","c-act"].map((c) => e("col", { key: c, className: c }))), e("thead", null, e("tr", null, ["Homework","Due","Attempts","Visibility","Status",""].map((h, i) => e("th", { key: h, className: i === 5 ? "th2-act" : "" }, h)))),
-        e("tbody", null, [1,2,3,4].map((i) => e("tr", { key: i, className: "th2-sk" }, e("td", { colSpan: 6 }, e("b", null))))));
+      return e("div", { className: "th2-hgrid" }, hHead, [1,2,3,4].map((i) => e("div", { key: i, className: "th2-rr th2-sk" }, e("b", { style: { gridColumn: "1 / -1" } }))));
     }
     if (!assigns.length) {
       return e("div", { className: "th2-empty" }, e("p", null, "No homework yet"),
         e("button", { type: "button", className: "th2-create", disabled: createDisabled, title: createDisabled ? "Course is completed" : "", onClick: () => setForm({ courseId: pickCreateCourseId(courses, cid), title: "", dueDate: "", maxPoints: 100, status: "Published", description: "", rubric: [] }) }, e(Plus), " Create homework"));
     }
-    return e("table", { className: "th2-table th2-htable" },
-      e("colgroup", null, ["c-main","c-due","c-att","c-vis","c-st","c-act"].map((c) => e("col", { key: c, className: c }))),
-      e("thead", null, e("tr", null, ["Homework","Due","Attempts","Visibility","Status",""].map((h, i) => e("th", { key: h, className: i === 5 ? "th2-act" : "" }, h)))),
-      e("tbody", null, assigns.map((a) => {
+    return e("div", { className: "th2-hgrid" }, hHead,
+      assigns.map((a) => {
         const total = ens.filter((en) => en.courseId === a.courseId && String(en.status || "").toLowerCase() !== "cancelled").length;
         const subN = subs.filter((s) => s.assignmentId === a.id && s.status !== "not_submitted").length;
         const grN = subs.filter((s) => s.assignmentId === a.id && s.status === "graded").length;
@@ -578,26 +583,21 @@ function Page({ uid, go, assignmentId, courseId }) {
         const st = dueKind(a);
         const c = course(a.courseId);
         const pub = isPublished(a);
-        return e("tr", { key: a.id },
-          e("td", { title: a.title }, e("button", { type: "button", className: "th2-back th2-ell", title: a.title, onClick: () => go("homework/" + a.id) }, a.title), e("span", { className: "th2-sub" }, c?.title || a.courseId, " ", e(StatusBadge, { course: c })), need ? e("span", { className: "th2-tograde" }, need + " to grade") : null),
-          e("td", { className: st.overdue ? "th2-overdue" : "", title: st.label }, st.label),
-          e("td", { title: subN + " / " + total }, e("span", { className: "th2-bar" }, subN + " / " + total, e("i", null, e("b", { style: { width: pct + "%" } }))), e("span", { className: "th2-sub" }, grN + " graded")),
-          e("td", { title: pub ? "Visible to students" : "Hidden from students" }, e("span", { className: "th2-vis " + (pub ? "pub" : "draft") }, e(Eye, { off: !pub }), e("span", { className: "th2-vislab" }, pub ? "Published" : "Draft"))),
-          e("td", null, e("span", { className: "th2-pill " + st.k }, st.l)),
-          e("td", { className: "th2-menurow th2-act" },
-            e("div", { className: "th2-actsrow" },
-              e("button", { type: "button", className: "th2-review", onClick: () => go("homework/" + a.id) }, "Review"),
-              e(RowMenu, { locked: isCourseLocked(c), items: [
-                { label: "Review submissions", icon: "review", onClick: () => go("homework/" + a.id) },
-                { label: "Edit", icon: "edit", lockWhenDone: true, onClick: () => setForm({ ...a, rubric: a.rubric || [] }) },
-                { label: pub ? "Unpublish" : "Publish", icon: pub ? "unpublish" : "publish", lockWhenDone: true, onClick: () => togglePub(a) },
-                { label: "Duplicate", icon: "dup", lockWhenDone: true, onClick: () => dup(a) },
-                { label: "Delete", icon: "del", danger: true, lockWhenDone: true, onClick: () => del(a) }
-              ] })
-            )
-          )
+        return e("div", { key: a.id, className: "th2-rr" },
+          e("div", { className: "th2-cmain", title: a.title }, e("button", { type: "button", className: "th2-back th2-ell", title: a.title, onClick: () => go("homework/" + a.id) }, a.title), e("span", { className: "th2-sub" }, c?.title || a.courseId, " ", e(StatusBadge, { course: c })), need ? e("span", { className: "th2-tograde" }, need + " to grade") : null),
+          e("div", { className: st.overdue ? "th2-overdue" : "", title: st.label }, st.label),
+          e("div", { title: subN + " / " + total }, e("span", { className: "th2-bar" }, subN + " / " + total, e("i", null, e("b", { style: { width: pct + "%" } }))), e("span", { className: "th2-sub" }, grN + " graded")),
+          e("div", { className: "th2-cvis", title: pub ? "Visible to students" : "Hidden from students" }, e("span", { className: "th2-vis " + (pub ? "pub" : "draft") }, e(Eye, { off: !pub }))),
+          e("div", null, e("span", { className: "th2-pill " + st.k }, st.l)),
+          e("div", { className: "th2-cact" }, e("button", { type: "button", className: "th2-review", onClick: () => go("homework/" + a.id) }, "Review")),
+          e("div", { className: "th2-cmenu" }, e(RowMenu, { locked: isCourseLocked(c), items: [
+            { label: "Edit", icon: "edit", lockWhenDone: true, onClick: () => setForm({ ...a, rubric: a.rubric || [] }) },
+            { label: pub ? "Unpublish" : "Publish", icon: pub ? "unpublish" : "publish", lockWhenDone: true, onClick: () => togglePub(a) },
+            { label: "Duplicate", icon: "dup", lockWhenDone: true, onClick: () => dup(a) },
+            { label: "Delete", icon: "del", danger: true, lockWhenDone: true, onClick: () => del(a) }
+          ] }))
         );
-      }))
+      })
     );
   };
 

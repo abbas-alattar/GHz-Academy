@@ -1,10 +1,10 @@
-import { parseScore, computeAverage, computeStatus, gradeCalc } from "./gradeCalc.js";
+import { parseScore, computeAverage, computeStatus, gradeCalc, formatGrade, isLockedAuto } from "./gradeCalc.js";
 
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
 const state = { popup: "" };
 
 function isAuto(c) {
-  return c?.source === "attendance" || c?.source === "homework" || c?.source === "quiz";
+  return isLockedAuto(c);
 }
 function passMarkOf(scheme) {
   const n = Number(scheme?.passMark);
@@ -73,7 +73,7 @@ function courseCard(course) {
     const auto = isAuto(c) ? `<span class="g2-auto">Auto</span>` : "";
     return `<td class="${low ? "low" : ""}">${v}${auto}</td>`;
   }).join("");
-  const avgCell = done && avg != null ? `<td class="avg">${avg.toFixed(1)}</td>` : `<td>—</td>`;
+  const avgCell = done && avg != null ? `<td class="avg">${formatGrade(avg)}</td>` : `<td>—</td>`;
   const resultCell = done
     ? `<td><span class="g2-pill ${passed ? "ok" : "no"}">${passed ? "Passed" : "Failed"}</span></td>`
     : `<td><span class="g2-lock" title="Visible after completion">${lockIcon()} Locked</span><span class="g2-auto">Visible after completion</span></td>`;
@@ -110,7 +110,7 @@ function printCourseBlock(course) {
     const v = parseScore(vals[c.id]);
     const score = v == null ? 0 : v;
     const pts = ((v == null ? 0 : v) * w) / 100;
-    return `<tr><td>${esc(c.title || "")}</td><td class="num">${w}%</td><td class="num">${v == null ? "—" : score + " / 100"}</td><td class="num">${pts.toFixed(1)}</td></tr>`;
+    return `<tr><td>${esc(c.title || "")}</td><td class="num">${w}%</td><td class="num">${v == null ? "—" : formatGrade(score) + " / 100"}</td><td class="num">${formatGrade(pts)}</td></tr>`;
   }).join("");
   return `<section class="blk">
     <h2>${esc(course.title || "Course")} <span class="pill ${passed ? "ok" : "no"}">${passed ? "PASSED" : "FAILED"}</span></h2>
@@ -118,7 +118,7 @@ function printCourseBlock(course) {
       <thead><tr><th>Section</th><th class="num">Weight</th><th class="num">Score (/100)</th><th class="num">Weighted points</th></tr></thead>
       <tbody>
         ${rows}
-        <tr class="final"><td>Final average</td><td></td><td></td><td class="num">${avg.toFixed(1)}</td></tr>
+        <tr class="final"><td>Final average</td><td></td><td></td><td class="num">${formatGrade(avg)}</td></tr>
         <tr><td>Pass mark</td><td></td><td></td><td class="num">${pass}</td></tr>
         <tr><td>Result</td><td colspan="3"><strong class="${passed ? "ok" : "no"}">${passed ? "PASSED" : "FAILED"}</strong></td></tr>
       </tbody>
@@ -140,7 +140,7 @@ function printDoc(opts, onlyId) {
       ${doneAll.map((c) => {
         const avg = courseAvg(c);
         const ok = coursePassed(c);
-        return `<tr><td>${esc(c.title || "")}</td><td class="num">${avg == null ? "—" : avg.toFixed(1)}</td><td>${ok ? "PASSED" : "FAILED"}</td></tr>`;
+        return `<tr><td>${esc(c.title || "")}</td><td class="num">${avg == null ? "—" : formatGrade(avg)}</td><td>${ok ? "PASSED" : "FAILED"}</td></tr>`;
       }).join("") || `<tr><td colspan="3">No completed courses.</td></tr>`}
     </tbody></table>
   </section>`;
@@ -241,7 +241,7 @@ export function renderGradesV2(opts) {
       avgSum += avg;
       avgN++;
     }
-    const overall = avgN ? (Math.round((avgSum / avgN) * 10) / 10).toFixed(1) : "—";
+    const overall = avgN ? formatGrade(avgSum / avgN) : "—";
     const notes = Array.isArray(opts.notes) ? opts.notes : [];
     const wrap = document.createElement("div");
     wrap.className = "g2-wrap";

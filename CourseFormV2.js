@@ -1,7 +1,8 @@
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { coverFor, cropCoverFile, loadCourseCover } from "./coverFor.js?v=stu11";
 
 class Boundary extends Component {
   constructor(p) { super(p); this.state = { err: null }; }
@@ -19,38 +20,7 @@ class Boundary extends Component {
 }
 
 function compressCover(file) {
-  return new Promise((resolve, reject) => {
-    if (!file || !/^image\/(jpeg|jpg|png|webp)$/i.test(file.type) && !/\.(jpe?g|png|webp)$/i.test(file.name || "")) {
-      reject(new Error("not-image"));
-      return;
-    }
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      const scale = Math.min(1, 800 / img.width);
-      const w = Math.max(1, Math.round(img.width * scale));
-      const h = Math.max(1, Math.round(img.height * scale));
-      const canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-      let q = 0.82;
-      let data = canvas.toDataURL("image/jpeg", q);
-      const tooBig = () => {
-        const b64 = data.split(",")[1] || "";
-        try { return atob(b64).length > 200 * 1024; } catch { return data.length > 270000; }
-      };
-      while (tooBig() && q > 0.35) {
-        q -= 0.08;
-        data = canvas.toDataURL("image/jpeg", q);
-      }
-      URL.revokeObjectURL(url);
-      if (tooBig()) reject(new Error("too large"));
-      else resolve(data);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("not-image")); };
-    img.src = url;
-  });
+  return cropCoverFile(file).then((r) => r.dataUrl);
 }
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -131,8 +101,14 @@ function Form({ course, trainers: trainersProp, onClose, onSave }) {
   const [endDate, setEndDate] = useState(c.endDate || "");
   const [status, setStatus] = useState(c.status || "Draft");
   const [trainerIds, setTrainerIds] = useState(Array.isArray(c.trainerIds) ? c.trainerIds : []);
-  const [coverImage, setCoverImage] = useState(c.coverImage || "");
+  const [coverImage, setCoverImage] = useState("");
   const [coverErr, setCoverErr] = useState("");
+  useEffect(() => {
+    let alive = true;
+    if (c.id) loadCourseCover(c.id).then((rec) => { if (alive && rec?.data) setCoverImage(rec.data); }).catch(() => {});
+    else if (c.coverImage) setCoverImage(c.coverImage);
+    return () => { alive = false; };
+  }, [c.id]);
   const [saving, setSaving] = useState(false);
   const [errs, setErrs] = useState({});
   const [drag, setDrag] = useState(null);
@@ -192,8 +168,8 @@ function Form({ course, trainers: trainersProp, onClose, onSave }) {
           ),
           e(Field, { label: "Duration" }, e("input", { id: "cdur", value: duration, onChange: (ev) => setDuration(ev.target.value) })),
           e("div", null,
-            e("span", { style: { fontSize: 13, fontWeight: 600 } }, "Cover image"),
-            e("p", { className: "cfv2-help" }, "Optional JPG or PNG. Recommended 16:9."),
+            e("span", { style: { fontSize: 13, fontWeight: 600 } }, "Cover photo (optional)"),
+            e("p", { className: "cfv2-help" }, "Optional JPG or PNG. Cropped to 16:9 at 640×360, under 80 KB."),
             e("input", { id: "ccover", type: "file", accept: "image/jpeg,image/png,.jpg,.jpeg,.png", style: { display: "none" }, onChange: async (ev) => {
               const file = ev.target.files && ev.target.files[0];
               ev.target.value = "";
@@ -203,16 +179,20 @@ function Form({ course, trainers: trainersProp, onClose, onSave }) {
                 const data = await compressCover(file);
                 setCoverImage(data);
               } catch (er) {
-                setCoverErr(er && er.message === "too large" ? "That file is too large. Use a smaller image." : "Please choose a JPG or PNG image.");
+                setCoverErr(er && er.message === "too large" ? "That photo could not be made smaller than 150 KB." : "Please choose a JPG or PNG image.");
               }
             } }),
             coverImage ? e("div", { className: "cfv2-cover" },
               e("img", { src: coverImage, alt: "Cover preview" }),
               e("div", { className: "cfv2-cover-acts" },
                 e("button", { type: "button", className: "cfv2-can", onClick: () => document.getElementById("ccover")?.click() }, "Replace"),
-                e("button", { type: "button", className: "cfv2-ib red", onClick: () => { setCoverImage(""); setCoverErr(""); } }, "Remove")
+                e("button", { type: "button", className: "cfv2-can", onClick: () => { setCoverImage(""); setCoverErr(""); } }, "Use default cover")
               )
-            ) : e("button", { type: "button", className: "cfv2-can", onClick: () => document.getElementById("ccover")?.click() }, "Upload cover"),
+            ) : e("div", null,
+              e("div", { className: "cfv2-cover", dangerouslySetInnerHTML: { __html: coverFor({ title, id: c.id }) } }),
+              e("button", { type: "button", className: "cfv2-can", onClick: () => document.getElementById("ccover")?.click() }, "Upload cover"),
+              e("button", { type: "button", className: "cfv2-can", style: { marginLeft: 8 }, onClick: () => { setCoverImage(""); setCoverErr(""); } }, "Use default cover")
+            ),
             coverErr ? e("span", { className: "cfv2-err" }, coverErr) : null
           )
         ),

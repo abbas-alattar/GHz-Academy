@@ -1,4 +1,4 @@
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs,
   runTransaction, serverTimestamp, Timestamp

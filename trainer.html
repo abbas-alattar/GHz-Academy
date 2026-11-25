@@ -1,13 +1,14 @@
-<!-- aha-build-id: bmvt74pfrdqnpxn42 -->
+<!-- aha-build-id: bmwvcxiux8xkqsjyt -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Trainer — GHz Academy</title>
   <link rel="icon" type="image/png" href="./favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./portal.css" />
+  <link rel="stylesheet" href="./ghz-responsive.css" />
   <link rel="stylesheet" href="./PageTransition.css" />
   <link rel="stylesheet" href="./DeliveryDays.css" />
   <link rel="stylesheet" href="./HomeworkSubmitV2.css" />
@@ -18,8 +19,11 @@
   <link rel="stylesheet" href="./HomeworkFormV2.css" />
   <link rel="stylesheet" href="./AdminAnnouncementsV2.css" />
   <link rel="stylesheet" href="./ConfirmDialog.css" />
+  <link rel="stylesheet" href="./ghz-mobile.css" />
+  <link rel="stylesheet" href="./trainer-phone-pages.css" />
+  <link rel="stylesheet" href="./ProfileV2.css" />
 </head>
-<body class="trainer-portal">
+<body class="trainer-portal portal-trainer">
 <script>
 window.__trainerBooted = false;
 window.__trainerBootErr = "";
@@ -58,7 +62,7 @@ setTimeout(function () {
       </nav>
     </aside>
     <div class="main">
-      <header class="top">
+      <header class="top topbar-desktop">
         <h1 style="font-size:1.1rem" id="pageTitle">My courses</h1>
         <div class="top-actions">
           <div class="nv2-slot" id="notifySlot">
@@ -67,6 +71,13 @@ setTimeout(function () {
           <div class="who"><strong id="userName">Account</strong><span id="userRole">trainer</span></div>
           <button class="out" id="logoutBtn" type="button">Log out</button>
         </div>
+      </header>
+      <header class="topbar-mobile" aria-label="Trainer">
+        <button class="tm-btn tm-menu" type="button" aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <h1 class="tm-title" id="tmTitle">My courses</h1>
+        <button class="tm-btn tm-search" type="button" aria-label="Search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+        <div class="nv2-slot tm-bell" id="notifySlotPhone"></div>
+        <button class="tm-avatar" type="button" aria-label="Account">TR</button>
       </header>
       <div class="content">
         <p id="bootErr" class="banner" hidden style="background:#fee2e2;color:#991b1b"></p>
@@ -109,6 +120,7 @@ setTimeout(function () {
         <section id="view-grades" class="hidden"><div id="tr2GradesRoot" class="tr2"></div></section>
         <section id="view-announcements" class="hidden"><div id="tr2AnnRoot" class="tr2"></div></section>
         <section id="view-notifications" class="hidden"><div id="nt2PageRoot"></div></section>
+        <section id="view-profile" class="hidden"><div id="tr2ProfileRoot"></div></section>
         <section id="view-takeatt" class="hidden">
           <p><a href="#course" id="backSess">← Sessions</a></p>
           <h2 id="attTitle">Take attendance</h2>
@@ -132,21 +144,21 @@ setTimeout(function () {
           </div>
         </section>
       </div>
-      <p style="padding:16px 24px;font-size:.85rem"><a href="./terms/" target="_blank" rel="noopener noreferrer">Terms & Conditions</a> · <a href="./privacy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a></p>
+      <p class="ghz-legal"><a href="./terms/" target="_blank" rel="noopener noreferrer">Terms & Conditions</a> · <a href="./privacy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a></p>
     </div>
   </div>
   <div class="modal hidden" id="modal"></div>
   <div class="drawer-bg hidden" id="drawerBg"></div>
   <aside class="drawer hidden" id="gradeDrawer"></aside>
   <script type="module">
-    import { protect } from "./auth-guard.js?v=auth9";
+    import { protect } from "./auth-guard.js?v=auth10";
     import { bootPending, bootOk, bootFail as traceFail } from "./bootTrace.js";
     import { bootNotify } from "./portal-notify.js";
     import { bootPageMotion } from "./PageTransition.js";
     import { bootPageShell } from "./PageShell.js";
     import { bootPortalShell } from "./PortalShell.js";
     import { swapLoadingText } from "./WaveLoader.js";
-    import { auth, db } from "./firebase-config.js?v=auth8";
+    import { auth, db } from "./firebase-config.js?v=auth10";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, setDoc, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { isCourseLocked, CompletedBanner, completedDate, lockBtn, lockWriteMsg } from "./course-lock.js";
@@ -1056,6 +1068,8 @@ setTimeout(function () {
       }
     });
   </script>
+  <script src="./ghz-responsive.js"></script>
+  <script src="./ghz-mobile.js"></script>
 </body>
 </html>
 

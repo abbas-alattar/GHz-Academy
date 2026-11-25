@@ -1,4 +1,5 @@
-import { bound } from "./student-dash-data.js?v=stu7";
+import { bound } from "./student-dash-data.js?v=stu11";
+import { getFirstName } from "./displayName.js";
 
 function greeting(d) {
   const h = d.getHours();
@@ -46,9 +47,10 @@ function nextLine(data) {
 export function mountHero(el) {
   bound(el, (root, data) => {
     const now = new Date();
-    const first = (data.name || "student").split(" ")[0];
+    const first = getFirstName({ name: data.name, fullName: data.user?.fullName, displayName: data.user?.displayName, email: data.user?.email || data.user?.email });
+    const hello = first ? greeting(now) + ", " + first : greeting(now);
     root.innerHTML = `<div class="sdash-hero">
-      <h2>${greeting(now)}, ${first}</h2>
+      <h2>${hello}</h2>
       <p class="sdash-date">${fmtDate(now)}</p>
       <p class="sdash-smart">${nextLine(data)}</p>
       <div class="sdash-meta">
@@ -59,6 +61,6 @@ export function mountHero(el) {
     const lab = root.querySelector("#sdashUpdated");
     const t = data.loadedAt ? new Date(data.loadedAt) : new Date();
     lab.textContent = "Last updated " + t.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    root.querySelector("#sdashRefresh").onclick = () => import("./student-dash-data.js?v=stu7").then((m) => m.loadStudentDash(true));
+    root.querySelector("#sdashRefresh").onclick = () => import("./student-dash-data.js?v=stu11").then((m) => m.loadStudentDash(true));
   });
 }

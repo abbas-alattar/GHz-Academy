@@ -1,4 +1,4 @@
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import {
   collection, query, where, getDocs, doc, setDoc, writeBatch, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";

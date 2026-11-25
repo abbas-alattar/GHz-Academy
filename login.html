@@ -1,16 +1,18 @@
-<!-- aha-build-id: bmvks94v7lqg9u3s7 -->
+<!-- aha-build-id: bmwojc1nis3lw32zb -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Log in — GHz Academy</title>
   <link rel="icon" type="image/png" href="./favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./portal.css" />
+  <link rel="stylesheet" href="./ghz-responsive.css" />
   <link rel="stylesheet" href="./AuthPageV2.css" />
+  <link rel="stylesheet" href="./ghz-mobile.css" />
 </head>
 <body>
   <div id="authV2Root"></div>
@@ -76,7 +78,7 @@
       sendPasswordResetEmail, updateProfile, reload, onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-    import { auth, db, roleHome } from "./firebase-config.js?v=auth8";
+    import { auth, db, roleHome } from "./firebase-config.js?v=auth10";
     import { ensureLocalPersistence, broadcastLogin, watchCrossTab } from "./auth-sync.js?v=auth9";
     import { markLoginActivity } from "./lastActive.js";
     import { assignStudentIdTx } from "./studentId.js";
@@ -299,6 +301,15 @@
           await sendEmailVerification(u);
           return { ok: true };
         } catch (ex) { return packErr(ex); }
+      },
+      continueVerified: async () => {
+        try {
+          const u = auth.currentUser; if (!u) return { ok: false, message: "Not signed in", code: "" };
+          await reload(u);
+          if (!u.emailVerified) return { ok: false, message: "Please verify your email, then try again.", code: "" };
+          await goRole(u);
+          return { ok: true };
+        } catch (ex) { return packErr(ex); }
       }
     };
     try {
@@ -307,6 +318,7 @@
       else if (classic) classic.classList.add("hidden");
     } catch (_) { onClassic(); }
   </script>
+  <script src="./ghz-mobile.js"></script>
 </body>
 </html>
 

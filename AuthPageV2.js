@@ -1,7 +1,7 @@
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { sortedCountries, detectCountry, flagUrl, digitsOnly, buildPhone, validLocal } from "./phoneCountries.js";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { courseStatusLabel } from "./courseStatusLabel.js";
 
@@ -19,6 +19,23 @@ class Boundary extends Component {
 }
 
 const ico = (d) => e("svg", { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "#94A3B8", strokeWidth: 2 }, e("path", { d }));
+
+function BrandMark() {
+  return e("a", { className: "ghz-brand", href: "./index.html", "aria-label": "GHz Academy" },
+    e("svg", { viewBox: "0 0 40 22", fill: "none", "aria-hidden": "true" },
+      e("path", { d: "M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0", stroke: "#38BDF8", strokeWidth: "2.6", strokeLinecap: "round" })
+    ),
+    e("span", { className: "ghz" }, "GHz"),
+    " ",
+    e("span", { className: "acad" }, "Academy")
+  );
+}
+function AuthBanner() {
+  return e("div", { className: "ap2-banner" },
+    BrandMark(),
+    e("a", { className: "ap2-back", href: "./index.html" }, "\u2190 Back to website")
+  );
+}
 
 function PhoneField({ iso, local, onIso, onLocal, err }) {
   const [open, setOpen] = useState(false);
@@ -46,9 +63,9 @@ function PhoneField({ iso, local, onIso, onLocal, err }) {
         e("span", null, cur.dial),
         e("span", null, "▾")
       ),
-      e("input", { value: local, inputMode: "tel", autoComplete: "tel-national", placeholder: "71 123 456", onChange: (ev) => onLocal(ev.target.value) })
+      e("input", { type: "tel", value: local, inputMode: "tel", autoComplete: "tel-national", placeholder: "71 123 456", onChange: (ev) => onLocal(ev.target.value) })
     ),
-    open ? e("div", { className: "ap2-dd", role: "listbox" },
+    open ? e("div", { className: "ap2-dd ap2-sheet", role: "listbox" },
       e("input", { autoFocus: true, placeholder: "Search country or code", value: q, onChange: (ev) => setQ(ev.target.value) }),
       list.map((c) => e("button", { type: "button", key: c.iso, className: c.iso === iso ? "on" : "", onClick: () => { onIso(c.iso); setOpen(false); } },
         e("img", { src: flagUrl(c.iso), width: 22, height: 16, alt: c.name + " flag" }),
@@ -69,12 +86,19 @@ function strength(pw) {
   return n;
 }
 
-function Field({ label, type, value, onChange, icon, auto, extra }) {
+function Field({ label, type, value, onChange, icon, auto, extra, inputMode, autoCapitalize }) {
   return e("div", { className: "ap2-field" },
     e("label", null, label),
     e("div", { className: "ap2-in" },
       icon,
-      e("input", { type, value, autoComplete: auto, onChange: (ev) => onChange(ev.target.value) }),
+      e("input", {
+        type: type || "text",
+        value,
+        autoComplete: auto,
+        inputMode: inputMode || undefined,
+        autoCapitalize: autoCapitalize || undefined,
+        onChange: (ev) => onChange(ev.target.value)
+      }),
       extra
     )
   );
@@ -97,7 +121,7 @@ function Page({ api }) {
   const [showL, setShowL] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [iso, setIso] = useState(detectCountry().iso);
+  const [iso, setIso] = useState("LB");
   const [local, setLocal] = useState("");
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
@@ -130,7 +154,7 @@ function Page({ api }) {
     setErr(""); setCode(""); setOk(""); setBusy(true);
     const r = await api.login(lemail.trim(), lpw);
     setBusy(false);
-    if (!r.ok) { setErr(r.message); setCode(r.code || ""); }
+    if (!r.ok) { setErr(r.message); setCode(r.code || ""); requestAnimationFrame(() => document.getElementById("ap2-alert")?.scrollIntoView({ block: "center", behavior: "smooth" })); }
   };
   const onSignup = async (ev) => {
     ev.preventDefault();
@@ -138,7 +162,7 @@ function Page({ api }) {
     setErr(""); setCode(""); setBusy(true);
     const r = await api.signup({ name: name.trim(), email: email.trim(), password: pw, ...phonePack() });
     setBusy(false);
-    if (!r.ok) { setErr(r.message); setCode(r.code || ""); return; }
+    if (!r.ok) { setErr(r.message); setCode(r.code || ""); requestAnimationFrame(() => document.getElementById("ap2-alert")?.scrollIntoView({ block: "center", behavior: "smooth" })); return; }
     setVerify(true);
   };
   const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim());
@@ -183,18 +207,22 @@ function Page({ api }) {
     e("svg", { className: "ap2-wave", viewBox: "0 0 800 120", preserveAspectRatio: "none" },
       e("path", { d: "M0 60c80-40 160 40 240 0s160-40 240 0 160 40 240 0 80-20 80-20" })
     ),
-    e("a", { className: "ap2-logo", href: "./index.html" }, e("img", { src: "./logo.png", alt: "GHz Academy logo" }), "GHz Academy"),
-    e("div", { className: "ap2-kicker" }, "Wireless academy"),
-    e("h1", { className: "ap2-h" }, "Learn wireless, from ", e("span", null, "LTE to 6G")),
-    e("ul", { className: "ap2-ben" },
-      ["Expert trainers", "Live sessions and recordings", "Certificates"].map((t) => e("li", { key: t }, e("span", { className: "ap2-ck" }, "✓"), t))
+    e("div", { className: "ap2-artbrand" }, BrandMark()),
+    e("div", { className: "ap2-artcopy" },
+      e("div", { className: "ap2-kicker" }, "Telecom engineering trainings academy"),
+      e("h1", { className: "ap2-h" }, "Learn wireless, from ", e("span", null, "LTE to 6G")),
+      e("ul", { className: "ap2-ben" },
+        ["Expert trainers", "Live sessions and recordings", "Certificates"].map((t) => e("li", { key: t }, e("span", { className: "ap2-ck" }, "✓"), t))
+      )
     )
+  );
+  const formWrap = (card) => e("div", { className: "ap2-formcol" },
+    e("a", { className: "ap2-back ap2-back-desk", href: "./index.html" }, "\u2190 Back to website"),
+    card
   );
 
   if (resetOpen) {
-    return e("div", { className: "ap2" }, art,
-      e("div", { className: "ap2-mobhead" }, e("img", { src: "./logo.png", alt: "GHz Academy logo" }), "GHz Academy"),
-      e("div", { className: "ap2-formcol" },
+    return e("div", { className: "ap2" }, AuthBanner(), art, formWrap(
         e("div", { className: "ap2-card", role: "dialog", "aria-labelledby": "ap2-reset-title" },
           e("h2", { id: "ap2-reset-title", className: "ap2-title" }, "Reset your password"),
           e("p", { className: "ap2-sub" }, "We will email a link to choose a new password."),
@@ -210,33 +238,32 @@ function Page({ api }) {
           code ? e("p", { className: "ap2-code" }, code) : null,
           e("button", { type: "button", className: "ap2-classic", onClick: () => { setResetOpen(false); setResetSent(false); setErr(""); setCode(""); setOk(""); setTab("login"); } }, "Back to log in")
         )
-      )
-    );
+      ));
   }
 
   if (verify) {
-    return e("div", { className: "ap2" }, art,
-      e("div", { className: "ap2-mobhead" }, e("img", { src: "./logo.png", alt: "GHz Academy logo" }), "GHz Academy"),
-      e("div", { className: "ap2-formcol" },
+    return e("div", { className: "ap2" }, AuthBanner(), art, formWrap(
         e("div", { className: "ap2-card ap2-ok" },
           e("div", { className: "ap2-check" }, "✓"),
           e("h2", null, "Check your email to verify your account"),
           e("p", null, email || lemail),
-          e("button", { type: "button", className: "ap2-btn", disabled: wait > 0, onClick: async () => {
+          err ? e("div", { id: "ap2-alert", className: "ap2-alert", role: "alert" }, err) : null,
+          e("button", { type: "button", className: "ap2-btn", disabled: wait > 0 || busy, onClick: async () => {
             setWait(30);
             const r = await api.resend();
             if (!r.ok) { setErr(r.message); setCode(r.code || ""); }
           } }, wait > 0 ? ("Resend email (" + wait + "s)") : "Resend email"),
-          e("p", null, e("button", { type: "button", className: "ap2-classic", onClick: () => { setVerify(false); setTab("login"); } }, "Back to log in")),
-          err ? e("p", { className: "ap2-err" }, err) : null
+          e("button", { type: "button", className: "ap2-btn ap2-btn-sec", onClick: async () => {
+            setBusy(true);
+            const r = await (api.continueVerified ? api.continueVerified() : api.resend());
+            setBusy(false);
+            if (r && !r.ok) { setErr(r.message || "Please verify your email, then try again."); }
+          } }, busy ? "Checking…" : "I verified, continue")
         )
-      )
-    );
+      ));
   }
 
-  return e("div", { className: "ap2" }, art,
-    e("div", { className: "ap2-mobhead" }, e("img", { src: "./logo.png", alt: "GHz Academy logo" }), "GHz Academy"),
-    e("div", { className: "ap2-formcol" },
+  return e("div", { className: "ap2" }, AuthBanner(), art, formWrap(
       e("div", { className: "ap2-card" },
         params.get("welcome") === "trainer" ? e("p", { className: "ap2-sub" }, "Welcome to GHz Academy! Your password is set. Log in to access your trainer portal.") : null,
         e("div", { className: "ap2-tabs" },
@@ -247,13 +274,14 @@ function Page({ api }) {
         courseHint ? e("p", { className: "ap2-sub", style: { marginBottom: 10 } }, "Create your account to register for ", e("strong", null, courseHint.title), " ", e("span", { className: "pc1-badge " + (courseHint.status === "Open" ? "open" : courseHint.status === "Coming soon" ? "soon" : "closed"), style: { display: "inline-flex", fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "#dcfce7", color: "#166534" } }, courseStatusLabel(courseHint.status || "Open"))) : null,
         tab === "signup" ? e("div", null, e("h2", { className: "ap2-title" }, "Create your account"), e("p", { className: "ap2-sub" }, "Join GHz Academy in a minute")) : e("h2", { className: "ap2-title" }, "Log in"),
         tab === "login" ? e("form", { onSubmit: onLogin },
-          e(Field, { label: "Email", type: "email", value: lemail, onChange: setLemail, auto: "email", icon: ico("M4 6h16v12H4z M4 6l8 7 8-7") }),
+          e(Field, { label: "Email", type: "email", value: lemail, onChange: setLemail, auto: "email", inputMode: "email", autoCapitalize: "none", icon: ico("M4 6h16v12H4z M4 6l8 7 8-7") }),
           e(Field, { label: "Password", type: showL ? "text" : "password", value: lpw, onChange: setLpw, auto: "current-password", icon: ico("M12 17a2 2 0 100-4 2 2 0 000 4z M6 10V8a6 6 0 1112 0v2"), extra: e("button", { type: "button", className: "ap2-eye", onClick: () => setShowL((v) => !v) }, showL ? "Hide" : "Show") }),
           e("button", { type: "button", className: "ap2-forgot", onClick: openReset }, "Forgot password?"),
-          e("button", { className: "ap2-btn", type: "submit", disabled: busy }, busy ? "Logging in…" : "Log in")
+          err ? e("div", { id: "ap2-alert", className: "ap2-alert", role: "alert" }, err) : null,
+          e("button", { className: "ap2-btn", type: "submit", disabled: busy }, busy ? e("span", { className: "ap2-spin" }, "Logging in…") : "Log in")
         ) : e("form", { onSubmit: onSignup },
           e(Field, { label: "Full name", type: "text", value: name, onChange: setName, auto: "name", icon: ico("M12 12a4 4 0 100-8 4 4 0 000 8z M4 20a8 8 0 0116 0") }),
-          e(Field, { label: "Email", type: "email", value: email, onChange: setEmail, auto: "email", icon: ico("M4 6h16v12H4z M4 6l8 7 8-7") }),
+          e(Field, { label: "Email", type: "email", value: email, onChange: setEmail, auto: "email", inputMode: "email", autoCapitalize: "none", icon: ico("M4 6h16v12H4z M4 6l8 7 8-7") }),
           e(PhoneField, { iso, local, onIso: setIso, onLocal: setLocal, err: local || busy ? phoneErr : "" }),
           e("div", { className: "ap2-field" },
             e("label", null, "Password"),
@@ -282,11 +310,10 @@ function Page({ api }) {
             e("input", { type: "checkbox", checked: agree, onChange: (ev) => setAgree(ev.target.checked) }),
             e("span", null, "I agree to the ", e("a", { href: "./terms/", target: "_blank", rel: "noopener noreferrer" }, "Terms & Conditions"), " and ", e("a", { href: "./privacy/", target: "_blank", rel: "noopener noreferrer" }, "Privacy Policy"))
           ),
-          e("button", { className: "ap2-btn", type: "submit", disabled: !valid || busy }, busy ? "Creating account…" : "Create student account")
-        ),
-        err ? e("p", { className: "ap2-err", role: "alert" }, err) : null,
-        code ? e("p", { className: "ap2-code" }, "(" + code + ")") : null,
-        ok ? e("p", { style: { color: "#16A34A" } }, ok) : null,)
+          err ? e("div", { id: "ap2-alert", className: "ap2-alert", role: "alert" }, err) : null,
+          e("button", { className: "ap2-btn", type: "submit", disabled: !valid || busy }, busy ? e("span", { className: "ap2-spin" }, "Creating account…") : "Create student account")
+        )
+      )
     )
   );
 }

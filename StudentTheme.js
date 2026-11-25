@@ -40,11 +40,11 @@ function CollapseDock() {
     const next = !collapsed;
     setCollapsed(next);
     try { localStorage.setItem("ghz-stu-side", next ? "1" : "0"); } catch {}
-    document.body.classList.toggle("stu-collapsed", next);
+    if (window.innerWidth >= 1024) document.body.classList.toggle("stu-collapsed", next);
   };
-  if (collapsed && !document.body.classList.contains("stu-collapsed")) document.body.classList.add("stu-collapsed");
+  if (collapsed && window.innerWidth >= 1024) document.body.classList.add("stu-collapsed");
+  else if (window.innerWidth < 1024) document.body.classList.remove("stu-collapsed");
   return e("div", { className: "stu-dock" },
-    e("button", { type: "button", className: "stu-collapse", onClick: toggle, "aria-label": "Collapse menu" }, collapsed ? "›" : "‹"),
     e("div", { className: "stu-usercard" },
       e("i", null, initials),
       e("div", null, e("strong", null, shown), e("span", null, "Student"))
@@ -55,14 +55,24 @@ function CollapseDock() {
 export function bootStudentTheme() {
   try {
     document.body.classList.add("stu-v3");
-    try { if (localStorage.getItem("ghz-stu-side") === "1") document.body.classList.add("stu-collapsed"); } catch {}
-    const portal = document.body.children[0];
-    const aside = portal && portal.children[0];
-    if (aside && !aside.querySelector(".stu-theme-root")) {
-      const host = document.createElement("div");
-      host.className = "stu-theme-root";
-      aside.appendChild(host);
-      createRoot(host).render(e(CollapseDock));
+    try { if (localStorage.getItem("ghz-stu-side") === "1" && window.innerWidth >= 1024) document.body.classList.add("stu-collapsed"); else document.body.classList.remove("stu-collapsed"); } catch {}
+    const portal = document.querySelector(".portal") || document.body.children[0];
+    const aside = portal && portal.querySelector(".side");
+    if (aside) {
+      let host = aside.querySelector(".stu-account-card") || aside.querySelector(".stu-theme-root");
+      if (!host) {
+        host = document.createElement("div");
+        host.className = "stu-account-card stu-theme-root";
+        aside.appendChild(host);
+        createRoot(host).render(e(CollapseDock));
+      } else {
+        host.classList.add("stu-account-card", "stu-theme-root");
+        host.style.order = "";
+        if (!host.dataset.ghzRoot) {
+          createRoot(host).render(e(CollapseDock));
+          host.dataset.ghzRoot = "1";
+        }
+      }
     }
   } catch (err) {
     document.body.classList.remove("stu-v3", "stu-collapsed");

@@ -1,5 +1,5 @@
 import { subscribeTrainerStore, getTrainerStore } from "./TrainerStore.js";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { gradeCalc, fmt1 } from "./gradeCalc.js";
 import { loadSeenBoxes, baselineTrainerSeen, markAssignedSeen, markCompletedSeen, markReopenedSeen, dropAssignedSeen, seenAssigned, seenCompleted, seenReopened, reopenEventId } from "./seenBoxes.js";

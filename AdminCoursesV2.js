@@ -4,6 +4,8 @@ import { createPortal } from "https://esm.sh/react-dom@18.3.1";
 import { AdminPdfButton, fmtPdfDate } from "./AdminPdfExport.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
 import { statusLabel, statusChipKind, statusChipShort, adminCourseTabLabel, matchesAdminCourseTab, registrationOpenLabel, canRegisterForCourse } from "./courseStatusLabel.js";
+import { coverMarkup, hydrateCovers } from "./coverFor.js?v=stu11";
+import { icon } from "./ghz-icons.js";
 
 function showSecErr(host, err, retry) {
   if (!host) return;
@@ -35,14 +37,34 @@ function stClass(s) {
   if (s === "Draft") return "draft";
   return "draft";
 }
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function parseYmd(s) {
+  const m = String(s || "").trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return { y: +m[1], mo: +m[2], d: +m[3] };
+  const t = Date.parse(s);
+  if (!Number.isFinite(t)) return null;
+  const dt = new Date(t);
+  return { y: dt.getFullYear(), mo: dt.getMonth() + 1, d: dt.getDate() };
+}
+function shortDay(p) { return p ? (p.d + " " + MON[p.mo - 1]) : ""; }
+function fmtRange(start, end) {
+  const a = parseYmd(start), b = parseYmd(end);
+  if (!a && !b) return "";
+  if (a && !b) return shortDay(a) + " " + a.y;
+  if (!a && b) return shortDay(b) + " " + b.y;
+  if (a.y === b.y) return shortDay(a) + " → " + shortDay(b) + " " + a.y;
+  return shortDay(a) + " " + a.y + " → " + shortDay(b) + " " + b.y;
+}
 function delivery(c) {
   const days = Array.isArray(c.days) ? c.days.filter(Boolean) : [];
   const t = String(c.sessionTime || "").trim();
-  const start = c.startDate ? ("Starts " + c.startDate) : "Starts —";
-  const end = c.endDate ? ("Ends " + c.endDate) : "";
-  const startLine = end ? (start + " · " + end) : start;
-  if (!days.length) return { line: "Not set", start: startLine };
-  return { line: days.join(" · ") + (t ? " · " + t : ""), start: startLine };
+  const start = String(c.startDate || "").trim();
+  const end = String(c.endDate || "").trim();
+  const hasSched = days.length || t || start || end;
+  if (!hasSched) return { dayLine: "Not set", range: "", tip: "Beirut time", line: "Not set" };
+  const dayLine = days.length ? (days.join(" · ") + (t ? " · " + t : "")) : (t || "Not set");
+  const range = fmtRange(start, end);
+  return { dayLine, range, tip: "Beirut time", line: dayLine + (range ? " · " + range : "") };
 }
 function trainerBits(c, users) {
   const ids = c.trainerIds || (c.trainerId ? [c.trainerId] : []);
@@ -52,7 +74,15 @@ function trainerBits(c, users) {
     if (s) return s;
     return (users.find((u) => u.id === id || u.uid === id) || {}).name || "";
   }).filter(Boolean);
-  return { names, label: names.join(", ") || "Unassigned", empty: !names.length };
+  const shown = names.slice(0, 2);
+  const extra = Math.max(0, names.length - 2);
+  return {
+    names, shown,
+    label: shown.join(", ") || "Unassigned",
+    extra,
+    all: names.join(", ") || "Unassigned",
+    empty: !names.length
+  };
 }
 
 class Boundary extends Component {
@@ -79,11 +109,19 @@ function icoPlus() {
     e("path", { d: "M12 5v14M5 12h14", strokeLinecap: "round" }));
 }
 
+function peopleIco() {
+  return e("svg", { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", "aria-hidden": "true" },
+    e("path", { d: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2", strokeLinecap: "round" }),
+    e("circle", { cx: "9", cy: "7", r: "4" }),
+    e("path", { d: "M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75", strokeLinecap: "round" }));
+}
 function Row({ c, users, n, actions, hi }) {
   const [open, setOpen] = useState(false);
+  const [tip, setTip] = useState(null);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
   const moreRef = useRef(null);
   const menuRef = useRef(null);
+  const moreTipRef = useRef(null);
   const placeMenu = () => {
     const btn = moreRef.current;
     if (!btn) return;
@@ -131,39 +169,55 @@ function Row({ c, users, n, actions, hi }) {
   else if (st === "Open" || st === "Closed") main = { label: "Complete", ghost: false, fn: () => actions.complete(c) };
   else if (st === "Coming soon") main = { label: "Publish", ghost: false, fn: () => actions.publish(c) };
   else if (st === "Archived") main = { label: "Restore", ghost: true, fn: () => actions.restore(c) };
-  return e("div", { className: "acv2-row" + (hi ? " acv2-hi" : "") },
-    e("div", { className: "acv2-edge", style: { background: hue(c.id) } }),
-    e("div", { className: "acv2-cell" },
-      e("p", { className: "acv2-title", title: c.title || "Untitled" }, c.title || "Untitled"),
-      e("p", { className: "acv2-sub", title: [c.level || "Level", c.duration || "Duration"].join(" · ") }, [c.level || "Level", c.duration || "Duration"].join(" · "))
+  return e("div", { className: "acv2-row" + (hi ? " acv2-hi" : ""), style: { "--acv2-edge": hue(c.id) } },
+    e("div", { className: "acv2-cell acv2-cell-cover" },
+      e("div", { className: "acv2-thumb", dangerouslySetInnerHTML: { __html: coverMarkup(c, "acv2-thumbart") } }),
+      e("div", { className: "acv2-txt" },
+        e("p", { className: "acv2-title", title: c.title || "Untitled" }, c.title || "Untitled")
+      )
     ),
     e("div", { className: "acv2-tr" },
       tr.empty
         ? e("div", { className: "acv2-av empty" })
         : e("div", { className: "acv2-av", style: { background: avBg(tr.names[0]) } }, initials(tr.names[0])),
-      e("span", { className: tr.empty ? "acv2-un" : "", title: tr.label }, tr.label)
+      e("div", { className: "acv2-trtxt" },
+        tr.empty ? e("span", { className: "acv2-un" }, tr.label) : tr.shown.map((nm) => e("span", { className: "acv2-trname", key: nm }, nm)),
+        tr.extra ? e("span", {
+          className: "acv2-trmore", ref: moreTipRef,
+          onMouseEnter: () => {
+            const r = moreTipRef.current && moreTipRef.current.getBoundingClientRect();
+            if (r) setTip({ top: r.bottom + 6, left: r.left, text: tr.all });
+          },
+          onMouseLeave: () => setTip(null)
+        }, "+" + tr.extra + " more") : null
+      ),
+      tip ? createPortal(e("div", {
+        className: "acv2-tip", role: "tooltip",
+        style: { position: "fixed", top: tip.top, left: tip.left, zIndex: 10060 }
+      }, tip.text), document.body) : null
     ),
     e("div", null,
       e("span", { className: "acv2-st " + statusChipKind(c), title: statusLabel(c) }, statusChipShort(c)),
       registrationOpenLabel(c) ? e("p", { className: "acv2-regtag" + (canRegisterForCourse(c) ? " open" : " shut") }, registrationOpenLabel(c)) : null
     ),
-    e("div", { className: "acv2-del" }, e("div", null, del.line), e("p", { className: "acv2-sub" }, del.start)),
+    e("div", { className: "acv2-del" },
+      e("div", { className: "acv2-del-main", dangerouslySetInnerHTML: { __html: icon("calendar") + (del.dayLine || "") } }),
+      e("p", { className: "acv2-del-tz" }, "Beirut time")
+    ),
     e("div", { className: "acv2-n" }, st === "Draft" ? "—" : String(n == null ? 0 : n)),
     e("div", { className: "acv2-acts", onClick: (ev) => ev.stopPropagation() },
       main ? e("button", { type: "button", className: "acv2-main" + (main.ghost ? " ghost" : ""), onClick: main.fn }, main.label) : null,
-      e("button", { type: "button", className: "acv2-edit", title: "Roster", "aria-label": "Roster", onClick: () => actions.roster(c) },
-        e("svg", { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2 }, e("path", { d: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" }), e("circle", { cx: 9, cy: 7, r: 4 }))),
-      e("button", { type: "button", className: "acv2-edit", onClick: () => actions.edit(c) }, "Edit"),
       e("button", { type: "button", className: "acv2-more", ref: moreRef, "aria-expanded": open, "aria-haspopup": "menu", onClick: (ev) => { ev.stopPropagation(); setOpen((o) => !o); } }, "⋯"),
       open ? createPortal(e("div", {
         className: "acv2-menu acv2-menu-portal", role: "menu", ref: menuRef,
         style: { position: "fixed", top: menuPos.top, left: menuPos.left, zIndex: 10050 },
         onClick: (ev) => ev.stopPropagation()
       },
+        e("button", { type: "button", role: "menuitem", onClick: () => { setOpen(false); actions.edit(c); } }, "Edit"),
         e("button", { type: "button", role: "menuitem", onClick: () => { setOpen(false); actions.roster(c); } }, "Roster"),
         e("button", { type: "button", role: "menuitem", onClick: () => { setOpen(false); actions.content(c); } }, "Course content"),
         e("button", { type: "button", role: "menuitem", onClick: () => { setOpen(false); actions.gd(c); } }, "Grade distribution"),
-        (st === "Open" || st === "Closed") ? e("button", { type: "button", role: "menuitem", onClick: () => { setOpen(false); actions.setReg?.(c, st === "Open" ? "Closed" : "Open"); } }, "Registration: " + (st === "Open" ? "Closed" : "Open")) : null,
+        (st === "Open" || st === "Closed") ? e("button", { type: "button", role: "menuitem", onClick: () => { setOpen(false); actions.setReg?.(c, st === "Open" ? "Closed" : "Open"); } }, st === "Open" ? "Close registration" : "Open registration") : null,
         st === "Coming soon" ? e("button", { type: "button", role: "menuitem", disabled: true, title: "Scheduled courses stay Coming soon" }, "Registration: Open") : null,
         e("button", { type: "button", role: "menuitem", className: "amber", onClick: () => { setOpen(false); actions.askArchive(c); } }, "Archive"),
         e("button", { type: "button", role: "menuitem", className: "red", onClick: () => { setOpen(false); actions.askDel(c); } }, "Delete")
@@ -183,7 +237,7 @@ function readCourseTab() {
   } catch (_) {}
   return "Active";
 }
-function Page({ courses, users, counts, error, loading, onRetry, onAdd, actions }) {
+function Page({ courses, users, counts, error, loading, onRetry, onAdd, onThumbs, onOptimize, actions }) {
   courses = Array.isArray(courses) ? courses : [];
   users = Array.isArray(users) ? users : [];
   counts = counts && typeof counts === "object" ? counts : {};
@@ -196,6 +250,15 @@ function Page({ courses, users, counts, error, loading, onRetry, onAdd, actions 
     setTab(t);
     try { sessionStorage.setItem("ghz-courses-tab", t); } catch (_) {}
   };
+  useEffect(() => {
+    requestAnimationFrame(() => hydrateCovers(document.querySelector(".admin-courses")));
+  }, [courses, q, tab]);
+  useEffect(() => {
+    const th = document.querySelector(".admin-courses .acv2-th");
+    if (!th) return;
+    const kids = [...th.children].map((el) => Math.round(el.getBoundingClientRect().width));
+    console.log("[ghz-layout]", { innerWidth: window.innerWidth, headers: kids, labels: ["Course","Trainer","Status","Delivery","Students","Actions"] });
+  }, [courses, q, tab]);
   useEffect(() => {
     const onHi = (ev) => {
       const id = String(ev.detail?.id || "");
@@ -263,6 +326,8 @@ function Page({ courses, users, counts, error, loading, onRetry, onAdd, actions 
             return { title: c.title, trainer: t.label, level: c.level || "—", status: statusLabel(c), start: fmtPdfDate(c.startDate) === "—" ? (c.startDate || "—") : c.startDate, delivery: d.line, students: String(counts[c.id] ?? "—") };
           })
         }) }),
+        e("button", { type: "button", className: "acv2-add", onClick: onThumbs, style: { background: "#fff", color: "#0F2747", border: "1px solid #E2E8F0" } }, "Generate thumbnails"),
+        onOptimize ? e("button", { type: "button", className: "acv2-add", onClick: onOptimize, style: { background: "#fff", color: "#0F2747", border: "1px solid #E2E8F0" } }, "Optimize courses") : null,
         e("button", { type: "button", className: "acv2-add", onClick: onAdd }, icoPlus(), "Add course")
       )
     ),
@@ -275,7 +340,9 @@ function Page({ courses, users, counts, error, loading, onRetry, onAdd, actions 
     e("div", { className: "acv2-card" },
       e("div", { className: "acv2-th" },
         e("div", null, "Course"), e("div", null, "Trainer"), e("div", null, "Status"),
-        e("div", null, "Delivery"), e("div", null, "Students"), e("div", null, "Actions")
+        e("div", null, "Delivery"),
+        e("div", { className: "acv2-nhead", title: "Students enrolled", "aria-label": "Students enrolled" }, peopleIco()),
+        e("div", null, "Actions")
       ),
       !courses.length && loading ? [1, 2, 3, 4].map((i) => e("div", { className: "acv2-row", key: i }, e("div", { className: "acv2-sk" }), e("div", { className: "acv2-sk" }), e("div", { className: "acv2-sk" }), e("div", { className: "acv2-sk" }), e("div", { className: "acv2-sk" }), e("div", { className: "acv2-sk" }))) :
       rows.length ? rows.map((c) => e(Row, { key: c.id, c, users, n: counts[c.id], actions: wrapped, hi: hi === c.id })) :

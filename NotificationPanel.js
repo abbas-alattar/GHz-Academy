@@ -64,6 +64,16 @@ export function bucketDay(ms) {
   if (t > t0 - 7 * 86400000) return "This week";
   return "Earlier";
 }
+export function sheetDay(ms) {
+  const d = new Date(ms);
+  const today = new Date();
+  const start = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const t0 = start(today);
+  const t = start(d);
+  if (t === t0) return "TODAY";
+  if (t === t0 - 86400000) return "YESTERDAY";
+  return "EARLIER";
+}
 
 function courseMap() {
   const packs = [
@@ -148,7 +158,8 @@ function row(n, unreadItem, onOpen, onRead, page) {
       tile(n, page),
       h("span", { className: "nt2-body" },
         h("span", { className: "nt2-line1" },
-          h("strong", null, n.title)
+          h("strong", null, n.title),
+          unreadItem ? h("span", { className: "nt2-udot", "aria-hidden": "true" }) : null
         ),
         n.message ? h("span", { className: "nt2-msg" }, n.message) : null,
         h("span", { className: "nt2-pills" },
@@ -157,7 +168,6 @@ function row(n, unreadItem, onOpen, onRead, page) {
         )
       ),
       h("span", { className: "nt2-meta" },
-        unreadItem ? h("span", { className: "nt2-udot", "aria-hidden": "true" }) : null,
         h("span", { className: "nt2-time" }, n.rel)
       )
     ),
@@ -236,8 +246,14 @@ export function NotificationPanel(p) {
   const tagged = items.map((n) => ({ ...n, _unread: unreadSet.has(n.id) }));
   const shown = filterItems(tagged, tab, muted, hidden, query).slice().sort((a, b) => b.time - a.time);
   const sliced = page ? shown.slice(0, limit) : shown;
-  const groups = { Today: [], "This week": [], Earlier: [] };
-  sliced.forEach((n) => groups[bucketDay(n.time)].push(n));
+  const sheet = !!p.sheet && !page;
+  const dayKeys = sheet ? ["TODAY", "YESTERDAY", "EARLIER"] : ["Today", "This week", "Earlier"];
+  const groups = {};
+  dayKeys.forEach((k) => { groups[k] = []; });
+  sliced.forEach((n) => {
+    const k = sheet ? sheetDay(n.time) : bucketDay(n.time);
+    (groups[k] || groups[dayKeys[dayKeys.length - 1]]).push(n);
+  });
   const counts = {};
   TABS.forEach((t) => {
     const list = t.id === "all" ? tagged.filter((n) => !hidden.includes(n.id) && !muted.includes(n.category))
@@ -250,7 +266,7 @@ export function NotificationPanel(p) {
     h("span", { className: "nt2-emptyico", "aria-hidden": "true" }, svg("M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 01-3.46 0", "#94A3B8", 22)),
     h("p", null, "You're all caught up")
   );
-  const listInner = ["Today", "This week", "Earlier"].map((g) => {
+  const listInner = dayKeys.map((g) => {
     const cards = groupCards(groups[g]);
     return cards.length ? h("div", { key: g, className: "nt2-day" },
       h("p", { className: "nt2-g" }, g),
@@ -267,8 +283,16 @@ export function NotificationPanel(p) {
   const body = (loading && !(items && items.length)) ? skel() :
     (!shown.length ? empty : h("div", { className: "nt2-list" }, listInner, more));
 
+  const trainerSheetTabs = [
+    { id: "all", label: "All" },
+    { id: "unread", label: "Unread" },
+    { id: "Courses", label: "Courses" },
+    { id: "Grades", label: "Grades" },
+    { id: "Announcements", label: "Announcements" }
+  ];
+  const tabList = (sheet && p.role === "trainer") ? trainerSheetTabs : TABS;
   const tabs = h("div", { className: "nt2-tabs" },
-    TABS.map((t) => h("button", {
+    tabList.map((t) => h("button", {
       type: "button",
       className: tab === t.id ? "on" : "",
       onClick: () => p.onTab(t.id)
@@ -287,6 +311,42 @@ export function NotificationPanel(p) {
             h("button", { type: "button", className: "nt2-all", onClick: p.onMarkAll }, "Mark all as read"),
             h("input", { className: "nt2-search", placeholder: "Search", value: query || "", onInput: (e) => p.onQuery(e.target.value) })
           )
+        ),
+        tabs,
+        body
+      )
+    );
+  }
+
+  if (sheet) {
+    const onHandleDown = (ev) => {
+      const startY = ev.touches ? ev.touches[0].clientY : ev.clientY;
+      const el = ev.currentTarget.closest(".nt2-sheet");
+      const move = (e) => {
+        const y = e.touches ? e.touches[0].clientY : e.clientY;
+        const dy = Math.max(0, y - startY);
+        if (el) el.style.transform = "translateY(" + dy + "px)";
+      };
+      const up = (e) => {
+        const y = (e.changedTouches ? e.changedTouches[0].clientY : e.clientY);
+        document.removeEventListener("touchmove", move);
+        document.removeEventListener("touchend", up);
+        if (y - startY > 60) p.onClose?.();
+        else if (el) el.style.transform = "";
+      };
+      document.addEventListener("touchmove", move, { passive: true });
+      document.addEventListener("touchend", up);
+    };
+    const closeOut = (ev) => { ev.stopPropagation(); p.onClose?.(); };
+    const stopIn = (ev) => { ev.stopPropagation(); };
+    return h("div", { className: "nt2-sheet-root", role: "dialog", "aria-modal": "true", "aria-label": "Notifications" },
+      h("div", { className: "nt2-scrim", onPointerDown: closeOut, onClick: closeOut }),
+      h("div", { className: "nt2-sheet", onPointerDown: stopIn, onClick: stopIn },
+        h("div", { className: "nt2-handlewrap", onTouchStart: onHandleDown }, h("div", { className: "nt2-handle" })),
+        h("div", { className: "nt2-h nt2-sheet-h" },
+          h("div", { className: "nt2-ht" }, h("strong", null, "Notifications")),
+          h("button", { type: "button", className: "nt2-all", onClick: p.onMarkAll }, "Mark all as read"),
+          h("button", { type: "button", className: "nt2-x", "aria-label": "Close", onClick: () => p.onClose?.() }, "×")
         ),
         tabs,
         body

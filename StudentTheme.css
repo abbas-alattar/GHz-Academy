@@ -6,7 +6,7 @@ body.stu-v3 .content {
   max-width: 1440px;
   margin: 0;
   width: 100%;
-  padding: 28px 32px;
+  padding: 24px 32px;
 }
 body.stu-v3 .uni-dash,
 body.stu-v3 .content > section,
@@ -82,7 +82,8 @@ body.stu-v3 .uni-emptycard .uni-soonico, body.stu-v3 .uni-emptycard .uni-calpuls
   width: 44px; height: 44px; margin: 0; flex: 0 0 44px;
 }
 body.stu-v3 .side nav {
-  display: grid; gap: 4px; margin-top: 20px; flex: 0 0 auto;
+  display: flex; flex-direction: column; gap: 4px; margin-top: 20px;
+  flex: 1 1 auto; min-height: 0; overflow-y: scroll; overflow-x: hidden;
 }
 body.stu-v3 .side nav a {
   display: flex; align-items: center; gap: 10px; position: relative; padding: 0 12px; height: 40px; min-height: 40px;
@@ -120,18 +121,22 @@ body.stu-v3 .side {
   display: flex; flex-direction: column;
   background: linear-gradient(180deg, #0B1B33, #0F2747);
 }
-body.stu-v3 .side nav { flex: 0 0 auto; }
+@media (min-width: 1024px) {
+  body.stu-v3 .side {
+    position: relative; top: auto; left: auto; bottom: auto;
+    overflow: hidden;
+  }
+  body.stu-v3 .main { margin-left: 0; }
+}
 body.stu-v3.stu-collapsed .portal { grid-template-columns: 72px minmax(0, 1fr); }
 body.stu-v3.stu-collapsed .side .ghz, body.stu-v3.stu-collapsed .side .acad,
 body.stu-v3.stu-collapsed .side nav a { font-size: 0; gap: 0; justify-content: center; padding-left: 8px; padding-right: 8px; }
 body.stu-v3.stu-collapsed .side nav a::before { margin: 0; }
 body.stu-v3.stu-collapsed .stu-usercard span, body.stu-v3.stu-collapsed .stu-usercard strong { display: none; }
-body.stu-v3 .stu-collapse {
-  position: absolute; top: 22px; right: 12px; width: 24px; height: 24px; border-radius: 50%;
-  border: 1px solid #1E3A5F; background: #0F2747; color: #94A3B8; cursor: pointer; font: inherit; font-size: 14px;
-  z-index: 6; padding: 0; line-height: 22px; text-align: center;
+body.stu-v3 .stu-theme-root .stu-collapse { display: none !important; }
+@media (min-width: 1024px) {
+  body.stu-v3 .side { position: relative; top: auto; left: auto; }
 }
-body.stu-v3 .side { position: sticky; }
 body.stu-v3 .stu-usercard {
   display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px;
   border-radius: 12px; background: #0F2747; color: #fff;
@@ -159,4 +164,61 @@ body.stu-v3 .uni-stat::after {
 @media (max-width: 900px) {
   body.stu-v3 .portal { grid-template-columns: 1fr; }
   body.stu-v3.stu-collapsed .portal { grid-template-columns: 1fr; }
+}
+@media (max-width: 767px) {
+  html, body.portal-student, body.stu-v3, body.portal-student .portal {
+    max-width: 100vw; min-width: 0;
+  }
+  body.portal-student .content, body.stu-v3 .content, body.portal-student .ghz-scroll,
+  body.portal-student .main, body.portal-student .dv3, body.portal-student .dv3-hero,
+  body.portal-student .dv3-stats, body.portal-student .dv3-grid, body.portal-student .pay-notice {
+    width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box;
+  }
+  body.portal-student .content, body.stu-v3 .content, body.portal-student .ghz-scroll {
+    padding: 16px; padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px) + 16px);
+  }
+  body.portal-student .top {
+    position: sticky; top: 0; z-index: 30; height: 56px; min-height: 56px; padding: 0 12px;
+    background: #fff; display: flex; align-items: center; gap: 4px; width: 100%; min-width: 0; box-sizing: border-box;
+  }
+  body.portal-student .top h1 {
+    flex: 1; min-width: 0; font-size: 18px !important; font-weight: 700; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; margin: 0;
+  }
+  body.portal-student .ghz-navbtn, body.portal-student .ghz-menu {
+    display: flex !important; width: 44px; height: 44px; flex: 0 0 44px; align-items: center; justify-content: center;
+    border: 0; background: transparent; padding: 0; margin: 0;
+  }
+  body.portal-student .ghz-navbtn + .ghz-menu, body.portal-student .ghz-menu + .ghz-navbtn { display: none !important; }
+  body.portal-student .stu-collapse { display: none !important; }
+  body.portal-student .top .who, body.portal-student .top .out { display: none !important; }
+  body.portal-student .top-actions { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; min-width: 0; }
+  body.portal-student .ghz-search { display: none !important; }
+  body.portal-student .ghz-search-ico, body.portal-student .notify-btn, body.portal-student .stu-search-btn {
+    display: flex !important; width: 44px; height: 44px; min-height: 44px; flex: 0 0 44px; border: 0; background: transparent; border-radius: 10px; align-items: center; justify-content: center; font-size: 22px;
+  }
+  body.portal-student .ghz-search-ico svg { width: 22px; height: 22px; }
+  body.portal-student .content > p:last-child,
+  body.portal-student .main > p:last-of-type {
+    text-align: center; font-size: 13px; color: #64748B; margin-top: 24px;
+    padding-bottom: calc(24px + 64px + env(safe-area-inset-bottom, 0px));
+  }
+  body.portal-student .stu-av { display: flex !important; width: 36px; height: 36px; flex: 0 0 36px; border-radius: 50%; border: 0; background: #0F2747; color: #fff; font-weight: 700; align-items: center; justify-content: center; }
+  body.portal-student .stu-banner-slot { margin: 0 0 16px; width: 100%; min-width: 0; }
+  body.portal-student .pay-notice {
+    display: grid; grid-template-columns: 36px minmax(0,1fr) 44px; grid-template-rows: auto auto;
+    column-gap: 12px; row-gap: 10px; padding: 14px 16px; align-items: start;
+  }
+  body.portal-student .pay-notice-ico { width: 36px; height: 36px; grid-row: 1; }
+  body.portal-student .pay-notice-txt { grid-column: 2; min-width: 0; }
+  body.portal-student .pay-notice-txt strong { font-size: 15px; }
+  body.portal-student .pay-notice-txt p {
+    font-size: 13px; color: #64748B; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  body.portal-student .pay-notice-x { grid-column: 3; grid-row: 1; width: 44px; height: 44px; min-height: 44px; }
+  body.portal-student .pay-notice-btn { grid-column: 1 / -1; width: 100%; height: 40px; min-height: 40px; }
+  body.portal-student .side .stu-logout-row {
+    display: flex !important; align-items: center; justify-content: center; color: #F87171 !important;
+    height: 48px; border: 1px solid rgba(248,113,113,.4); border-radius: 12px; background: transparent; font-size: 16px;
+  }
 }

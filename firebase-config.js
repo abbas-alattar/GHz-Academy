@@ -2,7 +2,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import {
   initializeAuth, browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import {
+  initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager, persistentSingleTabManager
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 export const firebaseConfig = {
   apiKey: "AIzaSyBBhCl5Y6JO1EzJYVIdnYh4ZIzxPw7mpCY",
@@ -25,6 +27,15 @@ try {
   });
 }
 export const auth = authInst;
-export const db = getFirestore(app);
+let dbInst;
+try {
+  dbInst = initializeFirestore(app, {
+    experimentalAutoDetectLongPolling: true,
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+  });
+} catch (_) {
+  dbInst = getFirestore(app);
+}
+export const db = dbInst;
 
 export const roleHome = { student: "./student.html", trainer: "./trainer.html", admin: "./admin.html" };

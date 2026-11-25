@@ -1,8 +1,8 @@
 import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 
 const HEART = 5 * 60 * 1000;
-const PING = 60 * 1000;
+const PING = 5 * 60 * 1000;
 
 export async function markLoginActivity(uid) {
   if (!uid) return;

@@ -1,4 +1,5 @@
 import { attendancePct } from "./gradeCalc.js";
+const asArray = (x) => Array.isArray(x) ? x : [];
 
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
 const state = { open: {}, popup: "", scope: "active" };
@@ -270,7 +271,9 @@ export function renderAttendanceV2(opts) {
       return true;
     }
     const uid = opts.uid;
-    const courses = Array.isArray(opts.courses) ? opts.courses : [];
+    const courses = asArray(opts.courses);
+    opts.sessions = asArray(opts.sessions);
+    opts.attendance = asArray(opts.attendance);
     const active = courses.filter((c) => String(c.status) !== "Completed").sort((a, b) => String(a.title||"").localeCompare(String(b.title||"")));
     const done = courses.filter((c) => String(c.status) === "Completed").sort((a, b) => String(a.title||"").localeCompare(String(b.title||"")));
     const allTime = state.scope === "all";

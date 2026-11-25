@@ -196,8 +196,8 @@ function Page({ uid, go }) {
           e("div", { className: "tr2-meta" }, e(Mini, { kind: "users", tone: "violet" }),
             e("span", { className: "tr2-avs" }, nameList.slice(0, 3).map((nm) => e("span", { className: "tr2-av", key: nm }, initials(nm)))),
             nameList.join(", ") || "—"),
-          e("div", { className: "tr2-meta" }, e(Mini, { kind: "clock", tone: "blue" }), (days || "—") + (time ? " · " + time : "")),
-          e("div", { className: "tr2-meta" }, e(Mini, { kind: "cal", tone: "teal" }), (formatCourseDate(c.startDate) || "—") + " – " + (formatCourseDate(c.endDate) || "—")),
+          e("div", { className: "tr2-meta" }, e(Mini, { kind: "clock", tone: "blue" }), e("span", null, (days || time) ? ((days || "") + (time ? (days ? " · " : "") + time : "")) : "Schedule to be announced", e("span", { className: "tr2-tz" }, "Beirut time"))),
+          e("div", { className: "tr2-meta" }, e(Mini, { kind: "cal", tone: "teal" }), (formatCourseDate(c.startDate) || formatCourseDate(c.endDate)) ? ((formatCourseDate(c.startDate) || "Dates to be announced") + " – " + (formatCourseDate(c.endDate) || "Dates to be announced")) : "Dates to be announced"),
           e("div", { className: "tr2-meta" }, e(Mini, { kind: "users", tone: "violet" }), pack.extrasReady ? (pack.enrErr ? e("span", null, "— ", refreshIco) : nLab) : e("i", { className: "tr2-sk tr2-mini" })),
           pack.extrasReady
             ? (sessErr
@@ -205,10 +205,10 @@ function Page({ uid, go }) {
               : e("div", { className: "tr2-prog" }, e("div", { className: "tr2-bar " + sk }, e("i", { style: { width: (sess.length ? pct : 0) + "%" } })), e("span", { className: "tr2-prog-lab" }, sess.length ? doneS + " of " + sess.length + " sessions · " + pct + "%" : "No sessions yet")))
             : e("div", { className: "tr2-sk" }),
           e("div", { className: "tr2-acts", onClick: stop },
-            e("button", { type: "button", className: "tr2-btn pri", onClick: () => go("roster/" + c.id) }, e(Svg, { d: IC.users, size: 14 }), completed ? "View roster" : "Roster"),
-            completed ? null : e("button", { type: "button", className: "tr2-btn ghost", onClick: () => go("course/" + c.id) }, e(Svg, { d: IC.book, size: 14 }), "Course content"),
-            e("button", { type: "button", className: "tr2-btn ghost", onClick: () => go("grades?course=" + c.id) }, e(Svg, { d: IC.chart, size: 14 }), "Grades"),
-            completed ? null : e("button", { type: "button", className: "tr2-btn ghost", onClick: () => go("attendance?course=" + c.id) }, e(Svg, { d: IC.check, size: 14 }), "Attendance")
+            e("button", { type: "button", className: "tr2-btn pri", onClick: () => go("roster/" + c.id) }, e(Svg, { d: IC.users, size: 16 }), "Roster"),
+            e("button", { type: "button", className: "tr2-btn ghost", onClick: () => go("course/" + c.id) }, e(Svg, { d: IC.book, size: 16 }), "Course content"),
+            e("button", { type: "button", className: "tr2-btn ghost", onClick: () => go("grades?course=" + c.id) }, e(Svg, { d: IC.chart, size: 16 }), "Grades"),
+            e("button", { type: "button", className: "tr2-btn ghost", onClick: () => go("attendance?course=" + c.id) }, e(Svg, { d: IC.check, size: 16 }), "Attendance")
           )
         )
       );

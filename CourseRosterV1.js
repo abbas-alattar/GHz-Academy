@@ -1,8 +1,8 @@
 import { createElement as e, useEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { auth, db } from "./firebase-config.js?v=auth8";
+import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { gradeCalc } from "./gradeCalc.js";
+import { storedCourseResult } from "./gradeCalc.js";
 import { loadGradePack } from "./AdminGradesV2.js";
 import { exportAdminPdf, nameWithId } from "./AdminPdfExport.js";
 import { startsEndsLine, formatCourseDate } from "./courseDates.js";
@@ -44,22 +44,17 @@ function isAbsent(st) {
 function courseIsCompleted(course) {
   return String(course?.status || "").trim().toLowerCase() === "completed";
 }
-function passFail(avg, passMark) {
-  const n = Number(avg);
-  const mark = Number(passMark);
-  if (!Number.isFinite(n) || !Number.isFinite(mark)) return "Failed";
-  return n >= mark ? "Passed" : "Failed";
-}
-/** One status for table, tiles, filter, PDF, CSV. Matches AdminGradesV2 statusInfo. */
+/** One status for table, tiles, filter, PDF, CSV. Same stored grades as Admin Grades. */
 export function studentRosterStatus(course, pack, uid) {
   const completed = courseIsCompleted(course);
   const passMark = Number.isFinite(Number(pack?.passMark)) ? Number(pack.passMark) : 60;
   const row = (pack?.rows || []).find((r) => r.uid === uid);
   const scheme = pack?.scheme || { components: pack?.components, passMark };
-  const g = gradeCalc(course, scheme, { uid, scores: row?.vals || row?.scores || {}, pack });
-  const avg = g.failed ? null : g.average;
-  if (completed) return { status: g.failed ? "—" : passFail(avg, passMark), avg, passMark, completed: true };
-  return { status: "IP", avg, passMark, completed: false };
+  const g = storedCourseResult(scheme, row?.rec, course?.status);
+  const avg = Number.isFinite(g.avg) ? g.avg : null;
+  if (!completed) return { status: "IP", avg, passMark, completed: false, badge: g.badge };
+  const status = g.badge === "Passed" ? "Passed" : g.badge === "Failed" ? "Failed" : (g.badge === "No grade" ? "—" : "IP");
+  return { status, avg, passMark, completed: true, badge: g.badge, display: g.display };
 }
 
 function App({ opts }) {
@@ -102,6 +97,7 @@ function App({ opts }) {
       const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       list.sort((a, b) => String(a.studentName || "").localeCompare(String(b.studentName || "")));
       setEns(list);
+      try { if (window.matchMedia("(max-width: 767px)").matches) console.log("[ghz-roster-phone]", courseId, list.length); } catch (_) {}
       return list;
     } catch (ex) { setEnErr(fbErr(ex)); return []; }
     finally { setEnLoad(false); }

@@ -1,4 +1,4 @@
-import { protect } from "./auth-guard.js?v=auth8";
+import { protect } from "./auth-guard.js?v=auth10";
 import { renderTrainerAnnouncementsV2 } from "./TrainerAnnouncementsV2.js";
 import { bootNotify } from "./portal-notify.js";
 import { loadAnnouncementReads } from "./announcementReads.js";

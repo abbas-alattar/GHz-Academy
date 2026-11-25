@@ -1,5 +1,5 @@
 import { collection, query, where, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 
 export async function homeworkHasSubs(courseId, assignmentId) {
   const snap = await getDocs(query(collection(db, "submissions"), where("courseId", "==", courseId)));

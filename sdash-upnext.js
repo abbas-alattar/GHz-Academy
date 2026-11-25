@@ -1,4 +1,4 @@
-import { bound } from "./student-dash-data.js?v=stu7";
+import { bound } from "./student-dash-data.js?v=stu11";
 
 function startMs(s) {
   return new Date(`${s.date || ""}T${s.startTime || "00:00"}`).getTime();

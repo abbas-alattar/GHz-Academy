@@ -1,10 +1,10 @@
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { AdminPdfButton, fmtPdfDate, exportStudentProfilePdf } from "./AdminPdfExport.js";
 import { loadGradePack } from "./AdminGradesV2.js";
-import { studentRosterStatus } from "./CourseRosterV1.js";
+import { storedCourseResult, formatGrade } from "./gradeCalc.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
 import { courseStatusLabel } from "./courseStatusLabel.js";
 
@@ -170,7 +170,9 @@ function IdChip({ id, onEdit }) {
   if (!id) return e("span", { className: "asv2-miss" }, "Not assigned yet");
   return e("span", { className: "asv2-idchip" },
     e("code", null, id),
-    e("button", { type: "button", className: "asv2-copy", title: "Copy", onClick: (ev) => { ev.stopPropagation(); copyId(id); } }, "Copy"),
+    e("button", { type: "button", className: "asv2-copy", title: "Copy ID", "aria-label": "Copy ID", onClick: (ev) => { ev.stopPropagation(); copyId(id); } },
+      e("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2 }, e("rect", { x: 9, y: 9, width: 13, height: 13, rx: 2 }), e("path", { d: "M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" }))
+    ),
     onEdit ? e("button", { type: "button", className: "asv2-copy", onClick: (ev) => { ev.stopPropagation(); onEdit(); } }, "Edit") : null
   );
 }
@@ -179,10 +181,11 @@ function trainerLine(c) {
   if (names.length) return names.join(", ");
   return c?.trainerName || "Trainer to be announced";
 }
-function resultPill(st) {
-  if (st === "Passed") return e("span", { className: "sd4-rp sd4-pass" }, "Passed");
-  if (st === "Failed") return e("span", { className: "sd4-rp sd4-fail" }, "Failed");
-  return e("span", { className: "sd4-rp sd4-ip" }, "IP");
+function resultPill(g) {
+  const badge = g?.badge || g?.status || "In progress";
+  const text = g?.display || badge;
+  const cls = badge === "Passed" ? "sd4-rp sd4-pass" : badge === "Failed" ? "sd4-rp sd4-fail" : "sd4-rp sd4-ip";
+  return e("span", { className: cls }, text);
 }
 function StatusBadge({ status }) {
   const st = String(status || "—").trim();
@@ -235,8 +238,12 @@ function Drawer({ s, courseById, lastMs, lastLabel, lastErr, onClose, onToggle, 
         const c = courseById[cid] || {};
         try {
           const pack = await loadGradePack(cid);
-          if (pack.err) out[cid] = { err: pack.err, status: "IP" };
-          else out[cid] = studentRosterStatus(c, pack, uid);
+          if (pack.err) out[cid] = { err: pack.err, status: "In progress", badge: "In progress" };
+          else {
+            const row = (pack.rows || []).find((r) => r.uid === uid);
+            const scheme = pack.scheme || { components: pack.components, passMark: pack.passMark };
+            out[cid] = storedCourseResult(scheme, row?.rec, c.status);
+          }
         } catch (err) {
           out[cid] = { err: err.code || err.message, status: "IP" };
         }
@@ -292,7 +299,7 @@ function Drawer({ s, courseById, lastMs, lastLabel, lastErr, onClose, onToggle, 
       const courseRows = list.map((en) => {
         const c = courseById[en.courseId] || {};
         const g = grades && grades[en.courseId];
-        const status = g?.err ? "IP" : (g?.status || (String(c.status || "").toLowerCase() === "completed" ? "Failed" : "IP"));
+        const status = g?.err ? "IP" : (g?.badge || g?.status || "In progress");
         return {
           title: c.title || en.courseTitle || en.courseId,
           trainers: trainerLine(c),
@@ -302,7 +309,7 @@ function Drawer({ s, courseById, lastMs, lastLabel, lastErr, onClose, onToggle, 
       });
       await exportStudentProfilePdf({
         previewWin: preview,
-        student: { name: u.name, studentId: u.studentId },
+        student: { name: (u.fullName || u.name || u.displayName || ""), studentId: u.studentId },
         details: [
           { k: "Student ID", v: u.studentId || "—" },
           { k: "Full name", v: u.name || "—" },
@@ -399,7 +406,7 @@ function Drawer({ s, courseById, lastMs, lastLabel, lastErr, onClose, onToggle, 
           e("div", { className: "sd4-cright" },
             !g ? e("div", { className: "asv2-sk asv2-sk-sm" }) :
             g.err ? e("button", { type: "button", className: "asv2-gpill amber", onClick: () => setReloadN((n) => n + 1) }, g.err + " · Try again") :
-            resultPill(g.status)
+            resultPill(g)
           )
         );
       }) : e("p", { className: "sd4-miss" }, "No enrollments"))
@@ -644,14 +651,14 @@ function Page({ students, courses, enrollments, enErr, loading, error, onRetry, 
       e("input", { className: "asv2-search", placeholder: "Search name, email, phone, ID", value: q, onChange: (ev) => setQ(ev.target.value) })
     ),
     e("div", { className: "asv2-card" },
-      e("div", { className: "asv2-th asv2-th-id" }, e("div", null, "ID"), e("div", null, "Student"), e("div", null, "Verified"), e("div", null, "Joined"), e("div", null, "Courses"), e("div", null, "Last activity"), e("div", null, "")),
+      e("div", { className: "asv2-th asv2-th-id" }, e("div", null, "ID"), e("div", null, "Student"), e("div", null, "Verified"), e("div", null, "Joined"), e("div", null, "Courses"), e("div", null, "Last activity"), e("div", null, "Action")),
       loading ? [1, 2, 3].map((i) => e("div", { className: "asv2-row", key: i }, e("div", { className: "asv2-sk" }))) :
       !rows.length ? e("div", { className: "asv2-empty" }, e("p", null, "No students match"), e("button", { type: "button", className: "asv2-view", onClick: () => { setTab("all"); setQ(""); setCid(""); } }, "Clear filters")) :
       rows.map((s) => e("div", { className: "asv2-row asv2-th-id", key: s.uid, onClick: () => setOpen(s) },
         e("div", { onClick: (ev) => ev.stopPropagation() }, e(IdChip, { id: s.studentId })),
-        e("div", { className: "asv2-stu" }, e("div", { className: "asv2-av", style: { background: avBg(s.name) } }, initials(s.name || s.email)), e("div", null, e("p", null, s.name || "Student"), e("small", null, s.email || ""))),
+        e("div", { className: "asv2-stu" }, e("div", { className: "asv2-av", style: { background: avBg(s.name) } }, initials(s.name || s.email)), e("div", { className: "asv2-stu-txt" }, e("p", null, s.name || "Student"), e("small", { title: s.email || "" }, s.email || ""))),
         e("div", null, verPill(s.emailVerified)),
-        e("div", { title: ago(tsMs(s.createdAt)) }, fmtDate(tsMs(s.createdAt))),
+        e("div", { className: "asv2-joined", title: ago(tsMs(s.createdAt)) }, fmtDate(tsMs(s.createdAt))),
         e(CountPills, {
           stats: s.stats,
           fail: enErr || courseFail,
@@ -663,9 +670,9 @@ function Page({ students, courses, enrollments, enErr, loading, error, onRetry, 
           if (acts[s.uid] == null) return e("div", { className: "asv2-sk asv2-sk-sm" });
           const rec = acts[s.uid] || {};
           const ms = rec.ms || tsMs(s.lastActiveAt) || tsMs(s.lastLoginAt);
-          return e("span", { title: ms ? fmtExact(ms) : "" }, ago(ms));
+          return e("span", { className: "asv2-last", title: ms ? fmtExact(ms) : "" }, ago(ms));
         })()),
-        e("div", null, e("button", { type: "button", className: "asv2-view", onClick: (ev) => { ev.stopPropagation(); setOpen(s); } }, "View"))
+        e("div", { className: "asv2-acts" }, e("button", { type: "button", className: "asv2-view", onClick: (ev) => { ev.stopPropagation(); setOpen(s); } }, "View"))
       ))
     ),
     open ? e("div", { className: "sd4-dim", onClick: () => setOpen(null) }) : null,

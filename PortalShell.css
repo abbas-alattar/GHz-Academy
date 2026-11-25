@@ -1,10 +1,72 @@
-.portal { display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100vh; }
-.side {
-  position:sticky; top:0; height:100vh; width:248px; min-width:248px; max-width:248px;
-  box-sizing:border-box; overflow-y:auto; overflow-x:hidden;
+.portal { display:grid; grid-template-columns:260px minmax(0,1fr); min-height:auto; height:auto; overflow:visible; align-items:start; }
+@media (min-width: 1024px) {
+  html:has(.portal), body:has(.portal) {
+    height: 100%; overflow: hidden;
+  }
+  body:has(.portal) { height: 100vh; }
+  .portal {
+    display: flex; height: 100vh; min-height: 100vh; overflow: hidden; align-items: stretch;
+  }
+  .side {
+    position: sticky; top: 0; left: auto; bottom: auto;
+    display: flex; flex-direction: column;
+    height: 100vh; height: 100dvh; width: 260px; min-width: 260px; max-width: 260px; flex: 0 0 260px;
+    box-sizing: border-box; padding: 16px; overflow: hidden; z-index: 20;
+  }
+  .side nav {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; order: 2;
+  }
+  body.portal-student .side nav {
+    overflow-y: scroll;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.45) rgba(255,255,255,0.08);
+  }
+  body.portal-student .side nav::-webkit-scrollbar { width: 8px; }
+  body.portal-student .side nav::-webkit-scrollbar-track { background: rgba(255,255,255,0.08); border-radius: 4px; }
+  body.portal-student .side nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.45); border-radius: 4px; }
+  body.portal-trainer .side nav,
+  body.portal-admin .side nav {
+    overflow-y: auto; scrollbar-width: none;
+  }
+  body.portal-trainer .side nav::-webkit-scrollbar,
+  body.portal-admin .side nav::-webkit-scrollbar { display: none; width: 0; height: 0; }
+  .side > .side-brand-row { order: 1; flex: 0 0 auto; }
+  .side > nav { order: 2; }
+  .side > .stu-account-card, .side > .stu-theme-root, .side > .stu-dock {
+    flex: 0 0 auto; margin-top: auto; width: 100%; order: 3;
+  }
+  .side > .ghz-drawer-foot { order: 4; flex: 0 0 auto; }
+  .main {
+    flex: 1 1 auto; min-width: 0; width: calc(100vw - 260px); height: 100vh; max-height: 100vh;
+    display: flex; flex-direction: column; overflow: hidden; margin-left: 0;
+  }
+  body.stu-collapsed .main { width: calc(100vw - 72px); }
+  .top {
+    position: relative; top: auto; flex: 0 0 68px; z-index: 12;
+    background: #fff; border-bottom: 1px solid #E2E8F0; padding-right: 24px; min-width: 0;
+  }
+  .top-actions { min-width: 0; flex-wrap: nowrap; }
+  .stu-banner-slot { position: relative; top: auto; flex: 0 0 auto; }
+  .content.ghz-scroll, .ghz-scroll {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden;
+    padding-top: 24px; padding-left: 24px; padding-right: 24px;
+    scrollbar-width: auto; scrollbar-color: #94A3B8 #EEF2F7;
+  }
+  .content.ghz-scroll::-webkit-scrollbar, .ghz-scroll::-webkit-scrollbar { width: 12px; }
+  .content.ghz-scroll::-webkit-scrollbar-track, .ghz-scroll::-webkit-scrollbar-track { background: #EEF2F7; }
+  .content.ghz-scroll::-webkit-scrollbar-thumb, .ghz-scroll::-webkit-scrollbar-thumb {
+    background: #94A3B8; border-radius: 6px;
+  }
+  body.stu-collapsed .portal { grid-template-columns: none; }
+  body.stu-collapsed .side { width: 72px; min-width: 72px; max-width: 72px; flex: 0 0 72px; }
 }
-.main { display:flex; flex-direction:column; min-width:0; min-height:100vh; }
-.top { height:68px; min-height:68px; flex:0 0 68px; box-sizing:border-box; }
+.side {
+  position:sticky; top:0; align-self:flex-start; height:100vh; width:260px; min-width:260px; max-width:260px;
+  box-sizing:border-box; padding:16px; overflow:visible;
+  display:flex; flex-direction:column;
+}
+.side::-webkit-scrollbar { width: 0; height: 0; display: none; }
+.main { display:flex; flex-direction:column; min-width:0; min-height:auto; height:auto; overflow:visible; }
+.top { height:68px; min-height:68px; flex:0 0 68px; box-sizing:border-box; position:sticky; top:0; z-index:8; }
 .content { padding:32px; max-width:1440px; width:100%; margin:0 auto; box-sizing:border-box; }
 .ghz-search {
   position: relative; z-index: 8; width: min(420px, 42vw); margin-right: 8px;
@@ -35,15 +97,43 @@
 .ghz-si i { width: 8px; height: 8px; border-radius: 50%; background: #2563EB; flex: 0 0 8px; }
 .ghz-snone { padding: 12px; color: #64748B; font-size: 13px; }
 .nv2-slot, .notify-btn { z-index: 6; }
-.top { z-index: 5; position: relative; }
-body.stu-collapsed .portal { grid-template-columns: 72px minmax(0,1fr); }
-body.stu-collapsed .side { width: 72px; min-width: 72px; max-width: 72px; }
-body.stu-v3 .stu-collapse {
-  position: absolute; right: 12px; top: 22px; width: 24px; height: 24px; border-radius: 50%;
-  border: 1px solid #1E3A5F; background: #0F2747; color: #94A3B8; cursor: pointer; font: inherit; font-size: 14px;
-  z-index: 6; padding: 0; line-height: 22px; text-align: center;
+.top { z-index: 8; }
+.side-brand-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  position: relative; min-height: 32px; flex: 0 0 auto; width: 100%;
 }
-body.stu-v3 .side { position: sticky; overflow-x: hidden; }
+.side .brand {
+  display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0;
+  white-space: nowrap; overflow: visible; flex-wrap: nowrap;
+}
+.side .brand svg { width: 28px; height: 28px; flex: 0 0 28px; max-width: 28px; }
+.side .brand .ghz, .side .brand .acad {
+  font-size: 20px; line-height: 1; white-space: nowrap; flex-shrink: 0; width: auto;
+}
+.side .brand .ghz { color: #fff; }
+.side .brand .acad { color: #2EC8FF; }
+.stu-collapse {
+  position: static; transform: none; flex: 0 0 32px; width: 32px; height: 32px; min-width: 32px;
+  border-radius: 50%; border: 1px solid #1E3A5F; background: #0F2747; color: #E2E8F0;
+  cursor: pointer; font: inherit; font-size: 16px; z-index: 30; padding: 0; line-height: 30px; text-align: center;
+  align-self: center;
+}
+body.stu-collapsed .portal { grid-template-columns: 72px minmax(0,1fr); }
+body.stu-collapsed .side {
+  width: 72px; min-width: 72px; max-width: 72px; padding: 16px 8px;
+  overflow: visible; z-index: 20;
+}
+body.stu-collapsed .side .ghz, body.stu-collapsed .side .acad { display: none; }
+body.stu-collapsed .side .brand { justify-content: center; gap: 0; }
+body.stu-collapsed .side-brand-row {
+  flex-direction: column; justify-content: flex-start; align-items: center; gap: 8px; overflow: visible;
+}
+body.stu-collapsed .stu-collapse {
+  display: grid; place-items: center; position: absolute; right: -16px; top: 0;
+  background: #fff; color: #0F2747; border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 12px rgba(15,39,71,.16); z-index: 40;
+}
+body.stu-v3 .side { position: sticky; top: 0; align-self: flex-start; overflow: visible; }
 .ghz-menu {
   display:none; width:40px; height:40px; border:1px solid #CBD5E1; border-radius:10px; background:#fff; cursor:pointer; font:inherit;
 }
@@ -51,9 +141,13 @@ body.stu-v3 .side { position: sticky; overflow-x: hidden; }
   .portal { grid-template-columns: minmax(0,1fr); }
   .side {
     position: fixed; left: 0; top: 0; z-index: 50; transform: translateX(-100%);
-    width: 248px; max-width: 248px; min-width: 248px;
+    width: min(84vw, 320px); max-width: min(84vw, 320px); min-width: min(84vw, 320px);
+    height: 100dvh;
   }
-  body.stu-drawer .side { transform: none; }
+  body.stu-drawer .side, body.ghz-nav-open .side { transform: none; }
   .ghz-menu { display:inline-grid; place-items:center; }
   body.stu-collapsed .portal { grid-template-columns: minmax(0,1fr); }
+  body.stu-collapsed .side { width: min(84vw, 320px) !important; min-width: min(84vw, 320px) !important; max-width: min(84vw, 320px) !important; padding: 16px 0 0 !important; }
+  body.stu-collapsed .side .ghz, body.stu-collapsed .side .acad { display: inline !important; }
+  .stu-collapse { display: none !important; }
 }

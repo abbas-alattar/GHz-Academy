@@ -1,0 +1,83 @@
+@media (max-width: 767px) {
+  body.student-portal .content,
+  body.student-portal .ghz-scroll { padding-left: 16px !important; padding-right: 16px !important; max-width: 100%; overflow-x: hidden; box-sizing: border-box; }
+  body.student-portal .hw2-head,
+  body.student-portal .qz2-head,
+  body.student-portal .sg4-head,
+  body.student-portal .ss2-head,
+  body.student-portal .av2-head,
+  body.student-portal .an2-head,
+  body.student-portal .cv2-head { display: none !important; }
+  body.student-portal .hw2-wrap h2,
+  body.student-portal .qz2-wrap h2,
+  body.student-portal .sg4-wrap h2,
+  body.student-portal .ss2-wrap h2,
+  body.student-portal .av2-wrap h2,
+  body.student-portal .an2-wrap h2,
+  body.student-portal .cv2-wrap h2 { display: none !important; }
+
+  body.student-portal:not([data-view="dash"]):not([data-view="dashboard"]):not([data-view="regs"]):not([data-view="registrations"]) .pay-notice,
+  body.student-portal:not(.view-dash):not(.view-regs) #pendingBanner { display: none !important; }
+
+  body.student-portal .hw2-tabs,
+  body.student-portal .hw2-filters { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 8px; margin: 0 0 12px; scrollbar-width: none; }
+  body.student-portal .hw2-tabs button { flex: 0 0 auto; min-height: 44px; padding: 0 14px; font-size: 14px; }
+  body.student-portal .hw2-sum, body.student-portal .hw2-filters { display: none !important; }
+  body.student-portal .hw2-card { flex-direction: column; align-items: stretch; padding: 14px; gap: 8px; }
+  body.student-portal .hw2-card .course, body.student-portal .hw2-card .hw2-course { font-size: 13px; color: #64748B; margin: 0; }
+  body.student-portal .hw2-card h4 { font-size: 17px; font-weight: 700; margin: 0; }
+  body.student-portal .hw2-card .btn, body.student-portal .hw2-card button { width: 100%; min-height: 44px; }
+  body.student-portal .hs2-upload, body.student-portal .hs2-file { width: 100%; min-height: 48px; }
+  body.student-portal .hs2-submit, body.student-portal [data-hs2-submit] {
+    position: sticky; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); width: 100%; min-height: 48px;
+  }
+
+  body.student-portal .qz2-sum { display: none; }
+  body.student-portal .qz2-tabs { display: flex; overflow-x: auto; flex-wrap: nowrap; gap: 8px; scrollbar-width: none; }
+  body.student-portal .qz2-card { display: flex; flex-direction: column; gap: 8px; padding: 14px; }
+  body.student-portal .qz2-card .btn, body.student-portal .qz2-card button { width: 100%; min-height: 44px; }
+  body.student-portal .sqt-opt, body.student-portal .sqt-choice { min-height: 52px; width: 100%; text-align: left; }
+  body.student-portal .sqt-bar { position: sticky; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 8px; }
+  body.student-portal .sqt-bar button { flex: 1; min-height: 44px; }
+
+  body.student-portal .sg4-kpis { display: flex; flex-direction: column; align-items: center; }
+  body.student-portal .sg4-kpi:not(.hero) { width: 100%; }
+  body.student-portal .sg4-kpi.hero { width: 140px; height: 140px; border-radius: 50%; display: grid; place-items: center; padding: 0; }
+  body.student-portal .sg4-grid, body.student-portal .sg4-card-grid { grid-template-columns: 1fr; }
+  body.student-portal .sg4-ring { width: 140px; height: 140px; margin: 8px auto 16px; }
+  body.student-portal .sg4-table, body.student-portal .sg4-wrap table { display: none !important; }
+  body.student-portal .sg4-course { display: block; padding: 14px; margin-bottom: 10px; border-radius: 16px; background: #fff; }
+  body.student-portal .sg4-course button, body.student-portal .sg4-open { min-height: 44px; width: 100%; }
+
+  body.student-portal .ss2-days { display: flex; overflow-x: auto; gap: 8px; scrollbar-width: none; padding: 4px 0 12px; }
+  body.student-portal .ss2-days button { flex: 0 0 auto; min-width: 44px; min-height: 44px; }
+  body.student-portal .ss2-card { padding: 14px; }
+  body.student-portal .ss2-card .btn { width: 100%; min-height: 44px; }
+  body.student-portal .ss2-tz { font-size: 12px; color: #64748B; }
+
+  body.student-portal .av2-ring { width: 140px; height: 140px; margin: 8px auto 16px; }
+  body.student-portal .av2-card { padding: 14px; margin-bottom: 10px; }
+  body.student-portal .av2-sq { width: 12px; height: 12px; border-radius: 3px; display: inline-block; margin-right: 4px; }
+
+  body.student-portal .an2-card { padding: 14px; margin-bottom: 10px; }
+  body.student-portal .an2-card p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px; }
+  body.student-portal .an2-unread { width: 8px; height: 8px; border-radius: 50%; background: #2563EB; display: inline-block; }
+
+  body.student-portal .cv2-card { display: flex; flex-direction: column; padding: 0 0 14px; overflow: hidden; }
+  body.student-portal .cv2-preview { aspect-ratio: 16/9; width: 100%; object-fit: cover; }
+  body.student-portal .cv2-card .btn, body.student-portal .cv2-acts button { width: 100%; min-height: 44px; margin: 6px 0 0; }
+
+  body.student-portal .pv2-wrap { display: flex; flex-direction: column; align-items: stretch; padding-bottom: 80px; }
+  body.student-portal .pv2-av { width: 96px; height: 96px; border-radius: 50%; margin: 8px auto; }
+  body.student-portal .pv2-wrap input, body.student-portal .pv2-wrap select { height: 48px; font-size: 16px; width: 100%; box-sizing: border-box; }
+  body.student-portal .pv2-save, body.student-portal #pv2Save {
+    position: sticky; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); width: 100%; min-height: 48px;
+  }
+
+  body.student-portal .hw2-wrap, body.student-portal .qz2-wrap, body.student-portal .sg4-wrap,
+  body.student-portal .ss2-wrap, body.student-portal .av2-wrap, body.student-portal .an2-wrap,
+  body.student-portal .cv2-wrap, body.student-portal .pv2-wrap, body.student-portal .hs2-wrap {
+    max-width: 100%; overflow-x: hidden; font-size: 14px; box-sizing: border-box;
+  }
+  body.student-portal button, body.student-portal .btn { min-height: 44px; }
+}

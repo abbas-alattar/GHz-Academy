@@ -1,7 +1,7 @@
 import { createElement as e, useEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, serverTimestamp, setDoc, Timestamp, updateDoc, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTrainerStore, setTrainerCourseId } from "./TrainerStore.js";
 import { isCourseLocked } from "./course-lock.js";
@@ -580,15 +580,15 @@ function Page({ uid, go, quizId, courseId }) {
     return e(Review, { pack, quiz, uid, go });
   }
 
+  const qHead = e("div", { className: "th2-rh" },
+    e("div", null, "Quiz"), e("div", null, "Details"), e("div", null, "Available"), e("div", null, "Attempts"), e("div", { className: "th2-hvis" }, "Visibility"), e("div", { className: "th2-hact" }, "Actions"), e("div", { className: "th2-hmenu", "aria-hidden": true }, "\u00a0")
+  );
   const table = () => {
     if (pack?.quizErr && pack?.extrasReady) return e("div", { className: "th2-err" }, pack.quizErr, " ", e("button", { className: "th2-btn", onClick: () => refreshTrainerStore(uid) }, "Try again"));
-    const cols = e("colgroup", null, ["c-main","c-det","c-due","c-att","c-vis","c-act"].map((c) => e("col", { key: c, className: c })));
-    const heads = ["Quiz","Details","Available","Attempts","Visibility",""];
-    if (!pack || !pack.extrasReady) return e("table", { className: "th2-table th2-qtable" }, cols, e("thead", null, e("tr", null, heads.map((h, i) => e("th", { key: h, className: i === 5 ? "th2-act" : "" }, h)))), e("tbody", null, [1,2,3].map((i) => e("tr", { key: i, className: "th2-sk" }, e("td", { colSpan: 6 }, e("b"))))));
+    if (!pack || !pack.extrasReady) return e("div", { className: "th2-qgrid" }, qHead, [1,2,3].map((i) => e("div", { key: i, className: "th2-rr th2-sk" }, e("b", { style: { gridColumn: "1 / -1" } }))));
     if (!list.length) return e("div", { className: "th2-empty" }, e("p", null, "No quizzes yet"), e("button", { className: "th2-create", disabled: createDisabled, title: createDisabled ? "Course is completed" : "", onClick: () => openForm() }, e(Plus), " Create quiz"));
-    return e("table", { className: "th2-table th2-qtable" }, cols,
-      e("thead", null, e("tr", null, heads.map((h, i) => e("th", { key: h, className: i === 5 ? "th2-act" : "" }, h)))),
-      e("tbody", null, list.map((qz) => {
+    return e("div", { className: "th2-qgrid" }, qHead,
+      list.map((qz) => {
         const c = course(qz.courseId);
         const qs = qqs.filter((x) => x.quizId === qz.id);
         const total = ens.filter((en) => en.courseId === qz.courseId && String(en.status || "").toLowerCase() !== "cancelled").length;
@@ -597,26 +597,21 @@ function Page({ uid, go, quizId, courseId }) {
         const pct = total ? Math.round(attN / total * 100) : 0;
         const pub = isPublished(qz);
         const lockedC = isCourseLocked(c);
-        return e("tr", { key: qz.id },
-          e("td", { title: (qz.title || "Quiz") + " · " + (c?.title || "") }, e("button", { className: "th2-back th2-ell", title: qz.title, onClick: () => go("quiz/" + qz.id) }, qz.title || "Quiz"), e("span", { className: "th2-sub" }, c?.title || qz.courseId, " ", e(StatusBadge, { course: c }))),
-          e("td", { title: (qs.length || 0) + " qs · " + (qz.timeLimitMinutes ? qz.timeLimitMinutes + " min" : "no limit") }, (qs.length || 0) + " qs", e("span", { className: "th2-sub" }, qz.timeLimitMinutes ? qz.timeLimitMinutes + " min" : "No limit")),
-          e("td", { title: (qz.startAt ? "Opens" : "") + " " + fmtDate(qz.dueDate) }, e("span", null, qz.startAt ? "Opens " + fmtWhen(qz.startAt) : "—"), e("span", { className: "th2-sub" }, "Closes " + (fmtWhen(qz.endAt) || fmtDate(qz.dueDate)))),
-          e("td", { title: attN + " / " + total + " · graded " + grN }, e("span", { className: "th2-bar" }, attN + " / " + total, e("i", null, e("b", { style: { width: pct + "%" } }))), e("span", { className: "th2-sub" }, grN + " graded")),
-          e("td", { title: pub ? "Visible to students" : "Hidden from students" }, e("span", { className: "th2-vis " + (pub ? "pub" : "draft") }, e(Eye, { off: !pub }), e("span", { className: "th2-vislab" }, pub ? "Published" : "Draft"))),
-          e("td", { className: "th2-menurow th2-act" },
-            e("div", { className: "th2-actsrow" },
-              e("button", { className: "th2-review", onClick: () => go("quiz/" + qz.id) }, "Review"),
-              e(RowMenu, { locked: lockedC, items: [
-                { label: "Review", icon: "review", onClick: () => go("quiz/" + qz.id) },
-                { label: "Edit", icon: "edit", lockWhenDone: true, onClick: () => openForm(qz) },
-                { label: pub ? "Unpublish" : "Publish", icon: pub ? "unpublish" : "publish", lockWhenDone: true, onClick: () => togglePub(qz) },
-                { label: "Duplicate", icon: "dup", lockWhenDone: true, onClick: () => dup(qz) },
-                { label: "Delete", icon: "del", danger: true, lockWhenDone: true, onClick: () => del(qz) }
-              ] })
-            )
-          )
+        return e("div", { key: qz.id, className: "th2-rr" },
+          e("div", { className: "th2-cmain", title: (qz.title || "Quiz") + " · " + (c?.title || "") }, e("button", { className: "th2-back th2-ell", title: qz.title, onClick: () => go("quiz/" + qz.id) }, qz.title || "Quiz"), e("span", { className: "th2-sub" }, c?.title || qz.courseId, " ", e(StatusBadge, { course: c }))),
+          e("div", { title: (qs.length || 0) + " qs · " + (qz.timeLimitMinutes ? qz.timeLimitMinutes + " min" : "no limit") }, (qs.length || 0) + " qs", e("span", { className: "th2-sub" }, qz.timeLimitMinutes ? qz.timeLimitMinutes + " min" : "No limit")),
+          e("div", { title: (qz.startAt ? "Opens" : "") + " " + fmtDate(qz.dueDate) }, e("span", null, qz.startAt ? "Opens " + fmtWhen(qz.startAt) : "—"), e("span", { className: "th2-sub" }, "Closes " + (fmtWhen(qz.endAt) || fmtDate(qz.dueDate)))),
+          e("div", { title: attN + " / " + total + " · graded " + grN }, e("span", { className: "th2-bar" }, attN + " / " + total, e("i", null, e("b", { style: { width: pct + "%" } }))), e("span", { className: "th2-sub" }, grN + " graded")),
+          e("div", { className: "th2-cvis", title: pub ? "Visible to students" : "Hidden from students" }, e("span", { className: "th2-vis " + (pub ? "pub" : "draft") }, e(Eye, { off: !pub }))),
+          e("div", { className: "th2-cact" }, e("button", { className: "th2-review", onClick: () => go("quiz/" + qz.id) }, "Review")),
+          e("div", { className: "th2-cmenu" }, e(RowMenu, { locked: lockedC, items: [
+            { label: "Edit", icon: "edit", lockWhenDone: true, onClick: () => openForm(qz) },
+            { label: pub ? "Unpublish" : "Publish", icon: pub ? "unpublish" : "publish", lockWhenDone: true, onClick: () => togglePub(qz) },
+            { label: "Duplicate", icon: "dup", lockWhenDone: true, onClick: () => dup(qz) },
+            { label: "Delete", icon: "del", danger: true, lockWhenDone: true, onClick: () => del(qz) }
+          ] }))
         );
-      }))
+      })
     );
   };
 

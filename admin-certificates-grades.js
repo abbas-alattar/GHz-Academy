@@ -1,7 +1,7 @@
-import { protect } from "./auth-guard.js?v=auth8";
-import { db } from "./firebase-config.js?v=auth8";
+import { protect } from "./auth-guard.js?v=auth10";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { computeAverage, computeStatus, gradeCalc } from "./gradeCalc.js";
+import { computeAverage, computeStatus, gradeCalc, formatGrade } from "./gradeCalc.js";
 import { mountPdfButton, fmtPdfDate } from "./AdminPdfExport.js";
 
 const root = document.getElementById("root");
@@ -175,7 +175,7 @@ try {
       </tr></thead><tbody>
       ${rows.length ? rows.map((r)=>`<tr>
         <td>${esc(r.name)}</td>
-        <td style="font-weight:700">${r.avg.toFixed(1)}/100</td>
+        <td style="font-weight:700">${formatGrade(r.avg)}/100</td>
         <td><span class="badge" style="background:${r.st.bg};color:${r.st.color}">${esc(r.st.label)}</span></td>
         <td>${certCell(r)}</td>
         <td>${actionCell(r)}</td>

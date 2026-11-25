@@ -1,4 +1,4 @@
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, getDocs, query, where, writeBatch, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 const KEY = "ghz-trainer-names-auto-v2";

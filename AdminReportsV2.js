@@ -1,8 +1,8 @@
 import { createElement as e, useMemo, useState, useEffect, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { attendancePct, homeworkAuto, gradeCalc } from "./gradeCalc.js";
+import { attendancePct, homeworkAuto, formatGrade, storedCourseResult } from "./gradeCalc.js";
 import { AdminPdfButton } from "./AdminPdfExport.js";
 import { csvDown } from "./grades-shell.js";
 import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
@@ -172,7 +172,6 @@ function courseMetrics(c, pack) {
   let hwDone = 0;
   assigns.forEach((a) => ens.forEach((en) => { if (subs.find((s) => s.uid === en.uid && s.assignmentId === a.id)) hwDone++; }));
   const hwRate = hwTot ? Math.round((hwDone / hwTot) * 100) : null;
-  const autoPack = { courseId: cid, attendance: recs, sessions: pack.sessions, assignments: assigns, submissions: subs, quizzes, quizAttempts: atts };
   const avgs = [];
   const passMark = Number(scheme?.passMark != null ? scheme.passMark : 60);
   let graded = 0, passed = 0;
@@ -180,12 +179,14 @@ function courseMetrics(c, pack) {
     const att = attendancePct(cid, en.uid, { attendance: recs, sessions: pack.sessions }).pct;
     const hw = homeworkAuto(en.uid, assigns, subs, scheme);
     let avg = null;
+    let badge = "";
     if (scheme && Array.isArray(scheme.components) && scheme.components.length) {
       const row = scores.find((s) => s.uid === en.uid && s.courseId === cid);
-      const g = gradeCalc({ id: cid, pack: { ...autoPack, scheme } }, scheme, { uid: en.uid, scores: row?.scores || {}, pack: { ...autoPack, scheme } });
-      if (!g.failed && Number.isFinite(g.average)) avg = g.average;
+      const g = storedCourseResult(scheme, row, c.status);
+      if (Number.isFinite(g.avg)) avg = g.avg;
+      badge = g.badge || "";
     }
-    if (avg != null) { avgs.push(avg); graded++; if (avg >= passMark) passed++; }
+    if (avg != null) { avgs.push(avg); graded++; if (badge === "Passed") passed++; }
     return { uid: en.uid, name: en.studentName || en.uid, att, hw, avg };
   });
   const attVals = ens.map((en) => attendancePct(cid, en.uid, { attendance: recs, sessions: pack.sessions }).pct).filter((x) => x != null);
@@ -266,7 +267,7 @@ function App({ onOpenStudent, loadKey }) {
     if (pills.length) risk.push({ ...s, course: r.c.title, pills });
   }));
   done.forEach((r) => (r.m?.students || []).forEach((s) => {
-    if (s.avg != null && s.avg < 60) risk.push({ ...s, course: r.c.title, pills: [{ t: "Failed " + s.avg, k: "r" }] });
+    if (s.avg != null && s.avg < 60) risk.push({ ...s, course: r.c.title, pills: [{ t: "Failed " + formatGrade(s.avg), k: "r" }] });
   }));
   const pdfData = () => ({
     page: "Reports",
@@ -280,8 +281,8 @@ function App({ onOpenStudent, loadKey }) {
     rows: [
       ...active.map((r) => ({ group: "Active", course: r.c.title, trainer: r.m?.trainer, enrolled: r.m?.enrolled, hw: r.m?.hwRate, att: r.m?.attPct, q: r.m?.qTaken, extra: r.m?.quizAvg ?? "—", pass: "" })),
       { group: "Active totals", course: "", trainer: "", enrolled: enSum, hw: hwM, att: attM, q: qSum, extra: "", pass: "" },
-      ...done.map((r) => ({ group: "Completed", course: r.c.title, trainer: r.m?.trainer, enrolled: r.m?.enrolled, hw: r.m?.hwRate, att: r.m?.attPct, q: r.m?.qTaken, extra: r.m?.avgGrade ?? "—", pass: r.m?.passRate ?? "—" })),
-      { group: "Completed totals", course: "", trainer: "", enrolled: done.reduce((a, r) => a + (r.m?.enrolled || 0), 0), hw: mean(done.map((r) => r.m?.hwRate)), att: mean(done.map((r) => r.m?.attPct)), q: done.reduce((a, r) => a + (r.m?.qTaken || 0), 0), extra: gM ?? "—", pass: pM ?? "—" }
+      ...done.map((r) => ({ group: "Completed", course: r.c.title, trainer: r.m?.trainer, enrolled: r.m?.enrolled, hw: r.m?.hwRate, att: r.m?.attPct, q: r.m?.qTaken, extra: r.m?.avgGrade == null ? "—" : formatGrade(r.m.avgGrade), pass: r.m?.passRate ?? "—" })),
+      { group: "Completed totals", course: "", trainer: "", enrolled: done.reduce((a, r) => a + (r.m?.enrolled || 0), 0), hw: mean(done.map((r) => r.m?.hwRate)), att: mean(done.map((r) => r.m?.attPct)), q: done.reduce((a, r) => a + (r.m?.qTaken || 0), 0), extra: gM == null ? "—" : formatGrade(gM), pass: pM ?? "—" }
     ]
   });
   const exportCsv = () => {

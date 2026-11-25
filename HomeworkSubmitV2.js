@@ -1,6 +1,6 @@
 import { createElement as e, Component, useEffect, useState } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { doc, setDoc, updateDoc, deleteDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { FileDropzone, typeOf, tileColor } from "./FileDropzone.js";
 import { HomeworkFilesViewer } from "./HomeworkFilesViewer.js";

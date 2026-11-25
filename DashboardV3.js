@@ -1,8 +1,9 @@
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { onDashData, loadStudentDash } from "./student-dash-data.js?v=stu7";
+import { onDashData, loadStudentDash, asArray, asObject, ensureSectionData, getEnrolledCourses, getActiveCourses, getCompletedCourses, enrollmentsReady, datasetStatus, getCourseResult } from "./student-dash-data.js?v=stu11";
+import { getFirstName } from "./displayName.js";
 import { getReadSet, unreadCount, onAnnouncementReads, loadAnnouncementReads, annTimeAgo } from "./announcementReads.js?v=stu7";
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { getDoc, doc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { attendancePct, gradeCalc } from "./gradeCalc.js";
 import { sessionStatus } from "./sessionStatus.js";
@@ -10,22 +11,26 @@ import { sessionStatus } from "./sessionStatus.js";
 class Boundary extends Component {
   constructor(p) { super(p); this.state = { err: null }; }
   static getDerivedStateFromError(err) { return { err }; }
-  componentDidCatch(err) { console.error("DashboardV3", err?.code || err?.message || err); }
+  componentDidCatch(err, info) {
+    try { console.error("[ghz-perf] dashboard error", err, err?.stack, info?.componentStack); } catch (_) {}
+  }
   render() {
     if (this.state.err) {
       const code = this.state.err?.code || this.state.err?.message || String(this.state.err);
-      return e("div", { className: "dv3-fail" },
-        e("p", { className: "banner" }, "Dashboard could not load"),
-        e("p", { className: "banner" }, String(code)),
-        e("button", { type: "button", className: "btn btn-sm", onClick: () => { this.setState({ err: null }); try { loadStudentDash(true); } catch (_) {} } }, "Try again"),
-        e("button", { type: "button", className: "btn btn-sm", onClick: this.props.onClassic }, "Use classic view")
+      return e("div", { className: this.props.card ? "dv3-card" : "dv3-fail" },
+        e("p", { className: "banner" }, this.props.card ? "Could not load" : "Dashboard could not load"),
+        this.props.card ? null : e("p", { className: "banner" }, String(code)),
+        e("button", { type: "button", className: "btn btn-sm", onClick: () => { this.setState({ err: null }); try { loadStudentDash(true); } catch (_) {} } }, "Try again")
       );
     }
     return this.props.children;
   }
 }
+function CardBound({ children }) {
+  return e(Boundary, { card: true }, children);
+}
 
-const firstName = (n) => String(n || "student").split(" ")[0];
+const firstName = (data) => getFirstName(data?.user || { name: data?.name });
 const greet = (d) => { const h = d.getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
 const fmtDate = (d) => d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
 const titleOf = (data, id) => (data.courses && data.courses[id]?.title) || data.enrollments.find((x) => x.courseId === id)?.courseTitle || id;
@@ -98,9 +103,9 @@ function ClockCd({ startMs, endMs, nowMs }) {
 }
 function getPendingHomework(data, now) {
   const today = localYmd(now);
-  const activeIds = new Set(Object.values(data.courses || {}).filter((c) => c.status !== "Completed").map((c) => c.id));
-  const submitted = new Set((data.submissions || []).map((s) => s.assignmentId));
-  const open = (data.assignments || []).filter((a) => {
+  const activeIds = new Set(Object.values(asObject(data.courses)).filter((c) => c.status !== "Completed").map((c) => c.id));
+  const submitted = new Set(asArray(data.submissions).map((s) => s.assignmentId));
+  const open = asArray(data.assignments).filter((a) => {
     if (String(a.status || "Published") !== "Published") return false;
     if (!activeIds.has(a.courseId)) return false;
     if (submitted.has(a.id)) return false;
@@ -125,8 +130,8 @@ function getPendingHomework(data, now) {
 function getPendingQuizzes(data, now) {
   const today = localYmd(now);
   const activeIds = new Set(Object.values(data.courses || {}).filter((c) => c.status !== "Completed").map((c) => c.id));
-  const taken = new Set((data.quizAttempts || []).map((a) => a.quizId));
-  return (data.quizzes || []).filter((q) => {
+  const taken = new Set(asArray(data.quizAttempts).map((a) => a.quizId));
+  return asArray(data.quizzes).filter((q) => {
     if (String(q.status || "Published") !== "Published") return false;
     if (!activeIds.has(q.courseId)) return false;
     if (taken.has(q.id)) return false;
@@ -160,7 +165,7 @@ function Dash({ onClassic }) {
   const [certs, setCerts] = useState([]);
   const [, setReadTick] = useState(0);
   useEffect(() => onDashData(setData), []);
-  useEffect(() => { loadStudentDash(false); }, []);
+  useEffect(() => { ensureSectionData(["enrollments", "registrations", "catalog", "sessions", "assignments", "quizzes", "attendance", "submissions", "quizAttempts"]).catch(() => loadStudentDash(false)); }, []);
   useEffect(() => {
     const uid0 = data?.user?.uid || data?.user?.id;
     if (uid0) loadAnnouncementReads(uid0);
@@ -170,6 +175,15 @@ function Dash({ onClassic }) {
     const t = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(t);
   }, []);
+  useEffect(() => {
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+    const w = window.innerWidth;
+    document.querySelectorAll(".dv3 *").forEach((el) => {
+      try {
+        if (el.getBoundingClientRect().width > w + 1) console.log("[ghz-overflow]", el.className, el.getBoundingClientRect().width);
+      } catch (_) {}
+    });
+  });
   useEffect(() => {
     if (!data?.user || data.status !== "ready") return;
     (async () => {
@@ -185,33 +199,22 @@ function Dash({ onClassic }) {
         const c = courses[id];
         if (c.status !== "Completed") continue;
         try {
-          const ss = await getDoc(doc(db, "gradeSchemes", id));
-          if (!ss.exists()) { byId[id] = { pending: true }; continue; }
-          const scheme = ss.data();
-          let scores = {};
-          const gs = await getDoc(doc(db, "gradeScores", uid + "_" + id));
-          if (gs.exists()) scores = gs.data().scores || {};
-          const pack = {
-            courseId: id,
-            assignments: data.assignments.filter((a) => a.courseId === id),
-            quizzes: data.quizzes.filter((q) => q.courseId === id),
-            attendance: data.attendance.filter((a) => a.courseId === id),
-            sessions: (data.sessions || []).filter((s) => s.courseId === id),
-            submissions: data.submissions.filter((s) => s.courseId === id),
-            quizAttempts: data.quizAttempts.filter((a) => a.courseId === id),
-            scheme
-          };
-          const g = gradeCalc({ id, pack }, scheme, { uid, scores, pack });
-          if (g.failed) { byId[id] = { pending: true }; continue; }
-          byId[id] = { pending: false, avg: g.average, passed: g.passed };
-          avgs.push(g.average);
+          const rec = await getCourseResult(id);
+          if (rec.status === "loading") { byId[id] = { pending: true }; continue; }
+          if (rec.status === "unpublished") { byId[id] = { pending: true, unpublished: true }; continue; }
+          byId[id] = { pending: false, avg: rec.avg, passed: rec.passed };
+          if (Number.isFinite(Number(rec.avg))) avgs.push(Number(rec.avg));
         } catch (_) { byId[id] = { pending: true }; }
       }
       setAvg({ pct: avgs.length ? Math.round((avgs.reduce((a, b) => a + b, 0) / avgs.length) * 10) / 10 : null, n: avgs.length, byId });
     })();
   }, [data]);
 
-  if (!data || data.status !== "ready") {
+  const enrolledList = getEnrolledCourses(data || {});
+  const enSt = datasetStatus("enrollments");
+  const dashFresh = enSt === "ready" && datasetStatus("sessions") === "ready" && datasetStatus("assignments") === "ready" && datasetStatus("quizzes") === "ready";
+  const dashReady = dashFresh || (enrolledList.length && (enSt === "stale" || enSt === "ready"));
+  if (!data || !dashReady) {
     return e("div", { className: "dv3" },
       e("h2", { style: { margin: "0 0 16px", fontSize: "28px" } }, "Dashboard"),
       e("div", { className: "stu-shimmer", style: { minHeight: "88px", borderRadius: "16px", marginBottom: "12px" } }),
@@ -225,8 +228,16 @@ function Dash({ onClassic }) {
     );
   }
 
-  const subIds = new Set(data.submissions.map((s) => s.assignmentId));
-  const attIds = new Set(data.quizAttempts.map((a) => a.quizId));
+  const submissions = asArray(data.submissions);
+  const quizAttempts = asArray(data.quizAttempts);
+  const sessionsList = asArray(data.sessions);
+  const assignments = asArray(data.assignments);
+  const quizzes = asArray(data.quizzes);
+  const announcements = asArray(data.announcements);
+  const attendanceList = asArray(data.attendance);
+  const enrollments = enrolledList.length ? enrolledList.map((c) => ({ courseId: c.id, courseTitle: c.title })) : asArray(data.enrollments);
+  const subIds = new Set(submissions.map((s) => s.assignmentId));
+  const attIds = new Set(quizAttempts.map((a) => a.quizId));
   const hw = getPendingHomework(data, now);
   const qzOpen = getPendingQuizzes(data, now);
   const hwOpen = hw.pending;
@@ -235,32 +246,35 @@ function Dash({ onClassic }) {
   const coursesMap = data.courses || {};
   const activeForAtt = Object.values(coursesMap).filter((c) => String(c.status) !== "Completed");
   const activeAttIds = new Set(activeForAtt.map((c) => c.id));
-  const attRecs = (data.attendance || []).filter((a) => a.status && activeAttIds.has(a.courseId));
-  const attAuto = attendancePct("", uid, { attendance: attRecs, sessions: data.sessions }).pct;
+  const attRecs = attendanceList.filter((a) => a.status && activeAttIds.has(a.courseId));
+  const attAuto = attendancePct("", uid, { attendance: attRecs, sessions: sessionsList }).pct;
   const attPct = attAuto == null ? "—" : Math.round(attAuto);
   const recs = attRecs;
   const den = recs.filter((r) => r.status !== "excused").length;
   const courseIds = data.courseIds || Object.keys(data.courses || {});
-  const unreadN = unreadCount(uid, data.announcements, courseIds);
-  const latestAnn = [...(data.announcements || [])].sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
+  const unreadN = unreadCount(uid, announcements, courseIds);
+  const latestAnn = [...announcements].sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
   const latestAgo = latestAnn?.createdAt?.toMillis ? annTimeAgo(latestAnn.createdAt.toMillis()) : "";
   const nextHw = hwOpen.filter((a) => a.dueDate).sort((a, b) => String(a.dueDate).localeCompare(String(b.dueDate)))[0];
   const nextQz = qzOpen.filter((q) => q.dueDate).sort((a, b) => String(a.dueDate).localeCompare(String(b.dueDate)))[0];
   const nextHwDay = nextHw ? new Date(nextHw.dueDate).toLocaleDateString(undefined, { weekday: "long" }) : "—";
   const qzDays = nextQz ? Math.max(0, Math.ceil((new Date(nextQz.dueDate) - now) / 86400000)) : null;
 
-  const sessions = data.sessions.filter((s) => { const st = sessionStatus(s, now, data); return st === "Upcoming" || st === "In progress"; })
+  const activeIdsNext = new Set(getActiveCourses(data || {}).map((c) => c.id));
+  const sessions = sessionsList.filter((s) => {
+    if (s.courseId && !activeIdsNext.has(s.courseId)) return false;
+    const st = sessionStatus(s, now, data); return st === "Upcoming" || st === "In progress";
+  })
     .map((s) => ({ s, t: localPartsMs(s.date, s.startTime) }))
     .filter((x) => Number.isFinite(x.t))
     .sort((a, b) => a.t - b.t);
   const nextClass = sessions[0];
 
-  const courses = data.courses || {};
-  const active = Object.values(courses).filter((c) => c.status !== "Completed");
-  const done = Object.values(courses).filter((c) => c.status === "Completed");
+  const active = getActiveCourses(data || {});
+  const done = getCompletedCourses(data || {});
   const att100 = den > 0 && attPct === 100;
   const firstDone = done.length >= 1;
-  const onTime = hwOpen.length === 0 && data.assignments.length > 0;
+  const onTime = hwOpen.length === 0 && assignments.length > 0;
 
   const goHash = (hash) => (ev) => { if (ev) { ev.preventDefault(); ev.stopPropagation(); } location.hash = hash; };
 
@@ -271,9 +285,9 @@ function Dash({ onClassic }) {
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
     const key = localYmd(d);
-    const cl = data.sessions.some((s) => String(s.date || "").slice(0, 10) === key && s.status !== "Cancelled");
+    const cl = sessionsList.some((s) => String(s.date || "").slice(0, 10) === key && s.status !== "Cancelled");
     const hwDot = hw.pending.some((a) => dueLocal(a.dueDate) === key);
-    const qz = data.quizzes.some((q) => String(q.dueDate || "").slice(0, 10) === key);
+    const qz = quizzes.some((q) => String(q.dueDate || "").slice(0, 10) === key);
     return { d, key, cl, hw: hwDot, qz, on: key === todayKey };
   });
 
@@ -282,13 +296,14 @@ function Dash({ onClassic }) {
   const dash = avg.pct == null ? 0 : (Math.min(100, Math.max(0, avg.pct)) / 100) * c;
 
   return e("div", { className: "dv3" },
+    dashFresh ? null : e("p", { className: "dv3-sub", style: { opacity: 0.7, margin: "0 0 8px" } }, "Updating dashboard…"),
     e("section", { className: "dv3-hero" },
       e("span", { className: "dv3-orb dv3-orb-a", "aria-hidden": "true" }),
       e("span", { className: "dv3-orb dv3-orb-b", "aria-hidden": "true" }),
       e("span", { className: "dv3-wave", "aria-hidden": "true" }),
       e("div", { className: "dv3-hero-l" },
         e("p", { className: "dv3-live" }, e("i"), " Live ", clock),
-        e("h2", { style: { color: "#FFFFFF", fontSize: "38px", fontWeight: 700 } }, greet(now) + ", " + firstName(data.name)),
+        e("h2", { style: { color: "#FFFFFF", fontSize: "38px", fontWeight: 700 } }, firstName(data) ? greet(now) + ", " + firstName(data) : greet(now)),
         e("p", { className: "dv3-sub" }, fmtDate(now) + " · " + (weekDue ? weekDue + " homework" + (weekDue === 1 ? "" : "s") + " due this week" : (hwOpen.length ? hwOpen.length + " homework" + (hwOpen.length === 1 ? "" : "s") + " to submit" : "You're all caught up"))),
         e("div", { className: "dv3-chips" },
           att100 ? e("span", { className: "dv3-chip" }, "100% attendance") : null,
@@ -311,31 +326,31 @@ function Dash({ onClassic }) {
       )
     ),
     e("div", { className: "dv3-stats" },
-      e("a", { className: "dv3-stat", href: "#homework", onClick: goHash("#homework") },
+      e(CardBound, null, e("a", { className: "dv3-stat", href: "#homework", onClick: goHash("#homework") },
         e("div", { className: "dv3-ico hw" }, ico("M14 3H6v18h12V8l-4-5z M14 3v5h5") ),
         e("div", null, e("span", null, "Homework due"), e(Count, { value: hwOpen.length }), nextHw ? e("em", null, "Next: " + nextHwDay) : null, hw.overdue.length ? e("em", { style: { color: "#DC2626" } }, hw.overdue.length + " overdue") : null)
-      ),
-      e("a", { className: "dv3-stat", href: "#quizzes", onClick: goHash("#quizzes") },
+      )),
+      e(CardBound, null, e("a", { className: "dv3-stat", href: "#quizzes", onClick: goHash("#quizzes") },
         e("div", { className: "dv3-ico qz" }, ico("M12 17h.01 M9.1 9a3 3 0 115.8 1c0 2-3 2-3 4 M12 21a9 9 0 110-18 9 9 0 010 18z")),
         e("div", null, e("span", null, "Quizzes to take"), e(Count, { value: qzOpen.length }), e("em", null, qzDays == null ? "No open quiz" : "Closes in " + qzDays + " days"))
-      ),
-      e("a", { className: "dv3-stat", href: "#attendance", onClick: goHash("#attendance") },
+      )),
+      e(CardBound, null, e("a", { className: "dv3-stat", href: "#attendance", onClick: goHash("#attendance") },
         e("div", { className: "dv3-ico at" }, ico("M9 12l2 2 4-4 M12 21a9 9 0 110-18 9 9 0 010 18z")),
         e("div", null, e("span", null, "Attendance"), e(Count, { value: attPct, suffix: attPct === "—" ? "" : "%" }), e("em", null, "Overall attendance"), den >= 3 ? e("div", { className: "dv3-spark" }, spark) : null)
-      ),
-      e("a", { className: "dv3-stat", href: "#announcements", onClick: goHash("#announcements") },
+      )),
+      e(CardBound, null, e("a", { className: "dv3-stat", href: "#announcements", onClick: goHash("#announcements") },
         e("div", { className: "dv3-ico an" }, ico("M3 11v2h2l8 5V6L5 11H3z M18 8a4 4 0 010 8")),
-        e("div", null, e("span", null, "Unread announcements"), e(Count, { value: unreadN }), e("em", null, unreadN ? (latestAgo ? "Latest " + latestAgo : "") : "You're all caught up"))
-      )
+        e("div", null, e("span", { className: "dv3-annlab" }, "Unread announcements"), e(Count, { value: unreadN }), e("em", null, unreadN ? (latestAgo ? "Latest " + latestAgo : "") : "You're all caught up"))
+      ))
     ),
     e("div", { className: "dv3-grid" },
-      e("div", { className: "dv3-card" },
+      e(CardBound, null, e("div", { className: "dv3-card" },
         e("div", { className: "dv3-h" }, e("h3", null, "Continue learning"), e("a", { href: "#courses", onClick: goHash("#courses") }, "All my courses")),
         e("div", { className: "dv3-learn" },
           active.length ? active.map((c) => {
             const cid = c.id;
-            const pubHw = (data.assignments || []).filter((a) => a.courseId === cid && String(a.status || "Published") === "Published");
-            const pubQz = (data.quizzes || []).filter((q) => q.courseId === cid && String(q.status || "Published") === "Published");
+            const pubHw = assignments.filter((a) => a.courseId === cid && String(a.status || "Published") === "Published");
+            const pubQz = quizzes.filter((q) => q.courseId === cid && String(q.status || "Published") === "Published");
             const totalItems = pubHw.length + pubQz.length;
             const doneHw = pubHw.filter((a) => subIds.has(a.id)).length;
             const doneQz = pubQz.filter((q) => attIds.has(q.id)).length;
@@ -343,55 +358,76 @@ function Dash({ onClassic }) {
             const emptyWork = totalItems === 0;
             const prog = emptyWork ? null : Math.round((doneItems / totalItems) * 100);
             const ringLen = 2 * Math.PI * 28;
-            const attC = data.attendance.filter((a) => a.courseId === cid && a.status);
+            const attC = attendanceList.filter((a) => a.courseId === cid && a.status);
             const attDen = attC.filter((a) => a.status !== "excused").length;
             const attG = attC.filter((a) => a.status === "present" || a.status === "late").length;
             const attCourse = attDen ? Math.round((attG / attDen) * 100) : null;
             const nowMs = now.getTime();
-            const nextSess = data.sessions.filter((s) => s.courseId === cid && (sessionStatus(s, now, data) === "Upcoming" || sessionStatus(s, now, data) === "In progress"))
+            const nextSess = sessionsList.filter((s) => s.courseId === cid && (sessionStatus(s, now, data) === "Upcoming" || sessionStatus(s, now, data) === "In progress"))
               .map((s) => ({ s, t: localPartsMs(s.date, s.startTime) }))
               .filter((x) => Number.isFinite(x.t))
               .sort((a, b) => a.t - b.t)[0];
             const nextHwItem = hw.pending.filter((a) => a.courseId === cid).sort((a, b) => dueLocal(a.dueDate).localeCompare(dueLocal(b.dueDate)))[0];
-            const nextQzItem = data.quizzes.filter((q) => q.courseId === cid && !attIds.has(q.id) && String(q.status || "Published") === "Published").sort((a, b) => dueLocal(a.dueDate || a.closeDate).localeCompare(dueLocal(b.dueDate || b.closeDate)))[0];
+            const nextQzItem = quizzes.filter((q) => q.courseId === cid && !attIds.has(q.id) && String(q.status || "Published") === "Published").sort((a, b) => dueLocal(a.dueDate || a.closeDate).localeCompare(dueLocal(b.dueDate || b.closeDate)))[0];
             let nextLine = "No upcoming item";
+            let phoneNext = "";
             const sessMs = nextSess ? nextSess.t : Infinity;
             const hwMs = nextHwItem ? localPartsMs(dueLocal(nextHwItem.dueDate), "23:59") : Infinity;
             const qzMs = nextQzItem ? localPartsMs(dueLocal(nextQzItem.dueDate || nextQzItem.closeDate), "23:59") : Infinity;
             const soon = Math.min(sessMs, hwMs, qzMs);
+            const dueMon = (dstr) => {
+              try {
+                const p = String(dstr || "").split("-").map(Number);
+                if (p.length < 3) return "";
+                return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString("en-US", { weekday: "short" });
+              } catch (_) { return ""; }
+            };
             if (Number.isFinite(soon) && soon < Infinity) {
               if (soon === sessMs) {
                 const sessTitle = String(nextSess.s.title || "").trim();
                 const label = !sessTitle || /^session$/i.test(sessTitle) ? "Class session" : sessTitle;
                 nextLine = "Next class: " + fmtClassWhen(nextSess.s.date, nextSess.s.startTime) + " · " + label;
+                phoneNext = "Next: " + label + " · " + dueMon(nextSess.s.date);
               } else if (soon === hwMs) {
                 const dd = dueLocal(nextHwItem.dueDate);
                 nextLine = (nextHwItem.title || "Homework") + " due " + (dd ? fmtClassWhen(dd, "") : "");
+                phoneNext = "Next: " + (nextHwItem.title || "Homework") + (dd ? " · Due " + dueMon(dd) : "");
               } else {
                 const dd = dueLocal(nextQzItem.dueDate || nextQzItem.closeDate);
                 nextLine = (nextQzItem.title || "Quiz") + " due " + (dd ? fmtClassWhen(dd, "") : "");
+                phoneNext = "Next: " + (nextQzItem.title || "Quiz") + (dd ? " · Due " + dueMon(dd) : "");
               }
             }
             const caption = emptyWork ? "No homework or quizzes yet" : ("Work completed: " + doneItems + " of " + totalItems + " items");
+            const workPhone = "Work " + doneItems + " of " + totalItems + (attCourse != null ? " · Attendance " + attCourse + "%" : "");
+            const endMs = localPartsMs(c.endDate || c.end || "", "23:59");
+            const courseEnded = Number.isFinite(endMs) && nowMs > endMs;
+            const workDone = !emptyWork && doneItems === totalItems;
+            const isComplete = String(c.status || "") === "Completed" || (workDone && courseEnded);
             return e("div", { className: "dv3-course", key: cid },
-              e("div", { className: "dv3-cover", style: { background: hue(c.title) } },
-                e("span", null, "In progress"),
-                e("div", { className: "dv3-ringwrap", title: "Homework submitted and quizzes taken in this course" },
-                  e("svg", { className: "dv3-ring", viewBox: "0 0 72 72" },
-                    e("circle", { cx: "36", cy: "36", r: "28", fill: "none", stroke: "rgba(255,255,255,.25)", "stroke-width": "6" }),
-                    e("circle", { cx: "36", cy: "36", r: "28", fill: "none", stroke: "#FFFFFF", "stroke-width": "6", "stroke-linecap": "round",
-                      "stroke-dasharray": (emptyWork ? 0 : (prog / 100) * ringLen) + " " + ringLen, transform: "rotate(-90 36 36)" }),
-                    e("text", { x: "36", y: "41", "text-anchor": "middle", fill: "#FFFFFF", "font-size": "14", "font-weight": "700" }, emptyWork ? "–" : (prog + "%"))
-                  ),
-                  e("i", { className: "dv3-ringinfo", "aria-label": "Homework submitted and quizzes taken in this course" }, "i")
+              e("div", { className: "dv3-course-top" },
+                e("div", { className: "dv3-cover", style: { background: hue(c.title) } },
+                  e("span", { className: isComplete ? "dv3-badge-done" : "" }, isComplete ? "Completed" : "In progress"),
+                  e("div", { className: "dv3-ringwrap", title: "Homework submitted and quizzes taken in this course" },
+                    e("svg", { className: "dv3-ring", viewBox: "0 0 72 72" },
+                      e("circle", { cx: "36", cy: "36", r: "28", fill: "none", stroke: "rgba(255,255,255,.25)", "stroke-width": "6" }),
+                      e("circle", { cx: "36", cy: "36", r: "28", fill: "none", stroke: "#FFFFFF", "stroke-width": "6", "stroke-linecap": "round",
+                        "stroke-dasharray": (emptyWork ? 0 : (prog / 100) * ringLen) + " " + ringLen, transform: "rotate(-90 36 36)" }),
+                      e("text", { x: "36", y: "41", "text-anchor": "middle", fill: "#FFFFFF", "font-size": "14", "font-weight": "700" }, emptyWork ? "–" : (prog + "%"))
+                    ),
+                    e("i", { className: "dv3-ringinfo", "aria-label": "Homework submitted and quizzes taken in this course" }, "i")
+                  )
+                ),
+                e("div", { className: "dv3-course-meta" },
+                  e("h4", null, c.title || "Course"),
+                  e("span", { className: "dv3-stchip " + (isComplete ? "done" : "prog") }, isComplete ? "Completed" : "In progress"),
+                  e("p", { className: "dv3-workcap" }, caption),
+                  attCourse != null ? e("span", { className: "dv3-mini" }, "Attendance " + attCourse + "%") : null,
+                  e("p", { className: "dv3-nextlap" }, nextLine)
                 )
               ),
-              e("div", null,
-                e("h4", null, c.title || "Course"),
-                e("p", { className: "dv3-workcap" }, caption),
-                attCourse != null ? e("span", { className: "dv3-mini" }, "Attendance " + attCourse + "%") : null,
-                e("p", null, nextLine)
-              ),
+              e("p", { className: "dv3-workline" }, workPhone),
+              phoneNext ? e("p", { className: "dv3-nextphone" }, phoneNext) : null,
               e("a", { className: "dv3-btn", href: "#course/" + cid, onClick: goHash("#course/" + cid) }, "Open course")
             );
           }) : e("div", { className: "dv3-empty" }, e("i"), e("p", null, "No active courses yet.")),
@@ -418,20 +454,23 @@ function Dash({ onClassic }) {
               badge = "Course failed"; kind = "no";
               btn = e("a", { className: "dv3-btn", href: "#certificates", onClick: goHash("#certificates") }, "View certificate");
             }
-            return e("div", { className: "dv3-done", key: c.id },
+            return e("div", { className: "dv3-done", key: c.id, role: "link", tabIndex: 0, onClick: (ev) => {
+                if (window.matchMedia("(max-width: 767px)").matches) goHash("#course/" + c.id)(ev);
+              } },
               e("i", { className: "dv3-doneico " + (revoked ? "bad" : "ok") }, revoked ? "!" : "✓"),
               e("div", { className: "dv3-donetxt" },
                 e("h4", null, c.title || "Course"),
+                e("span", { className: "dv3-badge dv3-badge-phone " + kind }, badge),
                 note ? e("p", null, note) : null
               ),
-              e("span", { className: "dv3-badge " + kind }, badge),
+              e("span", { className: "dv3-badge dv3-badge-lap " + kind }, badge),
               btn
             );
           })
         )
-      ),
+      )),
       e("div", { style: { display: "grid", gap: "16px" } },
-        e("div", { className: "dv3-card" },
+        e(CardBound, null, e("div", { className: "dv3-card" },
           e("div", { className: "dv3-h" }, e("h3", null, "This week"), e("span", { style: { fontSize: "13px", color: "#64748B" } }, days[0].d.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + " – " + days[6].d.toLocaleDateString(undefined, { day: "numeric", month: "short" }))),
           e("div", { className: "dv3-week" }, days.map((d) => e("div", { className: "dv3-day" + (d.on ? " on" : ""), key: d.key, onClick: goHash("#schedule"), role: "button" },
             e("b", null, d.d.toLocaleDateString(undefined, { weekday: "short" })),
@@ -447,8 +486,8 @@ function Dash({ onClassic }) {
             e("span", null, e("i", { className: "hw", style: { background: "#D97706" } }), " Homework"),
             e("span", null, e("i", { className: "qz", style: { background: "#7C3AED" } }), " Quiz")
           )
-        ),
-        e("div", { className: "dv3-card dv3-avg" },
+        )),
+        e(CardBound, null, e("div", { className: "dv3-card dv3-avg" },
           e("div", { className: "dv3-h" }, e("h3", null, "Overall average"), e("a", { href: "#grades", onClick: goHash("#grades") }, "Open grades")),
           e("svg", { viewBox: "0 0 140 140" },
             e("circle", { cx: "70", cy: "70", r: "54", fill: "none", stroke: "#E5EAF1", "stroke-width": "12" }),
@@ -457,11 +496,11 @@ function Dash({ onClassic }) {
             e("text", { x: "70", y: "76", "text-anchor": "middle", "font-size": "22", "font-weight": "700", fill: "#0F2747" }, avg.pct == null ? "–" : String(avg.pct))
           ),
           e("p", { style: { color: "#64748B", fontSize: "13px" } }, avg.n ? ("From " + avg.n + " completed course" + (avg.n === 1 ? "" : "s") + ", same as Grades.") : "Shows after a course is completed.")
-        ),
-        e("div", { className: "dv3-card" },
+        )),
+        e(CardBound, null, e("div", { className: "dv3-card" },
           e("div", { className: "dv3-h" }, e("h3", null, "Announcements"), e("a", { href: "#announcements", onClick: goHash("#announcements") }, "See all")),
           e("div", { className: "dv3-ann" },
-            data.announcements.length ? [...data.announcements].sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)).slice(0, 4).map((a) =>
+            announcements.length ? [...announcements].sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)).slice(0, 4).map((a) =>
               e("div", { className: "dv3-ann-row", key: a.id, onClick: goHash("#announcements"), role: "button" },
                 e("div", { className: "dv3-ann-ico" }, ico("M3 11v2h2l8 5V6L5 11H3z")),
                 e("div", null, e("p", null, a.title || "Announcement"), e("span", null, (a.authorName || a.authorRole || "Admin") + " · " + (a.createdAt?.toMillis ? annTimeAgo(a.createdAt.toMillis()) : ""))),
@@ -469,10 +508,9 @@ function Dash({ onClassic }) {
               )
             ) : e("div", { className: "dv3-empty" }, e("i"), e("p", null, "No announcements yet."))
           )
-        )
+        ))
       )
-    ),
-    e("p", { style: { fontSize: "12px", color: "#94A3B8" } }, e("button", { type: "button", className: "btn btn-sm", onClick: onClassic, style: { width: "auto" } }, "Use classic view"))
+    )
   );
 }
 

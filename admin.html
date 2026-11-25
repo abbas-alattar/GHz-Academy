@@ -1,13 +1,14 @@
-<!-- aha-build-id: bmvt74pfrdqnpxn42 -->
+<!-- aha-build-id: bmwvcxiux8xkqsjyt -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Admin — GHz Academy</title>
   <link rel="icon" type="image/png" href="./favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./portal.css" />
+  <link rel="stylesheet" href="./ghz-responsive.css" />
   <link rel="stylesheet" href="./PageTransition.css" />
   <link rel="stylesheet" href="./AdminDashboardV2.css" />
   <link rel="stylesheet" href="./AdminCoursesV2.css" />
@@ -25,8 +26,9 @@
   <link rel="stylesheet" href="./AdminMessagesV2.css" />
   <link rel="stylesheet" href="./AdminSettingsV2.css" />
   <link rel="stylesheet" href="./CourseContentV1.css" />
+  <link rel="stylesheet" href="./ghz-mobile.css" />
 </head>
-<body class="admin-portal">
+<body class="admin-portal portal-admin">
   <div class="portal">
     <aside class="side">
       <a class="brand" href="./index.html" aria-label="GHz Academy"><svg viewBox="0 0 40 22" fill="none" aria-hidden="true"><path d="M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0" stroke="#2EC8FF" stroke-width="2.6" stroke-linecap="round"/></svg><span class="ghz">GHz</span> <span class="acad">Academy</span></a>
@@ -140,7 +142,7 @@
   <div id="courseFormV2Host"></div>
   <div id="trainerFormV2Host"></div>
   <script type="module">
-    import { protect } from "./auth-guard.js?v=auth9";
+    import { protect } from "./auth-guard.js?v=auth10";
     import { bootPortalSpa } from "./portal-spa.js";
     bootPortalSpa();
     import { bootNotify } from "./portal-notify.js";
@@ -148,7 +150,7 @@
     import { bootPageShell } from "./PageShell.js";
     import { bootPortalShell } from "./PortalShell.js";
     import { swapLoadingText } from "./WaveLoader.js";
-    import { auth, db, firebaseConfig } from "./firebase-config.js?v=auth8";
+    import { auth, db, firebaseConfig } from "./firebase-config.js?v=auth10";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut as so } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, deleteField, writeBatch, query, where, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -158,6 +160,7 @@
     import { openGradeDistribution } from "./admin-grade-distribution.js";
     import { bootAdminDashboardV2 } from "./AdminDashboardV2.js?v=opt2";
     import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+    import { showConfirmDialog } from "./ConfirmDialog.js";
     const LA = (p) => import(p);
     const renderAdminCoursesV2 = async (host, opts) => (await LA("./AdminCoursesV2.js?v=opt2")).renderAdminCoursesV2(host, opts);
     const renderCourseContentV1 = async (a) => (await LA("./CourseContentV1.js?v=docx2")).renderCourseContentV1(a);
@@ -166,9 +169,9 @@
     const unmountCourseFormV2 = async () => { try { (await LA("./CourseFormV2.js?v=opt3")).unmountCourseFormV2(); } catch (_) {} };
     const bootTrainerFormV2 = async (a) => (await LA("./TrainerFormV2.js?v=opt2")).bootTrainerFormV2(a);
     const unmountTrainerFormV2 = async () => { try { (await LA("./TrainerFormV2.js?v=opt2")).unmountTrainerFormV2(); } catch (_) {} };
-    const renderAdminRegistrationsV2 = async (host, opts) => (await LA("./AdminRegistrationsV2.js?v=opt2")).renderAdminRegistrationsV2(host, opts);
+    const renderAdminRegistrationsV2 = async (host, opts) => (await LA("./AdminRegistrationsV2.js?v=opt7")).renderAdminRegistrationsV2(host, opts);
     const renderAdminStudentsV2 = async (host, opts) => (await LA("./AdminStudentsV2.js?v=opt2")).renderAdminStudentsV2(host, opts);
-    const renderAdminTrainersV2 = async (host, opts) => (await LA("./AdminTrainersV2.js?v=opt2")).renderAdminTrainersV2(host, opts);
+    const renderAdminTrainersV2 = async (host, opts) => (await LA("./AdminTrainersV2.js?v=act1")).renderAdminTrainersV2(host, opts);
     const loadTrainerExtras = async (a) => (await LA("./AdminTrainersV2.js?v=opt2")).loadTrainerExtras(a);
     const mountPdfButton = async (a) => (await LA("./AdminPdfExport.js")).mountPdfButton(a);
     const fmtPdfDate = async (a) => (await LA("./AdminPdfExport.js")).fmtPdfDate(a);
@@ -178,7 +181,7 @@
     const renderAdminAnnouncementsV2 = async (a) => (await LA("./AdminAnnouncementsV2.js?v=opt2")).renderAdminAnnouncementsV2(a);
     const renderAdminCertificatesV2 = async (a) => (await LA("./AdminCertificatesV2.js?v=opt2")).renderAdminCertificatesV2(a);
     const renderAdminMessagesV2 = async (a) => (await LA("./AdminMessagesV2.js?v=opt2")).renderAdminMessagesV2(a);
-    const renderAdminSettingsV2 = async (a) => (await LA("./AdminSettingsV2.js?v=opt2")).renderAdminSettingsV2(a);
+    const renderAdminSettingsV2 = async (a) => (await LA("./AdminSettingsV2.js?v=opt9")).renderAdminSettingsV2(a);
     const syncTrainerNamesOnce = async (a) => (await LA("./trainerNamesSync.js")).syncTrainerNamesOnce(a);
     try { if (!bootPageShell(document.body)) bootPageMotion(document.body); swapLoadingText(document.body); bootPortalShell(); } catch (_) { try { bootPageMotion(document.body); } catch (e) {} }
     protect("admin").then(({ user }) => {
@@ -310,11 +313,141 @@
     ];
 
     let courses = [], users = [], regs = [];
+    const generateThumbs = async () => {
+      toast("Generating thumbnails…");
+      let n = 0;
+      for (const c of courses) {
+        try {
+          const snap = await getDoc(doc(db, "courseCovers", c.id));
+          if (!snap.exists()) continue;
+          const d = snap.data() || {};
+          const src = String(d.data || "");
+          if (!src) continue;
+          const url = src.startsWith("data:") ? src : ("data:" + (d.mimeType || "image/jpeg") + ";base64," + src);
+          const img = new Image();
+          await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+          const cnv = document.createElement("canvas"); cnv.width = 480; cnv.height = 270;
+          cnv.getContext("2d").drawImage(img, 0, 0, 480, 270);
+          let tq = 0.6, td = cnv.toDataURL("image/jpeg", tq);
+          const tbs = () => { try { return atob((td.split(",")[1] || "")).length; } catch { return 0; } };
+          while (tbs() > 40 * 1024 && tq > 0.35) { tq -= 0.06; td = cnv.toDataURL("image/jpeg", tq); }
+          await setDoc(doc(db, "courseCovers", c.id + "_thumb"), { courseId: c.id, data: td.split(",")[1] || "", mimeType: "image/jpeg", updatedAt: Date.now() });
+          n += 1;
+        } catch (_) {}
+      }
+      toast(n ? ("Thumbnails ready: " + n) : "No covers to convert.");
+    };
+    const kbOf = (o) => { try { return Math.round(JSON.stringify(o || {}).length / 1024); } catch { return 0; } };
+    const dataUrlToB64 = (url) => {
+      const s = String(url || "");
+      const i = s.indexOf(",");
+      return i >= 0 ? s.slice(i + 1) : s;
+    };
+    const compressCover = (src, w, h, maxBytes, q0) => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const cnv = document.createElement("canvas");
+        const ir = img.width / img.height || (16 / 9);
+        const tw = w, th = h || Math.round(w / ir);
+        cnv.width = tw; cnv.height = th;
+        cnv.getContext("2d").drawImage(img, 0, 0, tw, th);
+        let q = q0 == null ? 0.72 : q0, td = cnv.toDataURL("image/jpeg", q);
+        const bytes = () => { try { return atob((td.split(",")[1] || "")).length; } catch { return 0; } };
+        while (bytes() > maxBytes && q > 0.35) { q -= 0.08; td = cnv.toDataURL("image/jpeg", q); }
+        resolve({ dataUrl: td, b64: td.split(",")[1] || "", bytes: bytes() });
+      };
+      img.onerror = reject;
+      img.src = src.startsWith("data:") ? src : ("data:image/jpeg;base64," + src);
+    });
+    const optimizeCourses = async () => {
+      const ok = await showConfirmDialog({
+        title: "Optimize courses?",
+        message: "Moves embedded covers into courseCovers (full + 480px JPEG thumb, quality 0.6, max 40 KB), downloads a JSON backup of removed fields, then strips heavy cover fields from course documents. Missing thumbnails are generated from the full cover. Already-optimized courses are skipped. Outline over 10KB is left in place.",
+        confirmLabel: "Optimize"
+      });
+      if (!ok || ok.ok === false) return;
+      const log = [];
+      const backup = [];
+      toast("Optimizing courses…");
+      for (const c of courses) {
+        const before = kbOf(c);
+        const removed = {};
+        try {
+          const coverSnap = await getDoc(doc(db, "courseCovers", c.id));
+          const thumbSnap = await getDoc(doc(db, "courseCovers", c.id + "_thumb"));
+          const raw = String(c.coverImage || c.cover || c.coverThumb || c.image || "");
+          const hasEmbed = raw.startsWith("data:") || raw.length > 800;
+          if (hasEmbed && !coverSnap.exists()) {
+            let b64 = dataUrlToB64(raw);
+            if (b64.length > 200000) {
+              const packed = await compressCover(raw, 1280, 720, 150 * 1024, 0.7);
+              b64 = packed.b64;
+            }
+            await setDoc(doc(db, "courseCovers", c.id), { courseId: c.id, data: b64, mimeType: "image/jpeg", updatedAt: Date.now() });
+          }
+          if (!thumbSnap.exists()) {
+            const srcSnap = coverSnap.exists() ? coverSnap : await getDoc(doc(db, "courseCovers", c.id));
+            const src = srcSnap.exists() ? String((srcSnap.data() || {}).data || "") : dataUrlToB64(raw);
+            if (src) {
+              const packed = await compressCover(src.startsWith("data:") ? src : src, 480, 270, 40 * 1024, 0.6);
+              await setDoc(doc(db, "courseCovers", c.id + "_thumb"), { courseId: c.id, data: packed.b64, mimeType: "image/jpeg", updatedAt: Date.now() });
+            }
+          }
+          const patch = {};
+          ["coverImage", "cover", "coverThumb", "image", "imageUrl", "photo", "thumbnail"].forEach((k) => {
+            if (c[k] != null && c[k] !== "") { removed[k] = c[k]; patch[k] = deleteField(); }
+          });
+          Object.keys(c).forEach((k) => {
+            if (["id", "title", "status", "outline", "short", "full", "trainerIds", "trainerNames"].includes(k)) return;
+            try {
+              const sz = JSON.stringify(c[k] || "").length;
+              if (sz > 10240 && (k.toLowerCase().includes("cover") || k.toLowerCase().includes("image"))) {
+                removed[k] = c[k];
+                patch[k] = deleteField();
+              }
+            } catch (_) {}
+          });
+          if (Object.keys(removed).length) {
+            backup.push({ id: c.id, title: c.title, removed });
+            await updateDoc(doc(db, "courses", c.id), patch);
+          }
+          const afterSnap = await getDoc(doc(db, "courses", c.id));
+          const after = afterSnap.exists() ? kbOf({ id: c.id, ...afterSnap.data() }) : before;
+          log.push((c.title || c.id) + ": " + before + " KB → " + after + " KB");
+        } catch (er) {
+          log.push((c.title || c.id) + ": error " + (er.code || er.message || er));
+        }
+      }
+      if (backup.length) {
+        const blob = new Blob([JSON.stringify({ at: Date.now(), courses: backup }, null, 2)], { type: "application/json" });
+        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "ghz-course-optimize-backup.json"; a.click();
+      }
+      const hostLog = document.getElementById("optCourseLog") || (() => { const d = document.createElement("pre"); d.id = "optCourseLog"; d.style.cssText = "margin:12px 24px;padding:12px;background:#0F2747;color:#fff;font:12px/1.4 ui-monospace,monospace;max-height:240px;overflow:auto;border-radius:10px"; const main = document.querySelector("#view-courses .acv2") || document.getElementById("coursesV2Root") || document.body; main.appendChild(d); return d; })();
+      hostLog.textContent = log.join("\n") || "Nothing to optimize.";
+      toast(log.length ? "Optimize finished. Backup downloaded if fields were removed." : "Nothing to optimize.");
+      await load();
+    };
     const load = async () => {
       if (!auth.currentUser) throw Object.assign(new Error("Not signed in"), { code: "unauthenticated", path: "courses" });
       const cs = await getDocs(collection(db, "courses"));
       const cs2 = cs.empty ? await getDocs(collection(db, "courses")) : cs;
       courses = cs2.docs.map((d) => ({ id:d.id, ...d.data() }));
+      (async () => {
+        for (const c of courses) {
+          const raw = String(c.coverImage || c.cover || "");
+          if (!raw.startsWith("data:")) continue;
+          const comma = raw.indexOf(",");
+          if (comma < 0) continue;
+          const header = raw.slice(0, comma);
+          const b64 = raw.slice(comma + 1);
+          const mime = /image\/\w+/.exec(header)?.[0] || "image/jpeg";
+          try {
+            await setDoc(doc(db,"courseCovers",c.id), { courseId: c.id, data: b64, mimeType: mime, updatedAt: Date.now() });
+            await updateDoc(doc(db,"courses",c.id), { coverImage: deleteField(), cover: deleteField(), coverThumb: deleteField() });
+            c.coverImage = ""; c.cover = ""; c.coverThumb = "";
+          } catch (_) {}
+        }
+      })();
       paintCoursesV2({ early: true });
       const us = await getDocs(collection(db, "users"));
       users = us.docs.map((d) => ({ id:d.id, ...d.data() }));
@@ -396,7 +529,7 @@
         courses, users, counts: enrollCounts,
         error: loadError ? ((loadError.code || loadError.message || String(loadError)) + " · courses") : null,
         loading: early && !courses.length && !loadError,
-        onRetry: load, onAdd: () => openCourse(), actions
+        onRetry: load, onAdd: () => openCourse(), onThumbs: generateThumbs, onOptimize: optimizeCourses, actions
       });
       if (early) return;
       getDocs(collection(db, "enrollments")).then((snap) => {
@@ -405,12 +538,12 @@
         enrollCounts = m;
         renderAdminCoursesV2(host, {
           courses, users, counts: enrollCounts, error: null, loading: false,
-          onRetry: load, onAdd: () => openCourse(), actions
+          onRetry: load, onAdd: () => openCourse(), onThumbs: generateThumbs, onOptimize: optimizeCourses, actions
         });
       }).catch((e) => {
         renderAdminCoursesV2(host, {
           courses, users, counts: enrollCounts, error: e.code || e.message, loading: false,
-          onRetry: load, onAdd: () => openCourse(), actions
+          onRetry: load, onAdd: () => openCourse(), onThumbs: generateThumbs, onOptimize: optimizeCourses, actions
         });
       });
     };
@@ -526,7 +659,7 @@
       const id = c.id || (String(data.title||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "course-"+Date.now());
       const trainerIds = data.trainerIds || [];
       const endVal = String(data.endDate || "").trim();
-      const payload = { title: data.title, short: data.short, full: data.full, outline: data.outline, duration: data.duration, days: data.days, sessionTime: data.sessionTime, prerequisites: data.prerequisites, level: data.level, price: Number(data.price||0), currency: data.currency, startDate: data.startDate, endDate: endVal || deleteField(), status: data.status, trainerIds, trainerNames: namesForIds(trainerIds), trainerName: namesForIds(trainerIds)[0] || "", coverImage: data.coverImage || "" };
+      const payload = { title: data.title, short: data.short, full: data.full, outline: data.outline, duration: data.duration, days: data.days, sessionTime: data.sessionTime, prerequisites: data.prerequisites, level: data.level, price: Number(data.price||0), currency: data.currency, startDate: data.startDate, endDate: endVal || deleteField(), status: data.status, trainerIds, trainerNames: namesForIds(trainerIds), trainerName: namesForIds(trainerIds)[0] || "", coverImage: deleteField(), cover: deleteField(), coverThumb: deleteField() };
       const existing = await getDoc(doc(db,"courses",id));
       const prevIds = existing.exists() ? (existing.data().trainerIds || []) : [];
       const trainerAssigned = existing.exists() ? (existing.data().trainerAssigned || {}) : {};
@@ -546,6 +679,34 @@
         payload.previousStatus = prevSt || "Closed";
       }
       await setDoc(doc(db,"courses",id), payload, { merge:true });
+      const coverRaw = String(data.coverImage || "");
+      if (coverRaw.startsWith("data:")) {
+        const comma = coverRaw.indexOf(",");
+        const header = coverRaw.slice(0, comma);
+        const b64 = coverRaw.slice(comma + 1);
+        const mime = /image\/\w+/.exec(header)?.[0] || "image/jpeg";
+        const ts = Date.now();
+        await setDoc(doc(db,"courseCovers",id), { courseId: id, data: b64, mimeType: mime, updatedAt: ts });
+        try {
+          const img = new Image();
+          await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = coverRaw; });
+          const cnv = document.createElement("canvas"); cnv.width = 480; cnv.height = 270;
+          cnv.getContext("2d").drawImage(img, 0, 0, 480, 270);
+          let tq = 0.6, td = cnv.toDataURL("image/jpeg", tq);
+          const tbs = () => { try { return atob((td.split(",")[1]||"")).length; } catch { return 0; } };
+          while (tbs() > 40 * 1024 && tq > 0.35) { tq -= 0.06; td = cnv.toDataURL("image/jpeg", tq); }
+          const tb64 = td.split(",")[1] || "";
+          await setDoc(doc(db,"courseCovers",id + "_thumb"), { courseId: id, data: tb64, mimeType: "image/jpeg", updatedAt: ts });
+        } catch (_) {}
+        payload.coverUpdatedAt = ts;
+        await setDoc(doc(db,"courses",id), { coverUpdatedAt: ts }, { merge:true });
+        try {
+          const rec = { data: coverRaw, mimeType: mime, updatedAt: ts, courseId: id };
+          localStorage.setItem("ghz-covers-v1", JSON.stringify(Object.assign(JSON.parse(localStorage.getItem("ghz-covers-v1")||"{}"), { [id]: rec })));
+        } catch (_) {}
+      } else if (!coverRaw) {
+        try { await deleteDoc(doc(db,"courseCovers",id)); } catch (_) {}
+      }
       toast("Course saved.");
       unmountCourseFormV2();
       closeModal();
@@ -908,7 +1069,11 @@
       if (!confirm("Confirm this enrollment?")) return;
       try {
         const batch = writeBatch(db);
-        batch.update(doc(db,"registrations", r.id), { status:"enrolled", confirmedBy: auth.currentUser.uid, confirmedAt: serverTimestamp() });
+        const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let tail = ""; for (let i = 0; i < 5; i++) tail += alphabet[Math.floor(Math.random() * alphabet.length)];
+        const now = new Date();
+        const receiptNo = r.receiptNo || ("GHZ-R-" + String(now.getFullYear()).slice(-2) + String(now.getMonth() + 1).padStart(2, "0") + "-" + tail);
+        batch.update(doc(db,"registrations", r.id), { status:"enrolled", confirmedBy: auth.currentUser.uid, confirmedAt: serverTimestamp(), receiptNo });
         batch.set(doc(db,"enrollments", enId(r)), { uid:r.uid, courseId:r.courseId, studentName:r.studentName||"", studentEmail:r.studentEmail||"", studentId:r.studentId||"", enrolledAt: serverTimestamp() });
         await batch.commit();
         toast("Enrollment confirmed."); await load();
@@ -927,11 +1092,11 @@
       } catch (_) {}
       await batch.commit();
     };
-    const rejectRegistration = async (r) => {
+    const rejectRegistration = async (r, givenNote) => {
       if (!r) return;
-      const note = prompt("Rejection note for the student:");
+      const note = givenNote != null ? String(givenNote) : prompt("Rejection note for the student:");
       if (note === null) return;
-      if (!confirm("Reject this registration?")) return;
+      if (givenNote == null && !confirm("Reject this registration?")) return;
       try {
         const batch = writeBatch(db);
         batch.update(doc(db,"registrations", r.id), { status:"rejected", rejectNote: note || "", cancelledBy: auth.currentUser.uid, cancelledAt: serverTimestamp() });
@@ -1055,6 +1220,8 @@
     if (window.__ghzAdminReady) window.__ghzAdminLoad();
 
   </script>
+  <script src="./ghz-responsive.js"></script>
+  <script src="./ghz-mobile.js"></script>
 </body>
 </html>
 

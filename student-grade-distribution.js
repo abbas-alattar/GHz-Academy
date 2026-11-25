@@ -1,6 +1,7 @@
-import { db } from "./firebase-config.js?v=auth8";
+import { db } from "./firebase-config.js?v=auth10";
 import { getDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { averageOf, statusOf, parseScore } from "./grade-sheet-math.js";
+import { formatGrade } from "./gradeCalc.js";
 
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
 
@@ -43,7 +44,7 @@ export async function studentGradeDistributionHtml(uid, courseId) {
       <th>Student</th><th>Average</th>${heads}<th>Status</th>
     </tr></thead><tbody><tr>
       <td>You</td>
-      <td style="font-weight:700">${avg.toFixed(1)}/100</td>
+      <td style="font-weight:700">${formatGrade(avg)}/100</td>
       ${cells}
       <td><span class="badge" style="background:${st.bg};color:${st.color}">${esc(st.label)}</span></td>
     </tr></tbody></table>

@@ -1,4 +1,4 @@
-import { bound } from "./student-dash-data.js?v=stu7";
+import { bound } from "./student-dash-data.js?v=stu11";
 import { resolveGradedItems } from "./student-grade-math.js";
 
 export function mountGrades(el) {

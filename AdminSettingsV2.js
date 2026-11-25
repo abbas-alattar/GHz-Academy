@@ -1,9 +1,10 @@
 import { createElement as e, useEffect, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { auth, db } from "./firebase-config.js?v=auth8";
+import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, doc, getDoc, getDocs, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { COUNTRIES } from "./phoneCountries.js";
+import { DEFAULT_METHODS, normalizeMethods } from "./paymentProviders.js?v=stu30";
 
 function showSecErr(host, err, retry) {
   if (!host) return;
@@ -60,6 +61,7 @@ function SaveBar({ saving, saved, err, onSave }) {
 const SECTIONS = [
   { id: "academy", label: "Academy" },
   { id: "payment", label: "Payment" },
+  { id: "paymethods", label: "Payment methods" },
   { id: "registration", label: "Registration" },
   { id: "certificates", label: "Certificates" },
   { id: "notifications", label: "Notifications" },
@@ -71,9 +73,11 @@ function App({ user }) {
   const [dirty, setDirty] = useState({});
   const [academy, setAcademy] = useState({ name: "", supportEmail: "", phone: "", phoneDial: "+961", website: "", address: "", linkedin: "", facebook: "", instagram: "", youtube: "", certificate: { signerName: "", signerTitle: "", lineUnderTitle: "" } });
   const [payment, setPayment] = useState({ text: "" });
+  const [payMethods, setPayMethods] = useState([]);
+  const defaultPayMethods = DEFAULT_METHODS;
   const [policies, setPolicies] = useState({ allowRegistrations: true, requirePaymentConfirm: true, currency: "USD", closedMessage: "" });
   const [notes, setNotes] = useState({ newRegistration: true, newMessage: true, paymentConfirmed: true });
-  const [load, setLoad] = useState({ academy: true, payment: true, policies: true, notifications: true });
+  const [load, setLoad] = useState({ academy: true, payment: true, paymentMethods: true, policies: true, notifications: true });
   const [lerr, setLerr] = useState({});
   const [saving, setSaving] = useState({});
   const [saved, setSaved] = useState({});
@@ -120,6 +124,7 @@ function App({ user }) {
       }
     })));
     fetchOne("payment", (d) => setPayment({ text: d.text || "" }));
+    fetchOne("paymentMethods", (d) => setPayMethods(normalizeMethods(Array.isArray(d.methods) && d.methods.length ? d.methods : defaultPayMethods)));
     fetchOne("policies", (d) => setPolicies({
       allowRegistrations: d.allowRegistrations !== false,
       requirePaymentConfirm: d.requirePaymentConfirm !== false,
@@ -226,6 +231,40 @@ function App({ user }) {
         syncMsg ? e("p", { className: "asv2-ok" }, syncMsg) : null,
         syncErr ? e("p", { className: "asv2-err" }, syncErr) : null
       );
+  } else if (sec === "paymethods") {
+    const list = payMethods.length ? payMethods : defaultPayMethods;
+    const setM = (i, patch) => { const next = list.map((m, j) => j === i ? { ...m, ...patch } : m); setPayMethods(next); mark("paymethods"); };
+    body = load.paymentMethods ? sk : e("div", null,
+      e("h3", null, "Payment methods"),
+      e("p", { className: "asv2-note" }, "Students see these as cards at checkout. Card stays Coming soon until a gateway is added."),
+      list.map((m, i) => e("div", { key: m.id, className: "asv2-preview", style: { marginBottom: 12 } },
+        e(Field, { label: "Label" }, e("input", { value: m.label || "", onChange: (ev) => setM(i, { label: ev.target.value }) })),
+        e(Toggle, { on: !!(m.askConf && m.askConf.mtcn), label: "Ask for MTCN", set: (v) => setM(i, { askConf: { ...(m.askConf || {}), mtcn: v } }) }),
+        m.id === "payoneer" ? null : e(Toggle, { on: !!(m.askConf && m.askConf.paymentId), label: "Ask for payment ID", set: (v) => setM(i, { askConf: { ...(m.askConf || {}), paymentId: v } }) }),
+        e(Toggle, { on: !m.askConf || m.askConf.senderName !== false, label: "Ask for sender name", set: (v) => setM(i, { askConf: { ...(m.askConf || {}), senderName: v } }) }),
+        e(Field, { label: "Steps (one per line, use {amount})" }, e("textarea", { value: (m.steps || []).join("\n"), onChange: (ev) => setM(i, { steps: ev.target.value.split("\n") }) })),
+        e("p", { className: "asv2-note" }, "Detail rows"),
+        (m.details || []).map((row, ri) => e("div", { key: ri, style: { display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, marginBottom: 8 } },
+          e("input", { placeholder: "Label", value: row.label || "", onChange: (ev) => {
+            const details = (m.details || []).map((x, j) => j === ri ? { ...x, label: ev.target.value } : x);
+            setM(i, { details });
+          } }),
+          e("input", { placeholder: "Value", value: row.value || "", onChange: (ev) => {
+            const details = (m.details || []).map((x, j) => j === ri ? { ...x, value: ev.target.value } : x);
+            setM(i, { details });
+          } }),
+          e(Toggle, { on: row.copy !== false, label: "Copy", set: (v) => {
+            const details = (m.details || []).map((x, j) => j === ri ? { ...x, copy: v } : x);
+            setM(i, { details });
+          } })
+        )),
+        e("button", { type: "button", className: "asv2-save", style: { marginBottom: 8 }, onClick: () => setM(i, { details: [...(m.details || []), { label: "", value: "", copy: true, mono: true }] }) }, "Add row"),
+        e(Field, { label: "Order" }, e("input", { type: "number", value: m.order || i + 1, onChange: (ev) => setM(i, { order: Number(ev.target.value) || i + 1 }) })),
+        e(Toggle, { on: m.enabled !== false, label: "Enabled", set: (v) => setM(i, { enabled: v }) }),
+        e(Toggle, { on: !!m.comingSoon, label: "Coming soon", set: (v) => setM(i, { comingSoon: v }) })
+      )),
+      e(SaveBar, { saving: saving.paymethods, saved: saved.paymethods, err: serr.paymethods, onSave: () => save("paymethods", "paymentMethods", { methods: list }) })
+    );
   } else if (sec === "payment") {
     body = load.payment ? sk : lerr.payment ? loadErr("payment", () => fetchOne("payment", (d) => setPayment({ text: d.text || "" }))) :
       e("div", null,

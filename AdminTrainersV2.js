@@ -1,6 +1,7 @@
-import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
+import { createElement as e, useEffect, useLayoutEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { db } from "./firebase-config.js?v=auth8";
+import { createPortal } from "https://esm.sh/react-dom@18.3.1";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, getDocs, getDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { AdminPdfButton } from "./AdminPdfExport.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
@@ -89,30 +90,68 @@ function icoPlus() {
     e("path", { d: "M12 5v14M5 12h14", strokeLinecap: "round" }));
 }
 
-function Menu({ t, onEdit, onResend, onWelcome, onToggle, close }) {
-  const off = t.active === false;
-  return e("div", { className: "atv2-menu", role: "menu", onClick: (ev) => ev.stopPropagation() },
-    e("button", { type: "button", onClick: () => { close(); onResend(t); } }, "Resend password email"),
-    e("button", { type: "button", onClick: () => { close(); onWelcome(t); } }, "Show welcome message"),
-    e("button", { type: "button", className: off ? "ok" : "danger", onClick: () => { close(); onToggle(t); } },
-      off ? "Activate" : "Deactivate")
-  );
-}
-
-function Actions({ t, onEdit, onResend, onWelcome, onToggle }) {
+function Actions({ t, onEdit, onResend, onWelcome, onToggle, onView }) {
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const btn = useRef(null);
+  const menu = useRef(null);
+  const off = t.active === false;
+  const items = [
+    { label: "Edit", fn: () => onEdit && onEdit(t) },
+    { label: "View courses", fn: () => onView && onView(t) },
+    { label: "Resend password email", fn: () => onResend && onResend(t) },
+    { label: "Show welcome message", fn: () => onWelcome && onWelcome(t) },
+    { label: off ? "Activate" : "Deactivate", cls: off ? "ok" : "danger", fn: () => onToggle && onToggle(t) }
+  ].filter((it) => typeof it.fn === "function");
+  const place = () => {
+    const r = btn.current?.getBoundingClientRect();
+    if (!r) return;
+    const w = 220, h = Math.max(48, items.length * 40 + 16);
+    let top = r.bottom + 6;
+    if (top + h > window.innerHeight - 8) top = r.top - h - 6;
+    if (top < 8) top = 8;
+    let left = r.right - w;
+    if (left < 8) left = 8;
+    if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
+    setPos({ top, left });
+  };
+  useLayoutEffect(() => { if (open) place(); }, [open]);
   useEffect(() => {
     if (!open) return;
-    const onKey = (ev) => { if (ev.key === "Escape") setOpen(false); };
-    const onDown = () => setOpen(false);
+    if (!items.length) console.error("AdminTrainersV2 menu: no actions available");
+    const close = () => setOpen(false);
+    const onDown = (ev) => {
+      if (menu.current?.contains(ev.target) || btn.current?.contains(ev.target)) return;
+      close();
+    };
+    const onKey = (ev) => { if (ev.key === "Escape") close(); };
+    window.addEventListener("mousedown", onDown);
     window.addEventListener("keydown", onKey);
-    window.addEventListener("click", onDown);
-    return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("click", onDown); };
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    window.addEventListener("hashchange", close);
+    return () => {
+      window.removeEventListener("mousedown", onDown);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+      window.removeEventListener("hashchange", close);
+    };
   }, [open]);
+  const pop = open ? createPortal(
+    e("div", {
+      ref: menu, className: "atv2-menu atv2-menu-portal", role: "menu",
+      style: { position: "fixed", top: pos.top, left: pos.left, zIndex: 10050, minWidth: 200 },
+      onClick: (ev) => ev.stopPropagation()
+    },
+      items.length
+        ? items.map((it) => e("button", { type: "button", role: "menuitem", key: it.label, className: it.cls || "", onClick: () => { setOpen(false); it.fn(); } }, it.label))
+        : e("div", { className: "atv2-menu-empty" }, "No actions available")
+    ), document.body) : null;
   return e("div", { className: "atv2-act atv2-wrap", onClick: (ev) => ev.stopPropagation() },
-    e("button", { type: "button", className: "atv2-edit", onClick: () => onEdit(t) }, "Edit"),
-    e("button", { type: "button", className: "atv2-dots", "aria-label": "More actions", "aria-expanded": open, onClick: (ev) => { ev.stopPropagation(); setOpen((v) => !v); } }, "⋯"),
-    open ? e(Menu, { t, onEdit, onResend, onWelcome, onToggle, close: () => setOpen(false) }) : null
+    e("button", { type: "button", className: "atv2-edit", onClick: () => onEdit && onEdit(t) }, "Edit"),
+    e("button", { type: "button", className: "atv2-dots", ref: btn, "aria-label": "More actions", "aria-expanded": open, onClick: (ev) => { ev.stopPropagation(); setOpen((v) => !v); } }, "⋯"),
+    pop
   );
 }
 
@@ -120,8 +159,10 @@ function CourseCounts({ total, activeN, doneN, titles }) {
   const tip = titles.length ? titles.join("\n") : "No courses";
   return e("div", { className: "atv2-cc", title: tip },
     e("strong", { title: tip }, String(total)),
-    e("span", { className: "atv2-cpill blue" + (activeN === 0 ? " zero" : ""), title: tip }, activeN + " Active"),
-    e("span", { className: "atv2-cpill green" + (doneN === 0 ? " zero" : ""), title: tip }, doneN + " Completed")
+    e("div", { className: "atv2-cc-pills" },
+      e("span", { className: "atv2-cpill blue" + (activeN === 0 ? " zero" : ""), title: tip }, activeN + " Active"),
+      e("span", { className: "atv2-cpill green" + (doneN === 0 ? " zero" : ""), title: tip }, doneN + " Completed")
+    )
   );
 }
 
@@ -161,10 +202,12 @@ function App(props) {
         students = enrollList.filter((en) => activeIds.has(en.courseId)).length;
       }
       const ev = extra && extra[tid];
+      const fromUser = Math.max(tsMs(t.lastActiveAt), tsMs(t.lastLoginAt));
+      const last = (ev && ev.last) || fromUser || 0;
       return {
         t, tid, mine, names, activeN, doneN, students,
-        last: ev?.last || 0,
-        lastLabel: ev?.lastLabel || "",
+        last,
+        lastLabel: ev?.lastLabel || (fromUser ? (tsMs(t.lastActiveAt) >= tsMs(t.lastLoginAt) ? "Active in portal" : "Signed in") : ""),
         lastCourse: ev?.lastCourse || "",
         events: ev?.events || [],
         actErr: ev?.err || null
@@ -258,13 +301,13 @@ function App(props) {
         return e("div", { className: "atv2-row", key: r.tid, onClick: () => { setSel(r.tid); setDtab("profile"); } },
           e("div", { className: "atv2-person" },
             e("div", { className: "atv2-av", style: { background: avBg(r.t.name) } }, initials(r.t.name)),
-            e("div", null, e("p", null, r.t.name || "Trainer"), e("small", null, r.t.email || ""))
+            e("div", { className: "atv2-ptxt" }, e("p", null, r.t.name || "Trainer"), e("small", { title: r.t.email || "" }, r.t.email || ""))
           ),
-          e("div", null, e("span", { className: "atv2-spec" + (r.t.specialty ? "" : " miss") }, r.t.specialty || "Not set")),
+          e("div", null, e("span", { className: "atv2-spec" + (r.t.specialty ? "" : " miss"), title: r.t.specialty || "Not set" }, r.t.specialty || "Not set")),
           e(CourseCounts, { total: r.mine.length, activeN: r.activeN, doneN: r.doneN, titles: r.names }),
           e("div", { className: "atv2-stu" },
             enErr ? e("span", { title: enErr }, "—") : (r.students == null ? e("div", { className: "atv2-sk" }) : e("strong", null, String(r.students))),
-            e("span", { className: "atv2-cmeta" }, "active enrollments")
+            e("span", { className: "atv2-cmeta" }, "enrolled")
           ),
           e("div", null, e("span", { className: "atv2-st " + (r.t.active === false ? "off" : "on") }, r.t.active === false ? "Deactivated" : "Active")),
           e("div", { className: "atv2-last" },
@@ -272,9 +315,9 @@ function App(props) {
               (r.actErr && !r.last
                 ? e("span", { className: "atv2-miss", title: r.actErr }, "Couldn't load ",
                     e("button", { type: "button", className: "atv2-retry", onClick: (ev) => { ev.stopPropagation(); onRetryActivity && onRetryActivity(r.tid); } }, "Retry"))
-                : e("span", { className: r.last ? "" : "atv2-miss", title: lastTip }, r.last ? (ago(r.last) + (r.lastLabel ? " · " + r.lastLabel : "")) : "Never"))
+                : e("span", { className: r.last ? "" : "atv2-miss", title: lastTip }, r.last ? ago(r.last) : "Never"))
           ),
-          e(Actions, { t: r.t, onEdit, onResend, onWelcome, onToggle: askToggle })
+          e(Actions, { t: r.t, onEdit, onResend, onWelcome, onToggle: askToggle, onView: () => { setSel(r.tid); setDtab("courses"); } })
         );
       }) : e("div", { className: "atv2-empty" }, "No trainers match ", e("button", { type: "button", className: "atv2-edit", onClick: () => { setTab("all"); setQ(""); } }, "Clear filters"))
     ),

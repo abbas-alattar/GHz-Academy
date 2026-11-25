@@ -1,8 +1,8 @@
 import { bootStudentNav } from "./student-nav.js";
-import { protect } from "./auth-guard.js?v=auth8";
-import { db } from "./firebase-config.js?v=auth8";
+import { protect } from "./auth-guard.js?v=auth10";
+import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { parseScore, computeAverage, computeStatus, gradeCalc } from "./gradeCalc.js";
+import { parseScore, computeAverage, computeStatus, gradeCalc, formatGrade, isLockedAuto } from "./gradeCalc.js";
 import { renderStudentGradesV3 } from "./StudentGradesV3.js";
 import { waveLoader } from "./WaveLoader.js";
 import { bootPageMotion } from "./PageTransition.js";
@@ -52,10 +52,10 @@ const schemeTable = (title, scheme, opts) => {
     const st = computeStatus(scheme, vals, passMark);
     cells = components.map((c) => {
       const v = parseScore(vals[c.id]);
-      const auto = c.source === "attendance" || c.source === "homework" || c.source === "quiz";
+      const auto = isLockedAuto(c);
       return `<td>${v == null ? "—" : v + "/100"}${auto ? ` <span class="badge badge-open">Auto</span>` : ""}</td>`;
     }).join("");
-    avgCell = `<td style="font-weight:700">${avg.toFixed(1)}/100</td>`;
+    avgCell = `<td style="font-weight:700">${formatGrade(avg)}/100</td>`;
     statusCell = `<td><span class="badge" style="background:${st.bg};color:${st.color}">${esc(st.label)}</span></td>`;
   }
   return `<article class="kpi" style="margin-bottom:18px">

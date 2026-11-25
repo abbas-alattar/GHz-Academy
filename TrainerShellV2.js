@@ -19,7 +19,7 @@ class Boundary extends Component {
 const titles = {
   courses: "My courses", homework: "Homework", quizzes: "Quizzes", grades: "Grades",
   attendance: "Attendance", announcements: "Announcements", roster: "Roster", coursecontent: "Course content",
-  hwavg: "Homework averages", qzavg: "Quiz averages", notifications: "Notifications"
+  hwavg: "Homework averages", qzavg: "Quiz averages", notifications: "Notifications", profile: "Profile"
 };
 
 function parseHash() {
@@ -41,7 +41,7 @@ function parseHash() {
   if (path.indexOf("quiz/") === 0) return { view: "quizzes", quizId: path.split("/")[1], params, path };
   if (path.indexOf("grades/") === 0) return { view: "grades", courseId: path.split("/")[1], params, path };
   if (path.indexOf("attendance/") === 0) return { view: "attendance", sessionId: path.split("/")[1], params, path };
-  const map = { courses: "courses", homework: "homework", quizzes: "quizzes", grades: "grades", attendance: "attendance", announcements: "announcements", notifications: "notifications" };
+  const map = { courses: "courses", homework: "homework", quizzes: "quizzes", grades: "grades", attendance: "attendance", announcements: "announcements", notifications: "notifications", profile: "profile", profilev2: "profile" };
   return { view: map[path] || "courses", params, path };
 }
 
@@ -86,7 +86,10 @@ export function bootTrainerShellV2({ uid, name } = {}) {
       a.classList.toggle("on", !!on);
     });
     const t = document.getElementById("pageTitle");
-    if (t) t.textContent = titles[nameV] || "Trainer";
+    const label = titles[nameV] || "Trainer";
+    if (t) t.textContent = label;
+    const tm = document.getElementById("tmTitle") || document.querySelector(".tm-title");
+    if (tm) tm.textContent = label;
     const cid = info.courseId || info.params.get("course") || "";
     if (nameV === "courses") {
       runSection(document.getElementById("tr2CoursesRoot"), () => import("./TrainerCoursesV2.js").then((m) => () => m.renderTrainerCoursesV2(document.getElementById("tr2CoursesRoot"), { uid, go, name })));
@@ -103,9 +106,20 @@ export function bootTrainerShellV2({ uid, name } = {}) {
     if (nameV === "hwavg") runSection(document.getElementById("tr2HwAvgRoot"), () => import("./HomeworkAveragesV1.js").then((m) => () => m.renderHomeworkAveragesV1(document.getElementById("tr2HwAvgRoot"), { uid, go, courseId: info.courseId || "", courses: getTrainerStore()?.courses || [] })));
     if (nameV === "quizzes") runSection(document.getElementById("tr2QuizRoot"), () => import("./TrainerQuizzesV2.js").then((m) => () => m.renderTrainerQuizzesV2(document.getElementById("tr2QuizRoot"), { uid, go, quizId: info.quizId, courseId: cid })));
     if (nameV === "qzavg") runSection(document.getElementById("tr2QzAvgRoot"), () => import("./QuizAveragesV1.js").then((m) => () => m.renderQuizAveragesV1(document.getElementById("tr2QzAvgRoot"), { uid, go, courseId: info.courseId || "", courses: getTrainerStore()?.courses || [] })));
-    if (nameV === "grades") runSection(document.getElementById("tr2GradesRoot"), () => import("./TrainerGradesV2.js?v=kpi2").then((m) => () => m.renderTrainerGradesV2(document.getElementById("tr2GradesRoot"), { uid, go, courseId: info.courseId || "", listCourse: cid })));
+    if (nameV === "grades") runSection(document.getElementById("tr2GradesRoot"), () => import("./TrainerGradesV2.js?v=proj3").then((m) => () => m.renderTrainerGradesV2(document.getElementById("tr2GradesRoot"), { uid, go, courseId: info.courseId || "", listCourse: cid })));
     if (nameV === "attendance") runSection(document.getElementById("tr2AttRoot"), () => import("./TrainerAttendanceV2.js").then((m) => () => m.renderTrainerAttendanceV2(document.getElementById("tr2AttRoot"), { uid, go, courseId: cid, sessionId: info.sessionId || "" })));
     if (nameV === "announcements") runSection(document.getElementById("tr2AnnRoot"), () => import("./TrainerSectionsV2.js").then((m) => () => m.renderTrainerAnnouncementsSection(document.getElementById("tr2AnnRoot"), { uid, name })));
+    if (nameV === "profile") {
+      runSection(document.getElementById("tr2ProfileRoot"), () => Promise.all([
+        import("./ProfileV2.js"),
+        import("./firebase-config.js?v=auth10"),
+        import("https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js")
+      ]).then(([m, fb, fs]) => () => m.renderProfileV2({
+        host: document.getElementById("tr2ProfileRoot"),
+        uid, role: "trainer", db: fb.db, email: "",
+        fs: { getDoc: fs.getDoc, doc: fs.doc, updateDoc: fs.updateDoc, setDoc: fs.setDoc, deleteDoc: fs.deleteDoc, serverTimestamp: fs.serverTimestamp }
+      })));
+    }
   };
 
   document.querySelectorAll(".side nav a[data-view]").forEach((a) => {

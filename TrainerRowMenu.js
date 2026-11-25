@@ -67,7 +67,7 @@ export function RowMenu({ items, locked }) {
     };
   }, [open]);
   const pop = open ? createPortal(
-    e("div", { ref: menu, className: "th2-fly", role: "menu", style: { top: pos.top + "px", left: pos.left + "px" } },
+    e("div", { ref: menu, className: "th2-fly", role: "menu", style: { position: "fixed", zIndex: 400, top: pos.top + "px", left: pos.left + "px" } },
       (items || []).map((it, i) => {
         const dis = !!(locked && it.lockWhenDone);
         return e("button", {

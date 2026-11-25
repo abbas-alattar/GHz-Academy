@@ -1,3 +1,39 @@
+export const ROUTE_ALIAS = {
+  dash: "dash", dashboard: "dash",
+  quizzes: "quizzes", quiz: "quizzes", quizv2: "quizzes", quiztake: "quizzes",
+  homework: "homework", homeworkv2: "homework",
+  attendance: "attendance", attendancev2: "attendance",
+  schedule: "schedule", schedulev2: "schedule",
+  browse: "browse", browsev2: "browse",
+  courses: "courses", coursesv2: "courses", course: "courses", coursecontent: "courses",
+  regs: "regs", regsv2: "regs",
+  grades: "grades", gradesv2: "grades",
+  certificates: "certificates",
+  announcements: "announcements",
+  profile: "profile", profilev2: "profile",
+  notifications: "notifications"
+};
+export function canonicalNavKey(hashOrName) {
+  const raw = String(hashOrName || "").replace(/^#/, "").split("/")[0] || "dash";
+  const base = raw.replace(/v2$/, "") || "dash";
+  return ROUTE_ALIAS[raw] || ROUTE_ALIAS[base] || base;
+}
+function revealActiveNavItem(nav) {
+  if (!nav) return;
+  const on = nav.querySelector("a.on");
+  if (!on || typeof on.scrollIntoView !== "function") return;
+  const nr = nav.getBoundingClientRect();
+  const ir = on.getBoundingClientRect();
+  if (ir.top < nr.top || ir.bottom > nr.bottom) on.scrollIntoView({ block: "nearest" });
+}
+export function highlightStudentNav(name) {
+  const key = canonicalNavKey(name || (typeof location !== "undefined" ? location.hash : "dash"));
+  document.querySelectorAll(".side nav a[data-view]").forEach((a) => {
+    a.classList.toggle("on", canonicalNavKey(a.dataset.view) === key);
+  });
+  revealActiveNavItem(document.querySelector(".side nav"));
+}
+
 const ITEMS = [
   { href: "./student.html#dash", label: "Dashboard", key: "dash" },
   { href: "./student.html#browse", label: "Browse courses", key: "browse" },
@@ -27,17 +63,11 @@ export function studentNavHtml(active) {
 }
 
 export function mountStudentNav(active) {
+  const key = canonicalNavKey(active);
   document.querySelectorAll("[data-student-nav]").forEach((nav) => {
-    if (!nav.children.length) nav.innerHTML = studentNavHtml(active);
-    const links = nav.getElementsByTagName("a");
-    for (let i = 0; i < links.length; i++) {
-      const a = links[i];
-      const key = a.getAttribute("data-view") || "";
-      const href = a.getAttribute("href") || "";
-      const on = (key && key === active) || (!key && href.indexOf(active) >= 0);
-      a.classList.toggle("on", !!on);
-    }
+    if (!nav.querySelector("a[data-view]")) nav.innerHTML = studentNavHtml(key);
   });
+  highlightStudentNav(key);
 }
 
 export function bootStudentNav(active) {

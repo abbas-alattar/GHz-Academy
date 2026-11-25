@@ -1,5 +1,6 @@
 import { renderCertificate, CERT_CSS, codeOf, verifyUrl, whenCert, openCertificateTab } from "./renderCertificate.js";
 
+const asArray = (x) => Array.isArray(x) ? x : [];
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
 const state = { copied: "" };
 const when = whenCert;
@@ -72,8 +73,8 @@ export function renderCertificatesV2(opts) {
       return true;
     }
     const student = opts.student || {};
-    const certs = Array.isArray(opts.certs) ? opts.certs : [];
-    const enrolls = Array.isArray(opts.enrolls) ? opts.enrolls : [];
+    const certs = asArray(opts.certs);
+    const enrolls = asArray(opts.enrolls);
     const courses = opts.courses || {};
     const issued = certs.filter((c) => String(c.status || "issued") === "issued");
     const revoked = certs.filter((c) => String(c.status) === "revoked");

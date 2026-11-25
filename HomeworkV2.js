@@ -1,3 +1,4 @@
+const asArray = (x) => Array.isArray(x) ? x : [];
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
 
 const state = { tab: "active", q: "", status: "all", open: {} };
@@ -5,8 +6,7 @@ const state = { tab: "active", q: "", status: "all", open: {} };
 function courseGroup(c) {
   const s = String(c?.status ?? "");
   if (s === "Completed") return "completed";
-  if (s === "Open" || s === "Closed") return "active";
-  return "other";
+  return "active";
 }
 
 function dueMs(a) {
@@ -93,10 +93,10 @@ function unseenFeedback(a, sub) {
     return t && t > seen;
   } catch { return !!sub.feedback; }
 }
-function cardHtml(a, sub, readonly) {
+function cardHtml(a, sub, readonly, courseTitle) {
   const k = itemKind(a, sub);
   const pct = gradePct(a, sub);
-  const label = readonly || k === "submitted" || k === "graded" ? "View" : k === "todo" || k === "soon" || k === "overdue" ? "Submit" : "Open";
+  const label = readonly || k === "submitted" || k === "graded" ? "Open" : k === "todo" || k === "soon" || k === "overdue" ? "Submit" : "Open";
   const max = Number(a?.maxPoints);
   const earned = Number(sub?.grade);
   const dot = unseenFeedback(a, sub) ? `<span class="hs2-newdot" title="New feedback"></span>` : "";
@@ -105,6 +105,7 @@ function cardHtml(a, sub, readonly) {
   const cal = `<svg class="hw2-cal" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 10h18M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
   return `<article class="hw2-card">
     <div style="flex:1;min-width:0">
+      <p class="hw2-course">${esc(courseTitle || "")}</p>
       <h4>${esc(a?.title || "Homework")}</h4>
       <p class="due">${cal}<span>${esc(dueLabel(a))}</span></p>
       <span class="hw2-st ${k==="soon"?"soon":k==="overdue"?"over":k==="submitted"?"sub":k==="graded"?"grad":"todo"}">${esc(kindLabel(k))}</span>
@@ -123,7 +124,7 @@ function sectionHtml(c, assigns, subs, q, status) {
   const open = state.open[cid] !== undefined ? !!state.open[cid] : group === "active";
   const readonly = group === "completed";
   const body = shown.length
-    ? shown.map((a) => cardHtml(a, subFor(a, subs), readonly)).join("")
+    ? shown.map((a) => cardHtml(a, subFor(a, subs), readonly, c?.title)).join("")
     : `<p class="hw2-none">No homework yet</p>`;
   const w = list.length ? Math.round((submittedN / list.length) * 100) : 0;
   return `<section class="hw2-sec">
@@ -144,8 +145,8 @@ export function renderHomeworkV2(opts) {
       host.innerHTML = `<div class="hw2-wrap"><div class="hw2-skel"></div><div class="hw2-skel"></div></div>`;
       return true;
     }
-    const courses = Array.isArray(opts.courses) ? opts.courses : [];
-    const assigns = Array.isArray(opts.assigns) ? opts.assigns : [];
+    const courses = asArray(opts.courses);
+    const assigns = asArray(opts.assigns);
     const subs = opts.subs && typeof opts.subs === "object" ? opts.subs : {};
     const q = String(state.q || "").toLowerCase();
     const status = state.status || "all";
@@ -163,7 +164,8 @@ export function renderHomeworkV2(opts) {
       ? `<div class="hw2-empty"><div class="ico">📡</div><p>No active courses</p></div>`
       : `<div class="hw2-empty"><div class="ico">🎓</div><p>No completed courses</p></div>`;
 
-    host.innerHTML = `<div class="hw2-wrap">
+    host.innerHTML = `<div class="hw2-wrap${opts.stale ? " is-stale" : ""}">
+      ${opts.stale ? `<p class="hw2-sub" style="opacity:.7">Updating homework…</p>` : ""}
       <div class="hw2-head">
         <div>
           <h2>Homeworks</h2>
@@ -177,8 +179,11 @@ export function renderHomeworkV2(opts) {
         <div class="hw2-stat over"><span class="ico">!</span><div><div class="n">${chips.overdue}</div><div class="l">Overdue</div></div></div>
       </div>
       <div class="hw2-tabs">
-        <button type="button" class="${tab==="active"?"on":""}" data-hw2-tab="active">Active courses (${nAct})</button>
-        <button type="button" class="${tab==="completed"?"on":""}" data-hw2-tab="completed">Completed courses (${nDone})</button>
+        <button type="button" class="${tab==="active"?"on":""}" data-hw2-tab="active">Active (${nAct})</button>
+        <button type="button" class="${tab==="completed"?"on":""}" data-hw2-tab="completed">Completed (${nDone})</button>
+        <button type="button" class="${status==="todo"?"on":""}" data-hw2-stchip="todo">To do</button>
+        <button type="button" class="${status==="submitted"?"on":""}" data-hw2-stchip="submitted">Submitted</button>
+        <button type="button" class="${status==="graded"?"on":""}" data-hw2-stchip="graded">Graded</button>
       </div>
       <div class="hw2-filters">
         <input type="search" data-hw2-q placeholder="Search by title" value="${esc(state.q)}" />
@@ -196,10 +201,16 @@ export function renderHomeworkV2(opts) {
     </div>`;
 
     host.onclick = (e) => {
-      const t = e.target?.closest?.("[data-hw2-tab],[data-hw2-tog],[data-hw2-open]");
+      const t = e.target?.closest?.("[data-hw2-tab],[data-hw2-stchip],[data-hw2-tog],[data-hw2-open]");
       if (!t) return;
       if (t.hasAttribute("data-hw2-tab")) {
         state.tab = t.getAttribute("data-hw2-tab") === "completed" ? "completed" : "active";
+        renderHomeworkV2(opts);
+        return;
+      }
+      if (t.hasAttribute("data-hw2-stchip")) {
+        const v = t.getAttribute("data-hw2-stchip") || "all";
+        state.status = state.status === v ? "all" : v;
         renderHomeworkV2(opts);
         return;
       }
