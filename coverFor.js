@@ -2,7 +2,7 @@
 
 const mem = new Map();
 const legacyMem = new Map();
-const LS = "ghz-covers-v2";
+const LS = "ghz-covers-v3";
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (ch) => {

@@ -324,14 +324,8 @@
           const src = String(d.data || "");
           if (!src) continue;
           const url = src.startsWith("data:") ? src : ("data:" + (d.mimeType || "image/jpeg") + ";base64," + src);
-          const img = new Image();
-          await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
-          const cnv = document.createElement("canvas"); cnv.width = 480; cnv.height = 270;
-          cnv.getContext("2d").drawImage(img, 0, 0, 480, 270);
-          let tq = 0.6, td = cnv.toDataURL("image/jpeg", tq);
-          const tbs = () => { try { return atob((td.split(",")[1] || "")).length; } catch { return 0; } };
-          while (tbs() > 40 * 1024 && tq > 0.35) { tq -= 0.06; td = cnv.toDataURL("image/jpeg", tq); }
-          await setDoc(doc(db, "courseCovers", c.id + "_thumb"), { courseId: c.id, data: td.split(",")[1] || "", mimeType: "image/jpeg", updatedAt: Date.now() });
+          const packed = await makeCardThumb(url);
+          await setDoc(doc(db, "courseCovers", c.id + "_thumb"), { courseId: c.id, data: packed.b64, mimeType: "image/jpeg", updatedAt: Date.now() });
           n += 1;
         } catch (_) {}
       }
@@ -343,26 +337,35 @@
       const i = s.indexOf(",");
       return i >= 0 ? s.slice(i + 1) : s;
     };
-    const compressCover = (src, w, h, maxBytes, q0) => new Promise((resolve, reject) => {
+    const compressCover = (src, w, h, maxBytes, q0, minQ) => new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
         const cnv = document.createElement("canvas");
         const ir = img.width / img.height || (16 / 9);
         const tw = w, th = h || Math.round(w / ir);
         cnv.width = tw; cnv.height = th;
-        cnv.getContext("2d").drawImage(img, 0, 0, tw, th);
+        // Centre-crop to the target shape so photos are never stretched or squashed.
+        const tr = tw / th;
+        let sw = img.width, sh = img.height, sx = 0, sy = 0;
+        if (ir > tr) { sw = img.height * tr; sx = (img.width - sw) / 2; }
+        else if (ir < tr) { sh = img.width / tr; sy = (img.height - sh) * 0.3; } // tall photos: keep the upper part (heads, tower tops)
+        const ctx = cnv.getContext("2d");
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, tw, th);
         let q = q0 == null ? 0.72 : q0, td = cnv.toDataURL("image/jpeg", q);
         const bytes = () => { try { return atob((td.split(",")[1] || "")).length; } catch { return 0; } };
-        while (bytes() > maxBytes && q > 0.35) { q -= 0.08; td = cnv.toDataURL("image/jpeg", q); }
+        while (bytes() > maxBytes && q > (minQ == null ? 0.35 : minQ)) { q -= 0.05; td = cnv.toDataURL("image/jpeg", q); }
         resolve({ dataUrl: td, b64: td.split(",")[1] || "", bytes: bytes() });
       };
       img.onerror = reject;
       img.src = src.startsWith("data:") ? src : ("data:image/jpeg;base64," + src);
     });
+    // Course-card thumbnail: 16:9 centre crop, 960x540 so cards stay sharp on high-DPI screens.
+    const makeCardThumb = (src) => compressCover(src, 960, 540, 140 * 1024, 0.85, 0.6);
     const optimizeCourses = async () => {
       const ok = await showConfirmDialog({
         title: "Optimize courses?",
-        message: "Moves embedded covers into courseCovers (full + 480px JPEG thumb, quality 0.6, max 40 KB), downloads a JSON backup of removed fields, then strips heavy cover fields from course documents. Missing thumbnails are generated from the full cover. Already-optimized courses are skipped. Outline over 10KB is left in place.",
+        message: "Moves embedded covers into courseCovers (full + 960px JPEG thumb, cropped to 16:9), downloads a JSON backup of removed fields, then strips heavy cover fields from course documents. Missing thumbnails are generated from the full cover. Already-optimized courses are skipped. Outline over 10KB is left in place.",
         confirmLabel: "Optimize"
       });
       if (!ok || ok.ok === false) return;
@@ -389,7 +392,7 @@
             const srcSnap = coverSnap.exists() ? coverSnap : await getDoc(doc(db, "courseCovers", c.id));
             const src = srcSnap.exists() ? String((srcSnap.data() || {}).data || "") : dataUrlToB64(raw);
             if (src) {
-              const packed = await compressCover(src.startsWith("data:") ? src : src, 480, 270, 40 * 1024, 0.6);
+              const packed = await makeCardThumb(src);
               await setDoc(doc(db, "courseCovers", c.id + "_thumb"), { courseId: c.id, data: packed.b64, mimeType: "image/jpeg", updatedAt: Date.now() });
             }
           }
@@ -688,14 +691,7 @@
         const ts = Date.now();
         await setDoc(doc(db,"courseCovers",id), { courseId: id, data: b64, mimeType: mime, updatedAt: ts });
         try {
-          const img = new Image();
-          await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = coverRaw; });
-          const cnv = document.createElement("canvas"); cnv.width = 480; cnv.height = 270;
-          cnv.getContext("2d").drawImage(img, 0, 0, 480, 270);
-          let tq = 0.6, td = cnv.toDataURL("image/jpeg", tq);
-          const tbs = () => { try { return atob((td.split(",")[1]||"")).length; } catch { return 0; } };
-          while (tbs() > 40 * 1024 && tq > 0.35) { tq -= 0.06; td = cnv.toDataURL("image/jpeg", tq); }
-          const tb64 = td.split(",")[1] || "";
+          const tb64 = (await makeCardThumb(coverRaw)).b64;
           await setDoc(doc(db,"courseCovers",id + "_thumb"), { courseId: id, data: tb64, mimeType: "image/jpeg", updatedAt: ts });
         } catch (_) {}
         payload.coverUpdatedAt = ts;
