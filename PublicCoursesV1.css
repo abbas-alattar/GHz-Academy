@@ -48,6 +48,7 @@
 .pc1-chip {
   border: 1px solid #d7e2ee; background: #fff; border-radius: 999px; padding: 7px 12px;
   font: inherit; font-size: .85rem; cursor: pointer; color: #334155;
+  white-space: nowrap; overflow-wrap: normal;
 }
 .pc1-chip.on { background: #0b2748; color: #fff; border-color: #0b2748; }
 .pc1-sort { min-height: 44px; border-radius: 12px; border: 1px solid #dbe4ef; padding: 8px 12px; font: inherit; background: #fff; }

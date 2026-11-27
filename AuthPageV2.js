@@ -209,7 +209,7 @@ function Page({ api }) {
     ),
     e("div", { className: "ap2-artbrand" }, BrandMark()),
     e("div", { className: "ap2-artcopy" },
-      e("div", { className: "ap2-kicker" }, "Telecom engineering trainings academy"),
+      e("div", { className: "ap2-kicker" }, "Telecom engineering training academy"),
       e("h1", { className: "ap2-h" }, "Learn wireless, from ", e("span", null, "LTE to 6G")),
       e("ul", { className: "ap2-ben" },
         ["Expert trainers", "Live sessions and recordings", "Certificates"].map((t) => e("li", { key: t }, e("span", { className: "ap2-ck" }, "✓"), t))
