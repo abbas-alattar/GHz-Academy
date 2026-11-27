@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /trainer
+Disallow: /student
+Disallow: /receipt.html
+Disallow: /material-view.html
+
+Sitemap: https://www.ghzacademy.com/sitemap.xml

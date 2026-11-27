@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
@@ -12,7 +13,7 @@ import { showConfirmDialog, showNoticeDialog, showLeaveGradesDialog } from "./Co
 import { RowMenu } from "./TrainerRowMenu.js";
 import { sessionStatus } from "./sessionStatus.js";
 
-function fbErr(er) { return String((er?.code || "") + " " + (er?.message || er)).trim(); }
+function fbErr(er) { return friendlyError(er); }
 function initials(n) { return String(n || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((x) => x[0].toUpperCase()).join("") || "?"; }
 function id7(en) {
   const s = String(en?.studentId || en?.id7 || "").replace(/\D/g, "");
@@ -688,7 +689,7 @@ export function renderTrainerAttendanceV2(host, props) {
     root.render(e(Boundary, null, e(Page, props)));
     return true;
   } catch (er) {
-    host.innerHTML = `<p class="th2-err">${er.message || er} <button class="th2-btn" type="button" id="tav2r">Try again</button></p>`;
+    host.innerHTML = `<p class="th2-err">${friendlyError(er)} <button class="th2-btn" type="button" id="tav2r">Try again</button></p>`;
     host.querySelector("#tav2r")?.addEventListener("click", () => renderTrainerAttendanceV2(host, props));
     return false;
   }

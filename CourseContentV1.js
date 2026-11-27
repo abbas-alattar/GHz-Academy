@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { createElement as e, useEffect, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { auth, db } from "./firebase-config.js?v=auth10";
@@ -820,7 +821,7 @@ export function renderCourseContentV1(opts) {
     root.render(e(Boundary, { onRetry: () => renderCourseContentV1(opts) }, e(App, { opts })));
     return true;
   } catch (err) {
-    host.innerHTML = `<p class="banner">${err.code || err.message}</p><button class="btn btn-sm" type="button" data-cc1-retry>Try again</button>`;
+    host.innerHTML = `<p class="banner">${friendlyError(err)}</p><button class="btn btn-sm" type="button" data-cc1-retry>Try again</button>`;
     host.querySelector("[data-cc1-retry]")?.addEventListener("click", () => renderCourseContentV1(opts));
     return false;
   }

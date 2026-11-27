@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { bootStudentNav } from "./student-nav.js";
 import { protect } from "./auth-guard.js?v=auth10";
 import { db } from "./firebase-config.js?v=auth10";
@@ -10,7 +11,7 @@ import { renderQuizStartV2, renderQuizTakeV2, renderQuizDoneV2, updateQuizTakeCl
 const root = document.getElementById("quizRoot");
 const fail = (step, e) => {
   console.error(step, e);
-  if (root) root.innerHTML = `<p class="banner">This page could not load<br>${step}: ${(e && (e.code || e.message)) || e}</p>`;
+  if (root) root.innerHTML = `<p class="banner">This page could not load<br>${friendlyError(e)}</p>`;
 };
 const esc = (s) => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 const today = () => new Date().toISOString().slice(0, 10);
@@ -104,7 +105,7 @@ try {
     try {
       const qq = await getDocs(query(collection(db, "quizQuestions"), where("courseId", "==", q.courseId), where("quizId", "==", q.id)));
       qs = qq.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
-    } catch (e) { root.innerHTML = `<p class="banner">quizQuestions: ${e.code || e.message}</p>`; return; }
+    } catch (e) { root.innerHTML = `<p class="banner">${friendlyError(e)}</p>`; return; }
     const scores = att.questionScores || {};
     const fb = typeof att.feedback === "string" ? att.feedback : "";
     root.innerHTML = `<p><button class="btn btn-sm btn-ghost" type="button" id="backRev">← Quizzes</button></p>
@@ -160,7 +161,7 @@ try {
       const qq = await getDocs(query(collection(db, "quizQuestions"), where("courseId", "==", q.courseId), where("quizId", "==", q.id)));
       qs = qq.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
     } catch (e) {
-      root.innerHTML = `<p class="banner">quizQuestions: ${e.code || e.message}</p>`;
+      root.innerHTML = `<p class="banner">${friendlyError(e)}</p>`;
       return;
     }
     const answers = {};
@@ -275,7 +276,7 @@ try {
             document.getElementById("retrySub").onclick = () => doSubmit(true);
           }
         } else {
-          root.insertAdjacentHTML("afterbegin", `<p class="banner">quizAttempts: ${e.code || e.message}</p><p><button class="btn" type="button" id="retrySub">Try again</button></p>`);
+          root.insertAdjacentHTML("afterbegin", `<p class="banner">${friendlyError(e)}</p><p><button class="btn" type="button" id="retrySub">Try again</button></p>`);
           document.getElementById("retrySub").onclick = () => doSubmit(true);
         }
       }

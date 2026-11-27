@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { db } from "./firebase-config.js?v=auth10";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { renderCertificate, CERT_CSS } from "./renderCertificate.js";
@@ -5,7 +6,7 @@ import { renderCertificate, CERT_CSS } from "./renderCertificate.js";
 const root = document.getElementById("root");
 const fail = (step, e) => {
   console.error(step, e);
-  root.innerHTML = `<p style="font-family:Inter,sans-serif;padding:24px;color:#DC2626">${step}: ${(e && (e.code || e.message)) || e}</p>`;
+  root.innerHTML = `<p style="font-family:Inter,sans-serif;padding:24px;color:#DC2626">${friendlyError(e)}</p>`;
 };
 
 const params = new URLSearchParams(location.search);

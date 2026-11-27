@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { auth, db } from "./firebase-config.js?v=auth10";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { collection, query, where, getDocs, getDoc, doc, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -672,12 +673,12 @@ export function bound(el, render) {
       clearTimeout(stop);
       try { render(el, d); }
       catch (e) {
-        el.innerHTML = `<p class="sdash-fail">This section could not load<br>${e?.code || e?.message || e}</p><button class="btn btn-sm" type="button" data-retry>Retry</button>`;
+        el.innerHTML = `<p class="sdash-fail">This section could not load<br>${friendlyError(e)}</p><button class="btn btn-sm" type="button" data-retry>Retry</button>`;
         el.querySelector("[data-retry]")?.addEventListener("click", () => loadStudentDash(true));
       }
     });
   } catch (e) {
-    el.innerHTML = `<p class="sdash-fail">This section could not load<br>${e?.code || e?.message || e}</p>`;
+    el.innerHTML = `<p class="sdash-fail">This section could not load<br>${friendlyError(e)}</p>`;
   }
 }
 

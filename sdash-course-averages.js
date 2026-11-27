@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { bound } from "./student-dash-data.js?v=stu11";
 import { db } from "./firebase-config.js?v=auth10";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -35,7 +36,7 @@ export function mountCourseAverages(el) {
             if (c.status === "Completed") continue;
             courses.push(c);
           } catch (e) {
-            root.innerHTML = `<div class="sdash-card"><h3>Course averages</h3><p class="sdash-fail">This section could not load<br>courses: ${e.code || e.message}</p></div>`;
+            root.innerHTML = `<div class="sdash-card"><h3>Course averages</h3><p class="sdash-fail">This section could not load<br>${friendlyError(e)}</p></div>`;
             return;
           }
         }
@@ -73,7 +74,7 @@ export function mountCourseAverages(el) {
           }
         };
       } catch (e) {
-        root.innerHTML = `<div class="sdash-card"><h3>Course averages</h3><p class="sdash-fail">This section could not load<br>${e.code || e.message || e}</p></div>`;
+        root.innerHTML = `<div class="sdash-card"><h3>Course averages</h3><p class="sdash-fail">This section could not load<br>${friendlyError(e)}</p></div>`;
       }
     })();
   });

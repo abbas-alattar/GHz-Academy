@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { bound } from "./student-dash-data.js?v=stu11";
 import { resolveGradedItems } from "./student-grade-math.js";
 
@@ -13,7 +14,7 @@ export function mountGrades(el) {
           }).join("") : "<p>No grades yet.</p>"
         }<p style="margin-top:10px"><a href="./student-grades.html">View all grades</a></p></div>`;
       } catch (e) {
-        root.innerHTML = `<div class="sdash-card"><h3>Recent grades</h3><p class="sdash-fail">This section could not load<br>${e.code || e.message || e}</p></div>`;
+        root.innerHTML = `<div class="sdash-card"><h3>Recent grades</h3><p class="sdash-fail">This section could not load<br>${friendlyError(e)}</p></div>`;
       }
     })();
   });

@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { db } from "./firebase-config.js?v=auth10";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
@@ -5,7 +6,7 @@ const root = document.getElementById("root");
 const input = document.getElementById("code");
 const fail = (step, e) => {
   console.error(step, e);
-  root.innerHTML = `<p class="banner">${step}: ${(e && (e.code || e.message)) || e}</p>`;
+  root.innerHTML = `<p class="banner">${friendlyError(e)}</p>`;
 };
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 const when = (t) => {

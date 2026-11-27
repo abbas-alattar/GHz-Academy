@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { sortedCountries, flagUrl, parsePhone, buildPhone, validLocal, digitsOnly } from "./phoneCountries.js";
 import { showNoticeDialog } from "./ConfirmDialog.js";
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
@@ -30,7 +31,7 @@ const state = {
 };
 
 function fbErr(e, step) {
-  return (e?.code || "error") + " — " + step + (e?.message ? ": " + e.message : "");
+  return friendlyError(e);
 }
 function initials(name) {
   return String(name || "?").split(/\s+/).slice(0,2).map((p)=>p[0]||"").join("").toUpperCase() || "?";

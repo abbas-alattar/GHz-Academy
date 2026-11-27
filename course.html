@@ -4,25 +4,100 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Course — GHz Academy</title>
+  <meta name="description" content="Course details at GHz Academy: outline, schedule, level, prerequisites and registration." />
   <link rel="icon" type="image/png" href="./favicon.png" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./portal.css" />
   <link rel="stylesheet" href="./DeliveryDays.css" />
-  <style>
-    body { background:#f6f8fb; }
-    nav.pub { position:sticky; top:14px; z-index:9; display:flex; justify-content:space-between; align-items:center; width:min(880px, calc(100% - 32px)); margin:0 auto; padding:10px 18px; background:#0e3a5d; border-radius:999px; }
-    main.pub { width:min(780px,92%); margin:40px auto 80px; background:#fff; border:1px solid var(--line); border-radius:18px; padding:28px; }
-    .meta { display:flex; gap:12px; flex-wrap:wrap; color:var(--muted); margin:12px 0 18px; }
-    ol { padding-left:20px; color:var(--muted); line-height:1.7; }
-  </style>
+  <link rel="stylesheet" href="./CourseCard.css" />
+  <link rel="stylesheet" href="./ghz-responsive.css" />
+  <link rel="stylesheet" href="./public-header.css" />
   <link rel="stylesheet" href="./ghz-mobile.css" />
+  <style id="page-course">
+    body.page-course { margin: 0; padding-top: 0 !important; background: #f4f7fb; font-family: "IBM Plex Sans", sans-serif; color: #0F2747; }
+    body.page-course nav#siteNav, body.page-course nav#siteNav.scrolled {
+      background-color: #0F2747 !important; background-image: none !important; backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important; opacity: 1 !important; position: sticky !important; top: 0 !important;
+      z-index: 50 !important; height: 72px !important; color: #fff !important;
+    }
+    body.page-course .nav-mid a { color: #fff !important; }
+    body.page-course .nav-mid a.on { color: #38BDF8 !important; background: rgba(56,189,248,.15) !important; }
+    body.page-course .brand .ghz { color: #fff !important; }
+    body.page-course .brand .acad { color: #38BDF8 !important; }
+    body.page-course .land-auth-login { color: #fff !important; }
+    body.page-course #landAuthSlot a, body.page-course #landAuthSlot button { white-space: nowrap; width: auto; }
+    .cd-hero { background: linear-gradient(135deg, #0F2747 0%, #123a66 60%, #1d4ed8 140%); color: #fff; }
+    .cd-hero-in { width: 100%; max-width: 1120px; margin: 0 auto; padding: 36px 24px 44px; box-sizing: border-box;
+      display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 36px; align-items: center; }
+    .cd-crumb { font-size: .85rem; opacity: .8; margin-bottom: 14px; }
+    .cd-crumb a { color: #7dd3fc; text-decoration: none; }
+    .cd-chip { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; letter-spacing: .04em;
+      background: rgba(56,189,248,.16); color: #7dd3fc; border: 1px solid rgba(125,211,252,.35); border-radius: 999px; padding: 4px 12px; }
+    .cd-hero h1 { font-family: "Space Grotesk", sans-serif; font-size: clamp(1.8rem, 3.6vw, 2.6rem); line-height: 1.15; margin: 14px 0 10px; color: #fff; }
+    .cd-lead { font-size: 1.05rem; line-height: 1.6; color: #cfe0f3; margin: 0; max-width: 56ch; }
+    .cd-cover { border-radius: 18px; overflow: hidden; box-shadow: 0 20px 50px rgba(2,6,23,.35); aspect-ratio: 16 / 9; background: #0b1f3a; }
+    .cd-cover .ghz-cover { position: relative; width: 100%; height: 100%; }
+    .cd-cover .ghz-cover > svg { width: 100%; height: 100%; display: block; }
+    .cd-cover .ghz-cover-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .cd-body { width: 100%; max-width: 1120px; margin: 0 auto; padding: 32px 24px 80px; box-sizing: border-box;
+      display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; align-items: start; }
+    .cd-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 24px; box-shadow: 0 1px 2px rgba(15,39,71,.04); }
+    .cd-card + .cd-card { margin-top: 20px; }
+    .cd-card h2 { font-family: "Space Grotesk", sans-serif; font-size: 1.2rem; margin: 0 0 14px; color: #0F2747; }
+    .cd-card p { margin: 0; line-height: 1.7; color: #475569; }
+    .cd-outline { list-style: none; margin: 0; padding: 0; counter-reset: m; }
+    .cd-outline li { counter-increment: m; display: grid; grid-template-columns: 36px 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid #eef2f7; }
+    .cd-outline li:first-child { border-top: 0; padding-top: 0; }
+    .cd-outline li::before { content: counter(m); width: 32px; height: 32px; border-radius: 10px; background: #eff6ff; color: #1d4ed8;
+      font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: "Space Grotesk", sans-serif; }
+    .cd-outline strong { display: block; color: #0F2747; margin-bottom: 2px; }
+    .cd-outline span { color: #64748b; line-height: 1.55; }
+    .cd-side { position: sticky; top: 96px; }
+    .cd-facts { list-style: none; margin: 0 0 18px; padding: 0; }
+    .cd-facts li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #eef2f7; font-size: .95rem; }
+    .cd-facts li:first-child { border-top: 0; }
+    .cd-facts span { color: #64748b; white-space: nowrap; }
+    .cd-facts b { color: #0F2747; font-weight: 600; text-align: right; }
+    .cd-price { font-family: "Space Grotesk", sans-serif; font-size: 1.8rem; font-weight: 700; color: #0F2747; margin: 0 0 4px; }
+    .cd-price small { font-size: .9rem; color: #64748b; font-weight: 500; }
+    #regArea .btn { width: 100% !important; justify-content: center; padding: 13px 20px !important; border-radius: 12px; text-decoration: none; text-align: center; display: inline-flex; }
+    #regArea .banner, #regArea p { margin-top: 10px; font-size: .9rem; }
+    .cd-side .dd-wrap, .cd-side [class*="dd-"] { max-width: 100%; }
+    .cd-state { max-width: 640px; margin: 60px auto; padding: 0 24px; }
+    @media (max-width: 900px) {
+      .cd-hero-in { grid-template-columns: 1fr; gap: 22px; padding: 26px 16px 32px; }
+      .cd-body { grid-template-columns: 1fr; padding: 22px 16px 60px; gap: 20px; }
+      .cd-side { position: static; order: -1; }
+    }
+  </style>
 </head>
-<body>
-  <nav class="pub">
-    <a class="brand" href="./index.html"><svg viewBox="0 0 40 22" fill="none" aria-hidden="true"><path d="M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0" stroke="#2EC8FF" stroke-width="2.6" stroke-linecap="round"/></svg><span class="ghz">GHz</span> <span class="acad">Academy</span></a>
-    <a class="btn btn-sm" href="./login.html">Log in</a>
+<body class="page-course">
+  <nav id="siteNav" class="site-header">
+    <a class="brand" href="./index.html" aria-label="GHz Academy">
+      <svg viewBox="0 0 40 22" fill="none" aria-hidden="true"><path d="M2 11c3-8 7-8 10 0s7 8 10 0 7-8 10 0 4 6 6 0" stroke="#2EC8FF" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <span class="ghz">GHz</span> <span class="acad">Academy</span>
+    </a>
+    <ul class="nav-mid" id="navLinks">
+      <span class="nav-pill" id="navPill" aria-hidden="true"></span>
+      <li><a href="./index.html">Home</a></li>
+      <li><a class="on" href="./courses.html">Courses</a></li>
+      <li><a href="./index.html#about">About</a></li>
+      <li><a href="./index.html#leadership">Leadership</a></li>
+      <li><a href="./index.html#faq">FAQ</a></li>
+      <li><a href="./index.html#contact">Contact</a></li>
+      <li class="land-m-auth">
+        <a href="./login.html">Login</a>
+        <a href="./login.html?tab=signup">Register</a>
+      </li>
+    </ul>
+    <div class="nav-right">
+      <div id="landAuthSlot" data-login-label="Log in" aria-live="polite"></div>
+      <button class="menu-btn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
   </nav>
-  <main class="pub" id="box">Loading course…</main>
+  <main id="box"><div class="cd-state cd-card"><p>Loading course…</p></div></main>
   <script type="module">
     import { auth, db } from "./firebase-config.js?v=auth10";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
@@ -31,26 +106,54 @@
     import { deliveryDaysHtml } from "./DeliveryDays.js";
     import { startsEndsLine } from "./courseDates.js";
     import { canRegisterForCourse, courseStatusLabel } from "./courseStatusLabel.js";
+    import { coverMarkup, hydrateCovers } from "./coverFor.js";
+    const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+    const para = (v) => esc(v).replace(/\n/g, "<br>");
     const id = new URLSearchParams(location.search).get("id");
     const box = document.getElementById("box");
-    if (!id) box.innerHTML = unavailableHtml();
+    const stateBox = (html) => `<div class="cd-state cd-card">${html}</div>`;
+    if (!id) box.innerHTML = stateBox(unavailableHtml());
     else {
-      const snap = await getDoc(doc(db, "courses", id));
-      if (!snap.exists() || !isPublicCourse(snap.data().status)) box.innerHTML = unavailableHtml();
+      // A missing or draft course is refused by the database rules; treat that as "unavailable".
+      let snap = null;
+      try { snap = await getDoc(doc(db, "courses", id)); } catch (_) { snap = null; }
+      if (!snap || !snap.exists() || !isPublicCourse(snap.data().status)) box.innerHTML = stateBox(unavailableHtml());
       else {
         const c = snap.data();
         document.title = c.title + " — GHz Academy";
         const next = encodeURIComponent("./course.html?id="+id);
-        box.innerHTML = `<div class="kicker" style="letter-spacing:.14em;font-size:.72rem;color:#0891b2">${c.status}</div>
-          <h1>${c.title}</h1>
-          <div class="meta"><span>${c.duration||""}</span><span>${c.level||""}</span><span>${c.price? c.price+" "+(c.currency||""):"Price on request"}</span>${startsEndsLine(c)?`<span>${startsEndsLine(c)}</span>`:""}</div>
-          ${deliveryDaysHtml(c, { emptyMode: "hide" })}
-          <p>${c.full||c.short||""}</p>
-          <h2 style="margin:22px 0 8px;font-size:1.1rem">Outline</h2>
-          <ol>${(c.outline||[]).map(m=>`<li><strong>${m.title||""}</strong> — ${m.description||""}</li>`).join("")}</ol>
-          <h2 style="margin:22px 0 8px;font-size:1.1rem">Prerequisites</h2>
-          <p>${c.prerequisites||"Listed on registration."}</p>
-          <div id="regArea" style="margin-top:22px"></div>`;
+        const priceNum = Number(c.price);
+        const priceHtml = c.price && Number.isFinite(priceNum) && priceNum > 0
+          ? `${esc(c.price)} <small>${esc(c.currency || "")}</small>` : `<small style="font-size:1rem;color:#0F2747">Price on request</small>`;
+        const dates = startsEndsLine(c);
+        const facts = [["Level", c.level], ["Duration", c.duration], ["Dates", dates]]
+          .filter(([, v]) => v && String(v).trim())
+          .map(([k, v]) => `<li><span>${k}</span><b>${esc(v)}</b></li>`).join("");
+        const outline = (c.outline || []).filter((m) => m && (m.title || m.description));
+        box.innerHTML = `
+          <section class="cd-hero"><div class="cd-hero-in">
+            <div>
+              <div class="cd-crumb"><a href="./courses.html">Courses</a> / ${esc(c.title)}</div>
+              <span class="cd-chip">${esc(courseStatusLabel(c) || c.status)}</span>
+              <h1>${esc(c.title)}</h1>
+              ${c.short ? `<p class="cd-lead">${esc(c.short)}</p>` : ""}
+            </div>
+            <div class="cd-cover">${coverMarkup({ id, ...c })}</div>
+          </div></section>
+          <div class="cd-body">
+            <div>
+              <section class="cd-card"><h2>About this course</h2><p>${para(c.full || c.short || "Details will be announced soon.")}</p></section>
+              ${outline.length ? `<section class="cd-card"><h2>Course outline</h2><ol class="cd-outline">${outline.map((m) => `<li><div><strong>${esc(m.title || "")}</strong><span>${esc(m.description || "")}</span></div></li>`).join("")}</ol></section>` : ""}
+              <section class="cd-card"><h2>Prerequisites</h2><p>${para(c.prerequisites || "Listed on registration.")}</p></section>
+            </div>
+            <aside class="cd-side"><div class="cd-card">
+              <p class="cd-price">${priceHtml}</p>
+              <ul class="cd-facts">${facts}</ul>
+              ${deliveryDaysHtml(c, { emptyMode: "hide" })}
+              <div id="regArea" style="margin-top:18px"></div>
+            </div></aside>
+          </div>`;
+        try { hydrateCovers(box, { thumb: false, eager: 1 }); } catch (_) {}
         const area = document.getElementById("regArea");
         onAuthStateChanged(auth, async (user) => {
           if (!canRegisterForCourse(c.status)) {
@@ -120,6 +223,9 @@
       }
     }
   </script>
+  <script src="./public-scroll.js"></script>
+  <script type="module" src="./landing-header-auth.js?v=auth11"></script>
+  <script>document.getElementById("menuBtn")?.addEventListener("click", () => document.getElementById("navLinks")?.classList.toggle("show"));</script>
   <script src="./ghz-mobile.js"></script>
 </body>
 </html>

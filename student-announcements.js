@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { bootStudentNav } from "./student-nav.js";
 import { protect } from "./auth-guard.js?v=auth10";
 import { db } from "./firebase-config.js?v=auth10";
@@ -12,7 +13,7 @@ const root = document.getElementById("annRoot");
 const LS = "ghz_ann_seen_at";
 const fail = (step, e) => {
   console.error(step, e);
-  if (root) root.innerHTML = `<p class="banner">This page could not load<br>${step}: ${(e && (e.code || e.message)) || e}</p>`;
+  if (root) root.innerHTML = `<p class="banner">This page could not load<br>${friendlyError(e)}</p>`;
 };
 
 try {
@@ -98,7 +99,7 @@ try {
     });
   } catch (e) {
     showClassic();
-    if (v2) v2.innerHTML = `<p class="banner">announcements: ${e.code||e.message}</p><button class="btn btn-sm" type="button" id="annClassicBtn">Use classic view</button>`;
+    if (v2) v2.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="annClassicBtn">Use classic view</button>`;
     document.getElementById("annClassicBtn")?.addEventListener("click", showClassic);
   }
 

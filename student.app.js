@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
     import { protect } from "./auth-guard.js?v=auth10";
     import { bootNotify } from "./portal-notify.js?v=stu11";
     import { bootPageMotion } from "./PageTransition.js?v=stu11";
@@ -650,7 +651,7 @@
         const fresh = await getDoc(doc(db, "courses", cid));
         if (fresh.exists()) { c = { id: fresh.id, ...fresh.data() }; const i = myCourseDocs.findIndex(x=>x.id===cid); if (i>=0) myCourseDocs[i]=c; else myCourseDocs.push(c); }
       } catch (e) {
-        document.getElementById("sovPane").innerHTML = `<p class="banner">courses: ${e.code||e.message}</p>`;
+        document.getElementById("sovPane").innerHTML = `<p class="banner">${friendlyError(e)}</p>`;
         showView("course");
         return;
       }
@@ -716,7 +717,7 @@
           }
         });
       } catch (e) {
-        if (host) host.innerHTML = `<p class="banner">${e.code||e.message}</p><button class="btn btn-sm" type="button" id="hdRetry">Try again</button>`;
+        if (host) host.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="hdRetry">Try again</button>`;
         document.getElementById("hdRetry")?.addEventListener("click", () => window.__openStudentHw(aid));
       }
     };
@@ -735,7 +736,7 @@
           location.hash = "quiz/" + qid + "/take";
         }
       } catch (e) {
-        if (host) host.innerHTML = `<p class="banner">${e.code||e.message}</p><button class="btn btn-sm" type="button" id="qrRetry">Try again</button>`;
+        if (host) host.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="qrRetry">Try again</button>`;
         document.getElementById("qrRetry")?.addEventListener("click", () => window.__openStudentQuiz(qid));
       }
     };
@@ -759,7 +760,7 @@
           onSubmitted: () => { loadStore(true); }
         });
       } catch (e) {
-        host.innerHTML = `<p class="banner">${e.code||e.message}</p><button class="btn btn-sm" type="button" id="qtRetry">Try again</button>`;
+        host.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="qtRetry">Try again</button>`;
         document.getElementById("qtRetry")?.addEventListener("click", () => window.__openStudentQuizTake(qid));
       }
     };
@@ -861,7 +862,7 @@
           }
           const err = store.errors && (store.errors.quizzes || store.errors.enrollments);
           if (err && !courses.length) {
-            host.innerHTML = `<p class="banner">${err.code || err}</p><button class="btn btn-sm" type="button" id="qzRetry">Try again</button>`;
+            host.innerHTML = `<p class="banner">${friendlyError(err)}</p><button class="btn btn-sm" type="button" id="qzRetry">Try again</button>`;
             document.getElementById("qzRetry")?.addEventListener("click", () => window.__bootQuizzes?.(navTok));
             return;
           }
@@ -925,7 +926,7 @@
             onRetry: () => window.__bootGrades?.(navTok)
           }));
         } catch (e) {
-          if (host) host.innerHTML = `<p class="banner">${e.code||e.message}</p><button class="btn btn-sm" type="button" id="grRetry">Retry</button>`;
+          if (host) host.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="grRetry">Retry</button>`;
           document.getElementById("grRetry")?.addEventListener("click", () => window.__bootGrades?.(navTok));
         }
       };
@@ -942,11 +943,11 @@
                 const courses = {};
                 (store.enrollments || []).forEach((en) => { courses[en.courseId] = en.courseTitle || store.courses?.[en.courseId]?.title || en.courseId; });
                 await renderAnnouncementsV2({ host, items: store.announcements || [], courses, uid: store.user?.uid || store.user?.id });
-              }).catch((e) => { if (host) host.innerHTML = `<p class="banner">${e.code||e.message}</p>`; });
+              }).catch((e) => { if (host) host.innerHTML = `<p class="banner">${friendlyError(e)}</p>`; });
             }
           });
         } catch (e) {
-          if (host) host.innerHTML = `<p class="banner">${e.code||e.message}</p><button class="btn btn-sm" type="button" id="annRetry">Try again</button>`;
+          if (host) host.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="annRetry">Try again</button>`;
           document.getElementById("annRetry")?.addEventListener("click", () => window.__bootAnnouncements?.(tok));
         }
       };
@@ -961,7 +962,7 @@
           m.renderCourseContentV1({ host, courseId: cid, role: "student", uid: user.uid, name: window.__ghzLiveName || "" });
         } catch (err) {
           window.__ghzBootErr = err?.message || String(err);
-          if (host) host.innerHTML = `<p class="banner">${err?.message || err}</p>`;
+          if (host) host.innerHTML = `<p class="banner">${friendlyError(err)}</p>`;
         }
       };
       window.__bootHomework = async (tok) => {
@@ -1007,7 +1008,7 @@
           attV2Ready = !!(await paintAtt(store || {}));
           ensureCatalog().catch(() => {});
         } catch (e) {
-          if (host) host.innerHTML = `<p class="banner">${e.code||e.message}</p><button class="btn btn-sm" type="button" id="attRetry2">Try again</button>`;
+          if (host) host.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="attRetry2">Try again</button>`;
           document.getElementById("attRetry2")?.addEventListener("click", () => window.__bootAttendance?.(navTok));
         }
       };
@@ -1022,7 +1023,7 @@
           const courses = getEnrolledCourses(store);
           schedV2Ready = !!(await renderStudentScheduleV2({ host, courses, sessions: store.sessions || [], attendance: store.attendance || [], uid: user.uid }));
         } catch (e) {
-          if (host) host.innerHTML = `<p class="banner">${e.code||e.message}</p><button class="btn btn-sm" type="button" id="scRetry">Try again</button>`;
+          if (host) host.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="scRetry">Try again</button>`;
           document.getElementById("scRetry")?.addEventListener("click", () => window.__bootSchedule?.(navTok));
         }
       };
@@ -1037,7 +1038,7 @@
           enrolled.forEach((c) => { coursesMap[c.id] = c; });
           await renderCertificatesV2({ host, student: { name: window.__ghzLiveName, uid: user.uid }, certs: store.certificates || [], enrolls: enrolled.map((c) => ({ courseId: c.id, courseTitle: c.title })), courses: coursesMap });
         } catch (e) {
-          if (host) host.innerHTML = `<p class="banner">${e.code||e.message}</p>`;
+          if (host) host.innerHTML = `<p class="banner">${friendlyError(e)}</p>`;
         }
       };
       let profileBooted = false;
@@ -1065,7 +1066,7 @@
         } catch (e) {
           profileV2Ready = false;
           const root = document.getElementById("profileV2Root");
-          if (root) root.innerHTML = `<p class="banner">${e.code||e.message}</p><button class="btn btn-sm" type="button" id="pv2RetryBtn">Retry</button>`;
+          if (root) root.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="pv2RetryBtn">Retry</button>`;
           document.getElementById("pv2ClassicBtn")?.addEventListener("click", () => { profileV2Ready = false; showView("profile"); });
         }
       };
@@ -1091,7 +1092,7 @@
           regs = Array.isArray(fresh?.registrations) ? fresh.registrations : [];
         }
       } catch (e) {
-        document.getElementById("regList").innerHTML = `<p class="banner">registrations: ${e.code||e.message}</p>`;
+        document.getElementById("regList").innerHTML = `<p class="banner">${friendlyError(e)}</p>`;
       }
       regsByCourse = Object.fromEntries(regs.map((r)=>[r.courseId, r]));
       let instructions = "Payment details will appear here once the academy publishes them.";
@@ -1246,7 +1247,7 @@
         if (myCoursesV2Ready && ((location.hash||"").replace("#","") === "courses" || (location.hash||"").replace("#","") === "coursesv2")) showView("coursesv2");
       } catch (e) {
         if (!String(document.getElementById("enrolledList").innerHTML||"").includes("banner"))
-          document.getElementById("enrolledList").innerHTML = `<p class="banner">enrollments: ${e.code||e.message}</p>`;
+          document.getElementById("enrolledList").innerHTML = `<p class="banner">${friendlyError(e)}</p>`;
       }
       window.__openCompletedTab = () => { showView(myCoursesV2Ready ? "coursesv2" : "courses"); myTab="completed"; paintMyCourses(); if (myCoursesV2Ready) window.__tryMyCoursesV2?.({ assigns: myAssigns, subs: mySubs }); };
       const paintClassicRegs = () => {
@@ -1345,7 +1346,7 @@
       } catch (e) {
         regsV2Ready = false;
         const root = document.getElementById("regsV2Root");
-        if (root) root.innerHTML = `<p class="banner">registrations: ${e.code||e.message}</p><button class="btn btn-sm" type="button" id="regsRetryBtn">Retry</button>`;
+        if (root) root.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="regsRetryBtn">Retry</button>`;
         document.getElementById("regsClassicBtn")?.addEventListener("click", showClassicRegs);
       }
 
@@ -1412,7 +1413,7 @@
           } catch (e) {
             hwV2Ready = false;
             const root = document.getElementById("hwV2Root");
-            if (root) root.innerHTML = `<p class="banner">homework: ${e.code||e.message}</p><button class="btn btn-sm" type="button" id="hwRetryBtn">Retry</button>`;
+            if (root) root.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="hwRetryBtn">Retry</button>`;
             document.getElementById("hwClassicBtn")?.addEventListener("click", showClassicHw);
           }
         } catch (e) { failHw("submissions", e); }
@@ -1435,7 +1436,7 @@
             const cid = enrolledCourses[i].courseId;
             sessAll.push(...p.value.docs.map(d=>({id:d.id,...d.data(), courseTitle:titleOf(cid)})));
           });
-        } catch(e) { document.getElementById("schedList").innerHTML = `<p class="banner">sessions: ${e.code||e.message}</p>`; }
+        } catch(e) { document.getElementById("schedList").innerHTML = `<p class="banner">${friendlyError(e)}</p>`; }
         const today = new Date().toISOString().slice(0,10);
         const activeIds = new Set(myCourseDocs.filter(c=>portalStatus(c).group==="active").map(c=>c.id));
         const up = sessAll.filter(s=>{ const st=sessionStatus(s); return (st==="Upcoming"||st==="In progress") && activeIds.has(s.courseId); }).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
@@ -1461,7 +1462,7 @@
         } catch (e) {
           schedV2Ready = false;
           const root = document.getElementById("schedV2Root");
-          if (root) root.innerHTML = `<p class="banner">schedule: ${e.code||e.message}</p><button class="btn btn-sm" type="button" id="schedRetryBtn">Retry</button>`;
+          if (root) root.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="schedRetryBtn">Retry</button>`;
           document.getElementById("schedClassicBtn")?.addEventListener("click", showClassicSched);
         }
 
@@ -1477,7 +1478,7 @@
               else console.error("attendance", enrolledCourses[i].courseId, p.reason?.code || p.reason);
             });
             }
-          } catch(e){ document.getElementById("stuAtt").innerHTML = `<p class="banner">attendance: ${e.code||e.message}</p>`; throw e; }
+          } catch(e){ document.getElementById("stuAtt").innerHTML = `<p class="banner">${friendlyError(e)}</p>`; throw e; }
           const badgeSt = (st) => {
             if (st==="present") return `<span class="badge" style="background:#16a34a;color:#fff">Present</span>`;
             if (st==="late") return `<span class="badge" style="background:#d97706;color:#fff">Late</span>`;
@@ -1534,7 +1535,7 @@
           } catch (e) {
             attV2Ready = false;
             const root = document.getElementById("attV2Root");
-            if (root) root.innerHTML = `<p class="banner">attendance: ${e.code||e.message}</p><button class="btn btn-sm" type="button" id="attRetryBtn">Retry</button>`;
+            if (root) root.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="attRetryBtn">Retry</button>`;
             document.getElementById("attClassicBtn")?.addEventListener("click", () => { attV2Ready = false; showView("attendancev2"); });
           }
           try {
@@ -1562,11 +1563,11 @@
             } catch (_) {}
           }
         } catch(e){
-          if (!String(document.getElementById("stuAtt").innerHTML).includes("banner")) document.getElementById("stuAtt").innerHTML = `<p class="banner">attendance: ${e.code||e.message}</p>`;
+          if (!String(document.getElementById("stuAtt").innerHTML).includes("banner")) document.getElementById("stuAtt").innerHTML = `<p class="banner">${friendlyError(e)}</p>`;
           attV2Ready = false;
           const root = document.getElementById("attV2Root");
           if (root && !root.querySelector(".av2-fail")) {
-            root.innerHTML = `<p class="banner">attendance: ${e.code||e.message}</p><button class="btn btn-sm" type="button" id="attRetryBtn2">Retry</button>`;
+            root.innerHTML = `<p class="banner">${friendlyError(e)}</p><button class="btn btn-sm" type="button" id="attRetryBtn2">Retry</button>`;
             document.getElementById("attClassicBtn2")?.addEventListener("click", () => showView("attendancev2"));
           }
         }

@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { createElement as e, useMemo, useState, useEffect, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { db, auth } from "./firebase-config.js?v=auth10";
@@ -29,7 +30,7 @@ class Boundary extends Component {
     return this.props.children;
   }
 }
-function fbErr(err) { return err?.code || err?.message || String(err); }
+function fbErr(err) { return friendlyError(err); }
 function withTimeout(p, ms) {
   return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("deadline-exceeded"), { code: "deadline-exceeded" })), ms))]);
 }

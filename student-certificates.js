@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { bootStudentNav } from "./student-nav.js";
 import { protect } from "./auth-guard.js?v=auth10";
 import { db } from "./firebase-config.js?v=auth10";
@@ -10,7 +11,7 @@ const root = document.getElementById("root");
 const v2 = document.getElementById("certV2Root");
 const fail = (step, e) => {
   console.error(step, e);
-  const msg = `<p class="banner">This page could not load<br>${step}: ${(e && (e.code || e.message)) || e}</p>`;
+  const msg = `<p class="banner">This page could not load<br>${friendlyError(e)}</p>`;
   if (v2) v2.innerHTML = msg + `<button class="btn btn-sm" type="button" id="certClassicBtn">Use classic view</button>`;
   if (root) root.innerHTML = msg;
   document.getElementById("certClassicBtn")?.addEventListener("click", () => {

@@ -3,6 +3,9 @@ import { addDoc, collection, getDocs, query, where, serverTimestamp } from "http
 
 const PUBLIC = ["Open", "Coming soon", "Closed"];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_FILL_MS = 2000;          // from first touch of the form to submit; bots are faster
+const COOLDOWN_MS = 60 * 1000;     // one message per browser per minute
+const LAST_KEY = "ghz-interest-last";
 
 try {
   const form = document.getElementById("interestForm");
@@ -51,6 +54,10 @@ try {
   }
 
   if (msg) msg.maxLength = 2000;
+  let firstTouch = 0;
+  const touch = () => { if (!firstTouch) firstTouch = Date.now(); };
+  form.addEventListener("focusin", touch);
+  form.addEventListener("input", touch);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -64,6 +71,17 @@ try {
         showOk("Thank you, we will contact you soon.");
         return;
       }
+      if (!firstTouch || Date.now() - firstTouch < MIN_FILL_MS) {
+        touch();
+        showErr("Please check your details, then press the button again.");
+        return;
+      }
+      let last = 0;
+      try { last = Number(localStorage.getItem(LAST_KEY) || 0); } catch (_) {}
+      if (last && Date.now() - last < COOLDOWN_MS) {
+        showErr("You just sent a message. Please wait a minute before sending another.");
+        return;
+      }
 
       const name = String(nameEl?.value || "").trim();
       const email = String(emailEl?.value || "").trim();
@@ -72,11 +90,14 @@ try {
       if (name.length < 2) {
         showField(nameHint, "Full name required (min 2 characters)");
         invalid = true;
+      } else if (name.length > 100) {
+        showField(nameHint, "Please keep your name under 100 characters");
+        invalid = true;
       }
       if (!email) {
         showField(emailHint, "Email required and valid");
         invalid = true;
-      } else if (!EMAIL_RE.test(email)) {
+      } else if (!EMAIL_RE.test(email) || email.length > 200) {
         showField(emailHint, "Email required and valid");
         invalid = true;
       }
@@ -100,6 +121,7 @@ try {
         createdAt: serverTimestamp(),
         source
       });
+      try { localStorage.setItem(LAST_KEY, String(Date.now())); } catch (_) {}
       form.reset();
       showField(nameHint, "");
       showField(emailHint, "");

@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { protect } from "./auth-guard.js?v=auth10";
 import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, setDoc, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -6,7 +7,7 @@ import { isCourseLocked, CompletedBanner, lockBtn, lockWriteMsg } from "./course
 const root = document.getElementById("quizRoot");
 const fail = (step, e) => {
   console.error(step, e);
-  if (root) root.innerHTML = `<p class="banner">This page could not load<br>${step}: ${(e && (e.code || e.message)) || e}</p>`;
+  if (root) root.innerHTML = `<p class="banner">This page could not load<br>${friendlyError(e)}</p>`;
 };
 
 try {
@@ -65,7 +66,7 @@ try {
       const qs = await getDocs(query(collection(db, "quizzes"), where("courseId", "==", cid)));
       quizzes = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
     } catch (e) {
-      box.innerHTML = `<p class="banner">quizzes: ${e.code || e.message}</p>`;
+      box.innerHTML = `<p class="banner">${friendlyError(e)}</p>`;
       return;
     }
     const counts = {};
@@ -74,7 +75,7 @@ try {
         const qq = await getDocs(query(collection(db, "quizQuestions"), where("courseId", "==", cid), where("quizId", "==", q.id)));
         counts[q.id] = qq.size;
       } catch (e) {
-        box.innerHTML = `<p class="banner">quizQuestions: ${e.code || e.message}</p>`;
+        box.innerHTML = `<p class="banner">${friendlyError(e)}</p>`;
         return;
       }
     }
@@ -136,7 +137,7 @@ try {
         const qq = await getDocs(query(collection(db, "quizQuestions"), where("courseId", "==", cid), where("quizId", "==", quiz.id)));
         questions = qq.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
       } catch (e) {
-        editor.innerHTML = `<p class="banner">quizQuestions: ${e.code || e.message}</p>`;
+        editor.innerHTML = `<p class="banner">${friendlyError(e)}</p>`;
         return;
       }
       try {
@@ -144,7 +145,7 @@ try {
         const hit = kd.docs.find((d) => d.id === quiz.id);
         if (hit) keys = hit.data().answers || {};
       } catch (e) {
-        editor.innerHTML = `<p class="banner">quizKeys: ${e.code || e.message}</p><div id="edRest"></div>`;
+        editor.innerHTML = `<p class="banner">${friendlyError(e)}</p><div id="edRest"></div>`;
       }
     }
     if (!questions.length) questions = [{ type: "mcq", text: "", options: ["", ""], points: 1, correct: 0 }];
@@ -290,15 +291,15 @@ try {
     try {
       const es = await getDocs(query(collection(db, "enrollments"), where("courseId", "==", cid)));
       ens = es.docs.map((d) => ({ id: d.id, ...d.data() }));
-    } catch (e) { box.innerHTML = `<p class="banner">enrollments: ${e.code || e.message}</p>`; return; }
+    } catch (e) { box.innerHTML = `<p class="banner">${friendlyError(e)}</p>`; return; }
     try {
       const as = await getDocs(query(collection(db, "quizAttempts"), where("courseId", "==", cid)));
       atts = as.docs.map((d) => ({ id: d.id, ...d.data() })).filter((a) => a.quizId === quiz.id);
-    } catch (e) { box.innerHTML = `<p class="banner">quizAttempts: ${e.code || e.message}</p>`; return; }
+    } catch (e) { box.innerHTML = `<p class="banner">${friendlyError(e)}</p>`; return; }
     try {
       const qq = await getDocs(query(collection(db, "quizQuestions"), where("courseId", "==", cid), where("quizId", "==", quiz.id)));
       questions = qq.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
-    } catch (e) { box.innerHTML = `<p class="banner">quizQuestions: ${e.code || e.message}</p>`; return; }
+    } catch (e) { box.innerHTML = `<p class="banner">${friendlyError(e)}</p>`; return; }
     const maxAll = questions.reduce((s, q) => s + Number(q.points || 0), 0);
     const graded = atts.filter((a) => a.status === "graded");
     const avg = graded.length ? Math.round(graded.reduce((s, a) => s + Number(a.score || 0), 0) / graded.length * 10) / 10 : 0;
@@ -362,7 +363,7 @@ try {
         try {
           const kd = await getDoc(doc(db, "quizKeys", quiz.id));
           key = kd.exists() ? (kd.data().answers || {}) : {};
-        } catch (e) { document.getElementById("revPanel").innerHTML = `<p class="banner">quizKeys: ${e.code || e.message}</p>`; return; }
+        } catch (e) { document.getElementById("revPanel").innerHTML = `<p class="banner">${friendlyError(e)}</p>`; return; }
         const scores = { ...(at.questionScores || {}) };
         const comments = { ...(at.feedback || {}) };
         const pane = document.getElementById("revPanel");

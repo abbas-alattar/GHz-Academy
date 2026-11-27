@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { auth, db } from "./firebase-config.js?v=auth10";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -7,7 +8,7 @@ import { collection, query, where, getDocs } from "https://www.gstatic.com/fireb
   if (!host) return;
   const fail = (step, e) => {
     console.error(step, e);
-    host.innerHTML = `<p class="banner">Latest announcements<br>${step}: ${(e && (e.code || e.message)) || e}</p>`;
+    host.innerHTML = `<p class="banner">Latest announcements<br>${friendlyError(e)}</p>`;
   };
   const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
   const millis = (t) => (t && t.toMillis ? t.toMillis() : t ? new Date(t).getTime() : 0);

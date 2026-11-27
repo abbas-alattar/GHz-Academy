@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { protect } from "./auth-guard.js?v=auth10";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -22,7 +23,7 @@ try {
     let ens=[], assigns=[], quizzes=[], subs=[], atts=[], recs=[];
     const get = async (col, step) => {
       try { return (await getDocs(query(collection(db,col), where("courseId","==", cid)))).docs.map(d=>({id:d.id,...d.data()})); }
-      catch(e){ box.innerHTML = `<p class="banner">${step}: ${e.code||e.message}</p>`; throw e; }
+      catch(e){ box.innerHTML = `<p class="banner">${step}: ${friendlyError(e)}</p>`; throw e; }
     };
     try {
       ens = await get("enrollments","enrollments");

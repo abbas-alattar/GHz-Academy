@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { createElement as e, useEffect, useState } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTrainerStore } from "./TrainerStore.js";
@@ -70,6 +71,6 @@ export function renderTrainerAttendanceV2(host, { uid, courseId } = {}) {
 export function renderTrainerAnnouncementsSection(host, props) {
   try { return renderTrainerAnnouncementsV2(host, props); } catch (er) {
     console.error("announcements", er);
-    if (host) host.innerHTML = `<p class="th2-err">${er.message || er}</p>`;
+    if (host) host.innerHTML = `<p class="th2-err">${friendlyError(er)}</p>`;
   }
 }

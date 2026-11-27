@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { createElement as e, useEffect, useLayoutEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
@@ -110,7 +111,7 @@ function letter(pct) {
 function loadChips() {
   try { return JSON.parse(localStorage.getItem(CHIP_KEY) || "null") || DEFAULT_CHIPS.slice(); } catch { return DEFAULT_CHIPS.slice(); }
 }
-function fbErr(er) { return (er?.code || "") + " " + (er?.message || er); }
+function fbErr(er) { return friendlyError(er); }
 function paintHwBadge(n) {
   const a = document.querySelector('.side nav a[data-view="homework"]');
   if (!a) return;

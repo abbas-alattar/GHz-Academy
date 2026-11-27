@@ -1,8 +1,8 @@
 import { subscribeTrainerStore, getTrainerStore } from "./TrainerStore.js";
 import { db } from "./firebase-config.js?v=auth10";
-import { collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { gradeCalc, fmt1 } from "./gradeCalc.js";
-import { loadSeenBoxes, baselineTrainerSeen, markAssignedSeen, markCompletedSeen, markReopenedSeen, dropAssignedSeen, seenAssigned, seenCompleted, seenReopened, reopenEventId } from "./seenBoxes.js";
+import { loadSeenBoxes, baselineTrainerSeen, markAssignedSeen, markCompletedSeen, markReopenedSeen, dropAssignedSeen, seenAssigned, seenCompleted, seenReopened, reopenEventId, patchSeenBoxes, assignedBoxKey, reopenedBoxKey, completedBoxKey } from "./seenBoxes.js";
 import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
 
 
@@ -346,6 +346,60 @@ export function showCompletedBox({ course, uid, name, stats, go, onClose }) {
   };
 }
 
+
+const escHtml = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+
+// One popup listing every waiting update, instead of one popup per course in a row.
+export function showSummaryBox({ items, uid, name, go, onClose }) {
+  ensureCss();
+  const label = { a: "New course assigned", r: "Course reopened", d: "Course completed" };
+  const chip = { a: "#0D9488", r: "#0284C7", d: "#2563EB" };
+  const first = displayFirstName(name);
+  const rows = items.map((it, i) => `
+      <li style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:${i ? "1px solid #E2E8F0" : "0"}">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;color:#0F2747;font-size:14px;line-height:1.35">${escHtml(it.course.title || "Course")}</div>
+          <span style="display:inline-block;margin-top:3px;font-size:11px;font-weight:700;color:${chip[it.kind]};background:${chip[it.kind]}14;border-radius:999px;padding:2px 8px">${label[it.kind]}</span>
+        </div>
+        <button type="button" class="rs-btn rs-ghost" style="height:34px;padding:0 12px;font-size:13px;flex:0 0 auto" data-rs-open="${i}">${it.kind === "d" ? "View grades" : "View course"}</button>
+      </li>`).join("");
+  const wrap = document.createElement("div");
+  wrap.className = "rs-dim";
+  wrap.setAttribute("role", "dialog");
+  wrap.setAttribute("aria-modal", "true");
+  wrap.innerHTML = `<div class="rs-card">
+    <button type="button" class="rs-x" aria-label="Close">×</button>
+    <div class="rs-head rs-thanks">
+      <h3>${items.length} course updates</h3>
+      <p>${first ? "Hi " + escHtml(first) + ", here" : "Here"} is what changed since your last visit.</p>
+    </div>
+    <div class="rs-body">
+      <ul style="list-style:none;margin:0 0 16px;padding:0;max-height:50vh;overflow:auto">${rows}</ul>
+      <div class="rs-acts"><button type="button" class="rs-btn rs-pri" data-rs="close">Got it</button></div>
+    </div>
+  </div>`;
+  document.body.appendChild(wrap);
+  const patch = {};
+  items.forEach(({ course, kind }) => {
+    if (kind === "a") patch[assignedBoxKey(course.id)] = serverTimestamp();
+    else if (kind === "r") patch[reopenedBoxKey(course.id)] = Number(reopenEventId(course)) || 0;
+    else patch[completedBoxKey(course.id)] = msOf(course.completedAt) || 0;
+    markBoxNotif(kind === "a" ? "course_assigned" : kind === "r" ? "course_reopened" : "courseDone", course.id);
+  });
+  patchSeenBoxes(uid, patch);
+  const finish = () => onClose?.();
+  const onKey = bindClose(wrap, finish);
+  wrap.querySelector("[data-rs=close]").onclick = () => { closeWrap(wrap, onKey); finish(); };
+  wrap.querySelectorAll("[data-rs-open]").forEach((b) => {
+    b.onclick = () => {
+      const it = items[Number(b.getAttribute("data-rs-open"))];
+      closeWrap(wrap, onKey);
+      try { go?.((it.kind === "d" ? "#grades/" : "#course/") + it.course.id); } catch (_) {}
+      finish();
+    };
+  });
+}
+
 async function col(name, cid) {
   const snap = await getDocs(query(collection(db, name), where("courseId", "==", cid)));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -392,6 +446,8 @@ async function statsFor(course) {
 let busy = false;
 let lastSig = "";
 
+// Updates the trainer already closed during this visit (even if saving "seen" failed).
+const dismissedThisVisit = new Set();
 async function consider(uid, name, go) {
   if (busy || !uid) return;
   const store = getTrainerStore();
@@ -424,6 +480,22 @@ async function consider(uid, name, go) {
   const pendingReopen = mine.filter((c) => String(c.status) !== "Completed" && reopenEventId(c) && !seenReopened(map, c.id, reopenEventId(c)));
   const pendingAssign = mine.filter((c) => String(c.status) !== "Completed" && !seenAssigned(map, c.id));
   const pendingDone = mine.filter((c) => String(c.status) === "Completed" && !seenCompleted(map, c.id, msOf(c.completedAt) || 0));
+  const all = [
+    ...pendingReopen.map((course) => ({ course, kind: "r" })),
+    ...pendingAssign.map((course) => ({ course, kind: "a" })),
+    ...pendingDone.map((course) => ({ course, kind: "d" }))
+  ];
+  if (all.length > 1) {
+    const sigAll = all.map((x) => x.course.id + ":" + x.kind).join("|");
+    if (sigAll === lastSig || dismissedThisVisit.has(sigAll)) return;
+    lastSig = sigAll;
+    busy = true;
+    try {
+      const realName = await resolveTrainerName(uid, name);
+      showSummaryBox({ items: all, uid, name: realName, go, onClose: () => { dismissedThisVisit.add(sigAll); busy = false; lastSig = ""; setTimeout(() => consider(uid, name, go), 200); } });
+    } catch (_) { busy = false; lastSig = ""; }
+    return;
+  }
   const next = pendingReopen[0] || pendingAssign[0] || pendingDone[0];
   if (!next) return;
   const kind = pendingReopen[0] === next ? "r" : pendingAssign[0] === next ? "a" : "d";

@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { db } from "./firebase-config.js?v=auth10";
@@ -7,7 +8,7 @@ import { StatusBadge, CourseSelect } from "./TrainerHomeworkV2.js";
 import { isCourseLocked } from "./course-lock.js";
 import { exportAdminPdf, nameWithId } from "./AdminPdfExport.js";
 
-function fbErr(er) { return String((er?.code || "") + " " + (er?.message || er)).trim(); }
+function fbErr(er) { return friendlyError(er); }
 function initials(n) {
   return String(n || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((x) => x[0].toUpperCase()).join("") || "?";
 }

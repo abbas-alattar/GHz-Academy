@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { bootUniDash } from "./student-uni-dash.js";
 import { bootDashboardV3 } from "./DashboardV3.js?v=stu9";
 
@@ -6,7 +7,7 @@ export function bootStudentDash() {
   if (!host) return;
   const classic = () => {
     try { bootUniDash(); } catch (e) {
-      host.innerHTML = `<p class="banner">Dashboard could not load<br>${e?.code || e?.message || e}</p>`;
+      host.innerHTML = `<p class="banner">Dashboard could not load<br>${friendlyError(e)}</p>`;
     }
   };
   try {

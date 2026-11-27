@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { createElement as e, useEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
@@ -11,7 +12,7 @@ import { CourseSelect, pickCreateCourseId, StatusBadge } from "./TrainerHomework
 import { RowMenu } from "./TrainerRowMenu.js";
 
 const QZ_KEY = "ghz-trainer-qz-course";
-function fbErr(er) { return (er?.code || "") + " " + (er?.message || er); }
+function fbErr(er) { return friendlyError(er); }
 function isPublished(q) { return String(q?.status || "") === "Published"; }
 function isActiveCourse(c) { return c?.status === "Open" || c?.status === "Closed"; }
 function initials(n) { return String(n || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((x) => x[0].toUpperCase()).join("") || "?"; }

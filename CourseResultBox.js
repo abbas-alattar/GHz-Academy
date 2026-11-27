@@ -132,12 +132,15 @@ export async function maybeShowCourseResult({ uid, name, forceCourseId } = {}) {
     }
     if (!pick) return;
     showing = true;
-    const wrap = showCourseResultBox({
+    // Automatic popups wait until the result is ready, so students are never blocked by a
+    // full-screen "Loading…" box. A popup the student opened themselves shows loading at once.
+    const wrap = forceCourseId ? showCourseResultBox({
       uid, courseId: pick, name: name || store.name, title: store.courses?.[pick]?.title || "this course",
       status: "loading", avg: null, pass: null, passed: null, unpublished: false, hasCert: false,
       onClose: () => { showing = false; }
-    });
+    }) : null;
     const rec = await getCourseResult(pick);
+    if (!wrap && rec.status === "loading") { showing = false; return; }
     let hasCert = false;
     try {
       const snap = await getDoc(doc(db, "certificates", uid + "_" + pick));
@@ -149,7 +152,8 @@ export async function maybeShowCourseResult({ uid, name, forceCourseId } = {}) {
       uid, courseId: pick, at: atStamp(store.courses?.[pick] || rec.course), name: name || store.name, title: rec.title,
       avg: rec.avg, pass: rec.pass, passed: rec.passed, unpublished: rec.unpublished, status: rec.status, hasCert
     };
-    wrap._paint?.(payload);
+    if (wrap) wrap._paint?.(payload);
+    else showCourseResultBox({ ...payload, onClose: () => { showing = false; } });
     if (rec.status !== "loading") markResultSeen(uid, pick, Number(payload.at) || 0);
     if (!watchBound && uid) {
       watchBound = true;

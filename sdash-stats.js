@@ -1,3 +1,4 @@
+import { friendlyError } from "./friendlyError.js";
 import { bound } from "./student-dash-data.js?v=stu11";
 
 function animate(el, target) {
@@ -17,7 +18,7 @@ export function mountStats(el) {
   bound(el, (root, data) => {
     const err = data.errors.assignments || data.errors.submissions || data.errors.quizzes || data.errors.quizAttempts || data.errors.attendance || data.errors.announcementsAll;
     if (err && !data.assignments.length && !data.quizzes.length) {
-      root.innerHTML = `<p class="sdash-fail">This section could not load<br>${err.step}: ${err.code}</p>`;
+      root.innerHTML = `<p class="sdash-fail">This section could not load<br>${friendlyError(err)}</p>`;
       return;
     }
     const subIds = new Set(data.submissions.map((s) => s.assignmentId));
