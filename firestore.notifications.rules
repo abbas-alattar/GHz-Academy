@@ -1,0 +1,47 @@
+    // ===== Saved notifications (Phase 1) =====
+    // Paste this block inside  match /databases/{database}/documents { ... }  in the Firebase console
+    // (Firestore Database → Rules), next to your other "match" blocks, then click Publish.
+    match /users/{uid}/notifications/{nid} {
+      function nMe() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+      function nIsAdmin() { return nMe().role == 'admin' && nMe().get('active', true) != false; }
+      function nIsTrainer() { return nMe().role == 'trainer' && nMe().get('active', true) != false; }
+      function nCourse(cid) { return get(/databases/$(database)/documents/courses/$(cid)).data; }
+      function nTrains(cid) { return nIsTrainer() && request.auth.uid in nCourse(cid).get('trainerIds', []); }
+      function nEnrolled(u, cid) { return exists(/databases/$(database)/documents/enrollments/$(u + '_' + cid)); }
+      function nRecipientIsAdmin() { return get(/databases/$(database)/documents/users/$(uid)).data.role == 'admin'; }
+      function nValid() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['type', 'title', 'message', 'courseId', 'courseTitle', 'link', 'sourceId', 'actorUid', 'actorName', 'read', 'createdAt'])
+          && d.actorUid == request.auth.uid
+          && d.read == false
+          && d.createdAt == request.time
+          && d.type is string && d.type.size() <= 40
+          && d.title is string && d.title.size() <= 200
+          && d.message is string && d.message.size() <= 1000
+          && d.courseId is string && d.courseId.size() <= 200
+          && d.link is string && d.link.size() <= 500;
+      }
+
+      // Only the owner can read their notifications.
+      allow read: if request.auth != null && request.auth.uid == uid;
+
+      // Who may send a notification to user {uid}:
+      //  - admins: anyone
+      //  - trainers: students enrolled in a course they teach
+      //  - students: their course's trainers (submissions) and admins (registrations, payments)
+      allow create: if request.auth != null && request.auth.uid != uid && nValid() && (
+        nIsAdmin()
+        || (nTrains(request.resource.data.courseId) && nEnrolled(uid, request.resource.data.courseId))
+        || nRecipientIsAdmin()
+        || (nEnrolled(request.auth.uid, request.resource.data.courseId)
+            && uid in nCourse(request.resource.data.courseId).get('trainerIds', []))
+      );
+
+      // The owner can only mark notifications read.
+      allow update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt']);
+
+      // The owner (or an admin) can delete.
+      allow delete: if request.auth != null && (request.auth.uid == uid || nIsAdmin());
+    }
+    // ===== end of saved notifications =====

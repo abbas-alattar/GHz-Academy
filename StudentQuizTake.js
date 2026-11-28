@@ -166,6 +166,7 @@ function TakeApp({ quiz, course, uid, studentName, onBack, onSubmitted }) {
         status: "submitted",
         submittedAt: serverTimestamp()
       });
+      import("./notify.js").then((m) => m.notifyQuizSubmitted({ attemptId: id, courseId: quiz.courseId, quizTitle: quiz.title, studentName: studentName || "" })).catch(() => {});
       if (tick.current) clearInterval(tick.current);
       setScore(gradeAuto(list, ans));
       setPhase("done");

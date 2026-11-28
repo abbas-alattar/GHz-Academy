@@ -1,3 +1,4 @@
+import { notifyHomeworkPosted } from "./notify.js";
 import { createElement as e, useEffect, useRef, useState } from "https://esm.sh/react@18.3.1";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
 import { db } from "./firebase-config.js?v=auth10";
@@ -165,6 +166,7 @@ export function HomeworkFormV2({ form, courses, uid, onClose, onSaved, CourseSel
         const ref = await addDoc(collection(db, "assignments"), { ...payload, createdAt: serverTimestamp(), createdBy: uid });
         aid = ref.id;
       }
+      if (payload.status === "Published") notifyHomeworkPosted({ id: aid, courseId: payload.courseId, title: payload.title });
       for (let i = 0; i < (f.files || []).length; i++) {
         const file = f.files[i];
         if (file.data) {

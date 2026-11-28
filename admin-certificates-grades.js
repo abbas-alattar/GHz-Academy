@@ -81,6 +81,7 @@ try {
       status: "issued"
     });
     await batch.commit();
+    import("./notify.js").then((m) => m.notifyCertificateIssued({ certId: `${row.uid}_${course.id}`, uid: row.uid, courseId: course.id, courseTitle: course.title || "" })).catch(() => {});
   };
 
   const load = async () => {

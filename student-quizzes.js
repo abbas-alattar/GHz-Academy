@@ -253,6 +253,7 @@ try {
           status: "submitted",
           submittedAt: serverTimestamp()
         });
+        import("./notify.js").then((m) => m.notifyQuizSubmitted({ attemptId: id, courseId: q.courseId, quizTitle: q.title, studentName: studentName || "" })).catch(() => {});
         try { window.__ghzPingActivity?.(); } catch (_) {}
         if (tick) clearInterval(tick);
         attempts.push({ id, quizId: q.id, submittedAt: new Date() });

@@ -71,7 +71,7 @@ function Modal({ row, courses, onClose, onSaved }) {
       } else {
         const user = auth.currentUser;
         const authorName = document.getElementById("userName")?.textContent?.trim() || user?.displayName || (user?.email || "").split("@")[0] || "Admin";
-        await addDoc(collection(db, "announcements"), {
+        const annRef = await addDoc(collection(db, "announcements"), {
           courseId,
           title: ttl,
           body: msg,
@@ -81,6 +81,7 @@ function Modal({ row, courses, onClose, onSaved }) {
           pinned,
           createdAt: serverTimestamp()
         });
+        import("./notify.js").then((m) => m.notifyAnnouncement({ id: annRef.id, courseId, title: ttl, body: msg })).catch(() => {});
       }
       onSaved();
       onClose();

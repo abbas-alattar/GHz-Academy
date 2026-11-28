@@ -242,7 +242,7 @@ export function NotificationPanel(p) {
   const { items, seenAt, readIds, tab, muted, hidden, loading, query } = p;
   const page = !!p.page;
   const limit = p.limit || 30;
-  const unreadSet = new Set(items.filter((n) => n.time > (seenAt || 0) && !(readIds || []).includes(n.id) && !(hidden || []).includes(n.id) && !(muted || []).includes(n.category)).map((n) => n.id));
+  const unreadSet = new Set(items.filter((n) => !n.read && n.time > (seenAt || 0) && !(readIds || []).includes(n.id) && !(hidden || []).includes(n.id) && !(muted || []).includes(n.category)).map((n) => n.id));
   const tagged = items.map((n) => ({ ...n, _unread: unreadSet.has(n.id) }));
   const shown = filterItems(tagged, tab, muted, hidden, query).slice().sort((a, b) => b.time - a.time);
   const sliced = page ? shown.slice(0, limit) : shown;

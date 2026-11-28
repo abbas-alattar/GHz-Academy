@@ -381,8 +381,10 @@ setTimeout(function () {
         };
         try {
           if (isCourseLocked(saveCourse)) { throw { code:"permission-denied", message:"This course is completed and read-only." }; }
+          let savedHwId = a.id;
           if (a.id) { const { courseId, ...rest } = payload; await updateDoc(doc(db,"assignments", a.id), rest); }
-          else await addDoc(collection(db,"assignments"), { ...payload, createdAt: serverTimestamp() });
+          else { const hwRef = await addDoc(collection(db,"assignments"), { ...payload, createdAt: serverTimestamp() }); savedHwId = hwRef.id; }
+          if (payload.status === "Published") import("./notify.js").then((m) => m.notifyHomeworkPosted({ id: savedHwId, courseId: payload.courseId || a.courseId, title: payload.title })).catch(() => {});
           modal.classList.add("hidden"); toast("Homework saved."); await reloadHw();
         } catch(e){ document.getElementById("herr").style.display="block"; document.getElementById("herr").textContent = lockWriteMsg(e); }
       };
@@ -472,7 +474,7 @@ setTimeout(function () {
       };
       const ph = document.getElementById("pubHw"); if (ph) ph.onclick=async()=>{
         if (isCourseLocked(active)) { toast("This course is completed and read-only.","err"); return; }
-        try { await updateDoc(doc(db,"assignments", a.id), { status: a.status==="Published"?"Draft":"Published" }); a.status = a.status==="Published"?"Draft":"Published"; toast("Updated."); renderHwDetail(); renderHw(); }
+        try { await updateDoc(doc(db,"assignments", a.id), { status: a.status==="Published"?"Draft":"Published" }); a.status = a.status==="Published"?"Draft":"Published"; if (a.status === "Published") import("./notify.js").then((m) => m.notifyHomeworkPosted({ id: a.id, courseId: a.courseId, title: a.title })).catch(() => {}); toast("Updated."); renderHwDetail(); renderHw(); }
         catch(er){ toast(lockWriteMsg(er),"err"); }
       };
       document.getElementById("hwSum").innerHTML = [
@@ -631,6 +633,7 @@ setTimeout(function () {
           }
           try {
             await updateDoc(doc(db,"submissions", s.id), { grade, feedback: document.getElementById("gfb").value, status:"graded", gradedBy: user.uid, gradedAt: serverTimestamp() });
+            import("./notify.js").then((m) => m.notifyHomeworkGraded({ submissionId: s.id, studentUid: s.uid, assignmentId: a.id, assignmentTitle: a.title, courseId: a.courseId, grade, maxPoints: a.maxPoints })).catch(() => {});
             toast("Grade saved");
             submissions = submissions.map(x=> x.id===s.id ? {...x, grade, feedback: document.getElementById("gfb").value, status:"graded"} : x);
             renderHw(); renderHwDetail();

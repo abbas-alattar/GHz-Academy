@@ -222,6 +222,7 @@ async function issueOne(row, course, opts) {
     status: "issued"
   });
   await batch.commit();
+  import("./notify.js").then((m) => m.notifyCertificateIssued({ certId: `${row.uid}_${course.id}`, uid: row.uid, courseId: course.id, courseTitle: course.title || "" })).catch(() => {});
 }
 
 async function revokeOne(row, courseId, reason) {

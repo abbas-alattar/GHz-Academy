@@ -188,6 +188,7 @@
                 btn.disabled = true; btn.textContent = "Registering…";
                 try {
                   await updateDoc(doc(db, "registrations", rid), { status: "pending_payment", createdAt: serverTimestamp() });
+                  await import("./notify.js").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: id, courseTitle: c.title, studentName: user.displayName || "" }))).catch(() => {});
                   location.href = "./student.html#regs";
                 } catch (e) {
                   document.getElementById("regMsg").textContent = "Could not register. " + (e.code||"") + " " + (e.message||"");
@@ -213,6 +214,7 @@
                 courseId: id, courseTitle: c.title, amount: Number.isFinite(amount) ? amount : 0, currency: c.currency||"USD",
                 status: "pending_payment", createdAt: serverTimestamp()
               });
+              await import("./notify.js").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: id, courseTitle: c.title, studentName: name }))).catch(() => {});
               location.href = "./student.html#regs";
             } catch (e) {
               document.getElementById("regMsg").textContent = "Could not register. " + (e.code||"") + " " + (e.message||"");

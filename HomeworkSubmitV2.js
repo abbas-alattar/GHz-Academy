@@ -176,6 +176,7 @@ function Drawer({ opts }) {
         }
       } else {
         await setDoc(doc(db, "submissions", subId), payload);
+        await import("./notify.js").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: subId, courseId: a.courseId, assignmentTitle: a.title, studentName: payload.studentName }))).catch(() => {});
       }
       try { window.__ghzPingActivity?.(); } catch (_) {}
       setDone(true);

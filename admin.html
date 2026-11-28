@@ -188,6 +188,7 @@
     protect("admin").then(({ user }) => {
       import("./lastActive.js").then((m) => { try { m.startLastActiveHeartbeat(user?.uid); } catch (e) { console.error("lastActiveAt", e); } }).catch((e) => console.error(e));
       try { bootNotify({ role: "admin", uid: user?.uid }); } catch (e) { console.error("bootNotify", e?.code || e?.message || e); }
+      import("./notify.js").then((m) => m.publishAdminList()).catch(() => {});
       import("./announcementReads.js").then((m) => { try { m.loadAnnouncementReads(user?.uid); } catch (e) { console.error("announcementReads", e?.code || e?.message || e); } }).catch((e) => console.error("announcementReads", e?.code || e?.message || e));
       window.__ghzAdminUid = user?.uid || "admin";
       setTimeout(() => { try { syncTrainerNamesOnce(toast).catch((e) => console.error(e?.code || e?.message || e)); } catch (e) { console.error(e); } }, 400);
@@ -1073,6 +1074,7 @@
         batch.update(doc(db,"registrations", r.id), { status:"enrolled", confirmedBy: auth.currentUser.uid, confirmedAt: serverTimestamp(), receiptNo });
         batch.set(doc(db,"enrollments", enId(r)), { uid:r.uid, courseId:r.courseId, studentName:r.studentName||"", studentEmail:r.studentEmail||"", studentId:r.studentId||"", enrolledAt: serverTimestamp() });
         await batch.commit();
+        import("./notify.js").then((m) => m.notifyEnrolled({ uid: r.uid, courseId: r.courseId, courseTitle: r.courseTitle || "" })).catch(() => {});
         toast("Enrollment confirmed."); await load();
       } catch(e){ toast("Could not confirm. "+(e.code||e.message||""),"err"); }
     };
@@ -1099,6 +1101,7 @@
         batch.update(doc(db,"registrations", r.id), { status:"rejected", rejectNote: note || "", cancelledBy: auth.currentUser.uid, cancelledAt: serverTimestamp() });
         batch.delete(doc(db,"enrollments", enId(r)));
         await batch.commit();
+        import("./notify.js").then((m) => m.notifyRegistrationRejected({ regId: r.id, uid: r.uid, courseId: r.courseId, courseTitle: r.courseTitle || "", note })).catch(() => {});
         toast("Rejected."); await load();
       } catch(e){ toast("Could not reject. "+(e.code||e.message||""),"err"); }
     };

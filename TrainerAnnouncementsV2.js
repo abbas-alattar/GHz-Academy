@@ -53,9 +53,10 @@ function Modal({ row, courses, onClose, onSaved, uid, authorName }) {
       if (row) {
         await updateDoc(doc(db, "announcements", row.id), { title: ttl, body: msg, pinned });
       } else {
-        await addDoc(collection(db, "announcements"), {
+        const annRef = await addDoc(collection(db, "announcements"), {
           courseId, title: ttl, body: msg, authorId: uid, authorName, authorRole: "trainer", pinned, createdAt: serverTimestamp()
         });
+        import("./notify.js").then((m) => m.notifyAnnouncement({ id: annRef.id, courseId, title: ttl, body: msg })).catch(() => {});
       }
       try { window.__ghzBumpActive?.(); } catch (_) {}
       onSaved(); onClose();

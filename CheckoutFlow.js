@@ -148,6 +148,7 @@ export async function openCheckout({ user, profile, course, existing }) {
           status: "pending_payment",
           createdAt: serverTimestamp()
         });
+        await import("./notify.js").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: course.id, courseTitle: course.title, studentName: details.name }))).catch(() => {});
       } catch (e) { throw new Error(fmtFsErr("create", createFields, e)); }
     }
     if (status !== "payment_submitted") return;
@@ -168,6 +169,7 @@ export async function openCheckout({ user, profile, course, existing }) {
     };
     try { await updateDoc(ref, patch); }
     catch (e) { throw new Error(fmtFsErr("update", ["status", "paymentMethod", "paymentRef", "paymentDate"], e)); }
+    await import("./notify.js").then((m) => m.settle(m.notifyPaymentSubmitted({ regId: rid, courseId: course.id, courseTitle: course.title, studentName: details.name }))).catch(() => {});
   }
 
   function flashCopy(btn, text) {

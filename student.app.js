@@ -442,6 +442,7 @@ import { friendlyError } from "./friendlyError.js";
       if (btn) { btn.disabled = true; btn.textContent = "Registering…"; }
       try {
         await updateDoc(doc(db,"registrations", rid), { status:"pending_payment", createdAt: serverTimestamp() });
+        await import("./notify.js").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: rid.split("_").slice(1).join("_"), studentName: currentUser?.displayName || "" }))).catch(() => {});
         location.hash = "regs";
         location.reload();
       } catch (e) {
@@ -682,6 +683,7 @@ import { friendlyError } from "./friendlyError.js";
       const payload = { assignmentId:a.id, courseId:a.courseId, uid:currentUser.uid, studentName: window.__ghzLiveName || document.getElementById("userName").textContent||"", text, link, submittedAt: serverTimestamp(), status:"submitted" };
       try {
         await setDoc(doc(db,"submissions", a.id+"_"+currentUser.uid), payload, { merge: true });
+        await import("./notify.js").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: a.id + "_" + currentUser.uid, courseId: a.courseId, assignmentTitle: a.title, studentName: payload.studentName }))).catch(() => {});
         toastOk = true; closeHomeworkDetailV2(); location.reload();
       } catch(e){
         if (errTarget) { errTarget.hidden = false; errTarget.style.display="block"; errTarget.textContent=(e.code||"")+" "+(e.message||""); }
@@ -712,6 +714,7 @@ import { friendlyError } from "./friendlyError.js";
           onSave: async ({ text, link, assignment, onError }) => {
             try {
               await setDoc(doc(db,"submissions", assignment.id+"_"+uid), { assignmentId:assignment.id, courseId:assignment.courseId, uid, studentName: window.__ghzLiveName || "", text, link, submittedAt: serverTimestamp(), status:"submitted" }, { merge: true });
+              await import("./notify.js").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: assignment.id + "_" + uid, courseId: assignment.courseId, assignmentTitle: assignment.title, studentName: window.__ghzLiveName || "" }))).catch(() => {});
               toastOk = true; closeHomeworkDetailV2(); location.hash = "homework"; loadStore(true);
             } catch (e) { onError?.((e.code||"")+" "+(e.message||"")); }
           }
@@ -795,6 +798,7 @@ import { friendlyError } from "./friendlyError.js";
             const payload = { assignmentId:assignment.id, courseId:assignment.courseId, uid:currentUser.uid, studentName: window.__ghzLiveName || document.getElementById("userName").textContent||"", text, link, submittedAt: serverTimestamp(), status:"submitted" };
             try {
               await setDoc(doc(db,"submissions", assignment.id+"_"+currentUser.uid), payload, { merge: true });
+              await import("./notify.js").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: assignment.id + "_" + currentUser.uid, courseId: assignment.courseId, assignmentTitle: assignment.title, studentName: payload.studentName }))).catch(() => {});
               toastOk = true; closeHomeworkDetailV2(); location.reload();
             } catch(e){ onError?.((e.code||"")+" "+(e.message||"")); }
           }
@@ -1288,6 +1292,7 @@ import { friendlyError } from "./friendlyError.js";
             paymentRef: document.getElementById("pr").value,
             paymentDate: document.getElementById("pd").value
           });
+          await import("./notify.js").then((m) => m.settle(m.notifyPaymentSubmitted({ regId: rid, courseId: rid.split("_").slice(1).join("_"), studentName: currentUser?.displayName || "" }))).catch(() => {});
           location.reload();
         };
       };

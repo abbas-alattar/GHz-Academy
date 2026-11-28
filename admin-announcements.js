@@ -80,7 +80,7 @@ try {
         if (row) {
           await updateDoc(doc(db, "announcements", row.id), { title: ttl, body: msg });
         } else {
-          await addDoc(collection(db, "announcements"), {
+          const annRef = await addDoc(collection(db, "announcements"), {
             courseId,
             title: ttl,
             body: msg,
@@ -90,6 +90,7 @@ try {
             pinned: false,
             createdAt: serverTimestamp()
           });
+          import("./notify.js").then((m) => m.notifyAnnouncement({ id: annRef.id, courseId, title: ttl, body: msg })).catch(() => {});
         }
         box.classList.add("hidden");
         toast("Saved.");

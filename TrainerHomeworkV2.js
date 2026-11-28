@@ -1,3 +1,4 @@
+import { notifyHomeworkGraded, notifyHomeworkPosted } from "./notify.js";
 import { friendlyError } from "./friendlyError.js";
 import { createElement as e, useEffect, useLayoutEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
@@ -373,6 +374,7 @@ function ReviewPage({ pack, a, uid, go, courses }) {
         gradedBy: uid,
         gradedAt: serverTimestamp()
       });
+      notifyHomeworkGraded({ submissionId: sid, studentUid: cur.en.uid, assignmentId: a.id, assignmentTitle: a.title, courseId: a.courseId, grade: g, maxPoints: max });
       setSaved(true);
       try { window.__ghzBumpActive?.(); } catch (_) {}
       try { localStorage.removeItem(draftKey(cur.en.uid)); } catch {}
@@ -556,6 +558,7 @@ function Page({ uid, go, assignmentId, courseId }) {
       await updateDoc(doc(db, "assignments", a.id), { status: "Draft" });
     } else {
       await updateDoc(doc(db, "assignments", a.id), { status: "Published" });
+      notifyHomeworkPosted({ id: a.id, courseId: a.courseId, title: a.title });
     }
     refreshTrainerStore(uid);
   };

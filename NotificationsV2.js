@@ -1,4 +1,6 @@
-import { loadNotifications, loadNotifPrefs, saveSeen, clearNotifCache, studentNotifsFromStore } from "./useNotifications.js";
+import { loadNotifications, loadNotifPrefs, saveSeen, clearNotifCache, studentNotifsFromStore, CAT } from "./useNotifications.js";
+import { db } from "./firebase-config.js?v=auth10";
+import { collection, query, orderBy, limit, onSnapshot, doc, updateDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { onDashData, getStudentStore, datasetsReady } from "./student-dash-data.js?v=stu11";
 import { NotificationBell } from "./NotificationBell.js";
 import { NotificationPanel } from "./NotificationPanel.js";
@@ -57,7 +59,7 @@ function visibleBadge(items, seenAt, hidden, muted, readIds) {
   const hid = new Set(hidden || []);
   const mut = new Set(muted || []);
   const read = new Set(readIds || []);
-  return items.filter((n) => !read.has(n.id) && n.time > (seenAt || 0) && !hid.has(n.id) && !mut.has(n.category)).length;
+  return items.filter((n) => !n.read && !read.has(n.id) && n.time > (seenAt || 0) && !hid.has(n.id) && !mut.has(n.category)).length;
 }
 function toastShown(id) {
   try { return (JSON.parse(sessionStorage.getItem("ghz-toast-shown") || "[]") || []).includes(id); } catch { return false; }
@@ -76,6 +78,27 @@ export function bootNotificationsV2({ role, uid, host }) {
   // The count is only shown once this person's read history has loaded; before that,
   // every notification would look unread and a large number would flash at login.
   let prefsReady = false;
+  // Saved notifications (live) are merged with the computed history; same id = same event.
+  let derived = [];
+  let saved = [];
+  let liveOk = false;
+  const relTime = (ms) => { const d = Date.now() - ms; if (d < 60000) return "now"; if (d < 3600000) return Math.floor(d / 60000) + "m"; if (d < 86400000) return Math.floor(d / 3600000) + "h"; return Math.floor(d / 86400000) + "d"; };
+  const merged = () => {
+    const byId = new Map();
+    derived.forEach((n) => byId.set(n.id, n));
+    saved.forEach((n) => { const old = byId.get(n.id); byId.set(n.id, old ? { ...old, ...n, link: old.link || n.link } : n); });
+    return Array.from(byId.values()).sort((a, b) => b.time - a.time);
+  };
+  const markSavedRead = (list) => {
+    const todo = (list || []).filter((n) => n && n.saved && !n.read && n.docId);
+    if (!todo.length || !uid) return;
+    todo.forEach((n) => { n.read = true; });
+    try {
+      const b = writeBatch(db);
+      todo.slice(0, 450).forEach((n) => b.update(doc(db, "users", uid, "notifications", n.docId), { read: true, readAt: serverTimestamp() }));
+      b.commit().catch(() => {});
+    } catch (_) {}
+  };
   const badgeNow = () => prefsReady ? visibleBadge(state.items, state.seenAt, state.hidden, state.muted, state.readIds) : 0;
   // Keep read state in step across open tabs of the same account.
   let chan = null;
@@ -187,7 +210,8 @@ export function bootNotificationsV2({ role, uid, host }) {
 
   const apply = (data, fromRefresh) => {
     const prevIds = known;
-    state.items = data.items || [];
+    derived = data.items || [];
+    state.items = merged();
     state.seenAt = data.seenAt;
     state.readIds = data.readIds || [];
     state.hidden = data.hiddenIds || [];
@@ -230,6 +254,7 @@ export function bootNotificationsV2({ role, uid, host }) {
   };
 
   const markAll = async () => {
+    markSavedRead(state.items);
     state.readIds = state.items.map((n) => n.id);
     state.seenAt = Date.now();
     state.badge = 0;
@@ -238,6 +263,7 @@ export function bootNotificationsV2({ role, uid, host }) {
   };
 
   const markOne = async (n) => {
+    markSavedRead(state.items.filter((x) => x.id === n.id));
     if (!state.readIds.includes(n.id)) state.readIds = [...state.readIds, n.id].slice(-300);
     state.badge = badgeNow();
     paint();
@@ -259,6 +285,7 @@ export function bootNotificationsV2({ role, uid, host }) {
   };
 
   const openItem = (n) => {
+    markSavedRead(state.items.filter((x) => x.id === n.id));
     if (!state.readIds.includes(n.id)) state.readIds = [...state.readIds, n.id].slice(-300);
     state.open = false;
     state.page = false;
@@ -307,7 +334,7 @@ export function bootNotificationsV2({ role, uid, host }) {
     if (state.page !== on) { state.page = on; if (on) state.open = false; document.body.classList.remove("nt2-noscroll"); paint(); }
     else if (state.open) { state.open = false; document.body.classList.remove("nt2-noscroll"); paint(); }
   });
-  timer = setInterval(() => { if (document.visibilityState === "visible") refresh(false); }, 90000);
+  timer = setInterval(() => { if (document.visibilityState === "visible" && !liveOk) refresh(false); }, 90000);
   if (chan) chan.onmessage = (ev) => {
     const d = ev && ev.data;
     if (!d) return;
@@ -319,6 +346,34 @@ export function bootNotificationsV2({ role, uid, host }) {
     paint();
   };
   window.addEventListener("ghz-logout", () => { try { chan?.close(); } catch (_) {} });
+  let unsubLive = null;
+  let firstLive = true;
+  try {
+    unsubLive = onSnapshot(query(collection(db, "users", uid, "notifications"), orderBy("createdAt", "desc"), limit(60)), (snap) => {
+      liveOk = true;
+      const fresh = [];
+      saved = snap.docs.map((d) => {
+        const x = d.data() || {};
+        const t = (x.createdAt && typeof x.createdAt.toMillis === "function") ? x.createdAt.toMillis() : Date.now();
+        return { id: d.id, docId: d.id, saved: true, read: !!x.read, type: x.type || "", category: CAT[x.type] || "Courses",
+          title: x.title || "", message: x.message || "", courseTitle: x.courseTitle || "", courseId: x.courseId || "",
+          link: x.link || "", time: t, rel: relTime(t), actorName: x.actorName || "" };
+      });
+      if (!firstLive) snap.docChanges().forEach((ch) => { if (ch.type === "added") { const n = saved.find((y) => y.id === ch.doc.id); if (n && !n.read) fresh.push(n); } });
+      firstLive = false;
+      state.items = merged();
+      known = new Set(state.items.map((n) => n.id));
+      state.badge = badgeNow();
+      const pick = fresh.find((n) => !state.muted.includes(n.category) && !state.hidden.includes(n.id) && !(state.readIds || []).includes(n.id) && !toastShown(n.id));
+      if (pick && !state.open) {
+        pushNotificationToast(pick, { onView: (n) => openItem(n) });
+        state.shake = true;
+        setTimeout(() => { state.shake = false; paint(); }, 700);
+      }
+      paint();
+    }, () => { liveOk = false; });
+  } catch (_) { liveOk = false; }
+  window.addEventListener("ghz-logout", () => { try { unsubLive?.(); } catch (_) {} });
   loadNotifPrefs(uid).then((p) => {
     if (!p || prefsReady) return;
     state.seenAt = p.seenAt; state.readIds = p.readIds.slice(); state.hidden = p.hiddenIds.slice(); state.muted = p.muted.slice();

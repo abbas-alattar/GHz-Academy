@@ -1,3 +1,4 @@
+import { notifyQuizGraded, notifyQuizPosted } from "./notify.js";
 import { friendlyError } from "./friendlyError.js";
 import { createElement as e, useEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
@@ -146,6 +147,7 @@ function QuizForm({ form, courses, uid, onClose, onSaved }) {
         const ref = await addDoc(collection(db, "quizzes"), { ...payload, createdAt: serverTimestamp() });
         qid = ref.id;
       }
+      if (payload.status === "Published") notifyQuizPosted({ id: qid, courseId: payload.courseId, title: payload.title });
       const old = await getDocs(query(collection(db, "quizQuestions"), where("courseId", "==", f.courseId), where("quizId", "==", qid)));
       for (const d of old.docs) await deleteDoc(d.ref);
       const answers = {};
@@ -352,6 +354,7 @@ function Review({ pack, quiz, uid, go }) {
         gradedBy: uid, gradedAt: serverTimestamp(),
         status: all ? "graded" : "partial"
       });
+      if (all) notifyQuizGraded({ attemptId: cur.at.id, studentUid: cur.en.uid, quizId: quiz.id, quizTitle: quiz.title, courseId: quiz.courseId, score: Number(score), maxPoints: Number(maxAll) });
       setSaved(true);
       try { window.__ghzBumpActive?.(); } catch (_) {}
       refreshTrainerStore(uid);
@@ -569,7 +572,10 @@ function Page({ uid, go, quizId, courseId }) {
         if (!ok) return;
       }
       await updateDoc(doc(db, "quizzes", q.id), { status: "Draft" });
-    } else await updateDoc(doc(db, "quizzes", q.id), { status: "Published" });
+    } else {
+      await updateDoc(doc(db, "quizzes", q.id), { status: "Published" });
+      notifyQuizPosted({ id: q.id, courseId: q.courseId, title: q.title });
+    }
     refreshTrainerStore(uid);
   };
 
