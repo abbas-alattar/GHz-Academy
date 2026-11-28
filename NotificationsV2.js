@@ -1,4 +1,4 @@
-import { loadNotifications, saveSeen, clearNotifCache, studentNotifsFromStore } from "./useNotifications.js";
+import { loadNotifications, loadNotifPrefs, saveSeen, clearNotifCache, studentNotifsFromStore } from "./useNotifications.js";
 import { onDashData, getStudentStore, datasetsReady } from "./student-dash-data.js?v=stu11";
 import { NotificationBell } from "./NotificationBell.js";
 import { NotificationPanel } from "./NotificationPanel.js";
@@ -73,9 +73,20 @@ export function bootNotificationsV2({ role, uid, host }) {
   let timer = 0;
   let toastTimer = 0;
   let known = new Set();
+  // The count is only shown once this person's read history has loaded; before that,
+  // every notification would look unread and a large number would flash at login.
+  let prefsReady = false;
+  const badgeNow = () => prefsReady ? visibleBadge(state.items, state.seenAt, state.hidden, state.muted, state.readIds) : 0;
+  // Keep read state in step across open tabs of the same account.
+  let chan = null;
+  try { chan = uid && "BroadcastChannel" in window ? new BroadcastChannel("ghz-notif-" + uid) : null; } catch (_) { chan = null; }
+  const broadcast = () => {
+    try { chan?.postMessage({ seenAt: state.seenAt, readIds: state.readIds, hidden: state.hidden, muted: state.muted }); } catch (_) {}
+  };
 
   const persist = async (extra) => {
     if (!uid) return;
+    broadcast();
     await saveSeen(uid, state.seenAt, state.readIds, extra || { hiddenIds: state.hidden, muted: state.muted });
   };
 
@@ -182,10 +193,11 @@ export function bootNotificationsV2({ role, uid, host }) {
     state.hidden = data.hiddenIds || [];
     state.muted = data.muted || [];
     state.loading = false;
-    state.badge = visibleBadge(state.items, state.seenAt, state.hidden, state.muted, state.readIds);
+    if (fromRefresh) prefsReady = true;
+    state.badge = badgeNow();
     known = new Set(state.items.map((n) => n.id));
     if (fromRefresh && prevIds.size) {
-      const fresh = state.items.find((n) => !prevIds.has(n.id) && !state.muted.includes(n.category) && !state.hidden.includes(n.id) && !(state.readIds || []).includes(n.id) && !toastShown(n.id));
+      const fresh = state.items.find((n) => n.type !== "coursePass" && n.type !== "courseFail" && !prevIds.has(n.id) && !state.muted.includes(n.category) && !state.hidden.includes(n.id) && !(state.readIds || []).includes(n.id) && !toastShown(n.id));
       if (fresh) {
         if (fresh.type === "coursePass" || fresh.type === "courseFail") {
           /* student result modal is CourseResultBox */
@@ -227,21 +239,21 @@ export function bootNotificationsV2({ role, uid, host }) {
 
   const markOne = async (n) => {
     if (!state.readIds.includes(n.id)) state.readIds = [...state.readIds, n.id].slice(-300);
-    state.badge = visibleBadge(state.items, state.seenAt, state.hidden, state.muted);
+    state.badge = badgeNow();
     paint();
     await persist();
   };
 
   const hideOne = async (n) => {
     if (!state.hidden.includes(n.id)) state.hidden = [...state.hidden, n.id].slice(-300);
-    state.badge = visibleBadge(state.items, state.seenAt, state.hidden, state.muted);
+    state.badge = badgeNow();
     paint();
     await persist({ hiddenIds: state.hidden, muted: state.muted });
   };
 
   const muteCat = async (c) => {
     state.muted = state.muted.includes(c) ? state.muted.filter((x) => x !== c) : [...state.muted, c];
-    state.badge = visibleBadge(state.items, state.seenAt, state.hidden, state.muted);
+    state.badge = badgeNow();
     paint();
     await persist({ hiddenIds: state.hidden, muted: state.muted });
   };
@@ -296,6 +308,24 @@ export function bootNotificationsV2({ role, uid, host }) {
     else if (state.open) { state.open = false; document.body.classList.remove("nt2-noscroll"); paint(); }
   });
   timer = setInterval(() => { if (document.visibilityState === "visible") refresh(false); }, 90000);
+  if (chan) chan.onmessage = (ev) => {
+    const d = ev && ev.data;
+    if (!d) return;
+    state.seenAt = Math.max(Number(state.seenAt) || 0, Number(d.seenAt) || 0);
+    state.readIds = Array.from(new Set([...(state.readIds || []), ...(d.readIds || [])])).slice(-300);
+    state.hidden = Array.from(new Set([...(state.hidden || []), ...(d.hidden || [])])).slice(-300);
+    if (Array.isArray(d.muted)) state.muted = d.muted.slice();
+    state.badge = badgeNow();
+    paint();
+  };
+  window.addEventListener("ghz-logout", () => { try { chan?.close(); } catch (_) {} });
+  loadNotifPrefs(uid).then((p) => {
+    if (!p || prefsReady) return;
+    state.seenAt = p.seenAt; state.readIds = p.readIds.slice(); state.hidden = p.hiddenIds.slice(); state.muted = p.muted.slice();
+    prefsReady = true;
+    state.badge = badgeNow();
+    paint();
+  }).catch(() => {});
   paint();
   if (role === "student") {
     const fromStore = (st) => {

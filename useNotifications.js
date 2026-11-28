@@ -34,9 +34,10 @@ export const CAT = {
   regReceived: "Courses", payReview: "Courses", enrolled: "Courses", regRejected: "Courses", courseDone: "Courses",
   assigned: "Courses", course_assigned: "Courses", course_reopened: "Courses", course_completed: "Courses", gradeDist: "Grades", coursePass: "Grades", courseFail: "Grades", certIssued: "Courses", certRevoked: "Courses"
 };
+// Stable id per event ("type~source"), so re-saving a record doesn't create a "new" notification.
 function item(type, sourceId, time, title, message, courseTitle, link, extra) {
   if (!time) return null;
-  return { id: type + "_" + sourceId + "_" + time, type, category: CAT[type] || "Courses", title, message, courseTitle: courseTitle || "", time, link, rel: rel(time), ...(extra || {}) };
+  return { id: type + "~" + sourceId, type, category: CAT[type] || "Courses", title, message, courseTitle: courseTitle || "", time, link, rel: rel(time), ...(extra || {}) };
 }
 async function settled(step, fn) {
   try { return await fn(); }
@@ -44,8 +45,27 @@ async function settled(step, fn) {
 }
 function rows(snap) { return snap && snap.docs ? snap.docs.map((d) => ({ id: d.id, ...d.data() })) : []; }
 
+// Old ids were "type_source_time". Convert saved read/hidden ids to the new "type~source" form.
+const TYPES = Object.keys(CAT).sort((a, b) => b.length - a.length);
+function migrateId(id) {
+  const s = String(id || "");
+  if (!s || s.includes("~")) return s;
+  const base = s.replace(/_\d{10,}$/, "");
+  const t = TYPES.find((k) => base.startsWith(k + "_"));
+  return t ? t + "~" + base.slice(t.length + 1) : s;
+}
+export function migrateIds(list) {
+  return Array.from(new Set((Array.isArray(list) ? list : []).map(migrateId).filter(Boolean)));
+}
+function dedupeItems(list) {
+  const byId = new Map();
+  (list || []).forEach((n) => { if (n && (!byId.has(n.id) || n.time > byId.get(n.id).time)) byId.set(n.id, n); });
+  return Array.from(byId.values());
+}
+
 export function clearNotifCache() { cache.clear(); lastUid = ""; prefsCache = { uid: "", data: null }; }
 
+export async function loadNotifPrefs(uid, force) { return loadStudentPrefs(uid, force); }
 async function loadStudentPrefs(uid, force) {
   if (!force && prefsCache.uid === uid && prefsCache.data) return prefsCache.data;
   const userSnap = await settled("users", () => getDoc(doc(db, "users", uid)));
@@ -53,8 +73,8 @@ async function loadStudentPrefs(uid, force) {
   const data = {
     seenAt: msOf(profile.notifSeenAt),
     firstRun: !profile.notifSeenAt,
-    readIds: Array.isArray(profile.notifReadIds) ? profile.notifReadIds.slice() : [],
-    hiddenIds: Array.isArray(profile.notifHiddenIds) ? profile.notifHiddenIds.slice() : [],
+    readIds: migrateIds(profile.notifReadIds),
+    hiddenIds: migrateIds(profile.notifHiddenIds),
     muted: Array.isArray(profile.notifMuted) ? profile.notifMuted.slice() : []
   };
   prefsCache = { uid, data };
@@ -171,7 +191,7 @@ function buildStudentItemsFromStore(uid, store) {
 }
 
 export function studentNotifsFromStore(uid, store) {
-  return buildStudentItemsFromStore(uid, store);
+  return dedupeItems(buildStudentItemsFromStore(uid, store));
 }
 
 export async function loadNotifications({ role, uid, force }) {
@@ -331,8 +351,7 @@ export async function loadNotifications({ role, uid, force }) {
     await Promise.allSettled(jobs);
   }
 
-  items.sort((a, b) => b.time - a.time);
-  const slim = items;
+  const slim = dedupeItems(items).sort((a, b) => b.time - a.time);
   const liveIds = new Set(slim.map((x) => x.id));
   readIds = readIds.filter((id) => liveIds.has(id)).slice(0, 300);
   const data = { items: slim, seenAt, readIds, hiddenIds, muted, firstRun };
