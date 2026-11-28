@@ -88,7 +88,7 @@
   background: #FFFFFF; border: 1px solid #E5EAF1; border-radius: 12px;
   box-shadow: 0 12px 32px rgba(15,39,71,.14); z-index: 40; padding: 6px 0;
 }
-.ghz-sg { padding: 8px 12px 4px; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #64748B; }
+.ghz-sg { padding: 8px 12px 4px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #64748B; }
 .ghz-si {
   display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
   border: 0; background: transparent; padding: 8px 12px; font: inherit; cursor: pointer; color: #0F2747;

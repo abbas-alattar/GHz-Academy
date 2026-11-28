@@ -112,7 +112,9 @@ export function applyDisplayName(shown, extra) {
   if (greet) greet.textContent = first;
   writeNameCache({ ...readNameCache(), ...profile, name });
   const cached = readNameCache();
-  paintWhoChip({ name: name || "Account", role: profile.role || cached.role || "student", studentId: profile.studentId || cached.studentId || "" });
+  const pagePath = (location.pathname || "").toLowerCase();
+  const pageRole = pagePath.includes("admin") ? "admin" : pagePath.includes("trainer") ? "trainer" : "student";
+  paintWhoChip({ name: name || "Account", role: profile.role || pageRole, studentId: profile.studentId || cached.studentId || "" });
   document.querySelectorAll(".pv2-name, .stu-who-name, [data-shell-name]").forEach((el) => {
     if (el.id === "userRole") return;
     if (el.classList.contains("pv2-name") || el.hasAttribute("data-shell-name") || el.classList.contains("stu-who-name")) {

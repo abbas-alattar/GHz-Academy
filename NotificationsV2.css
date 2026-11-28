@@ -39,7 +39,7 @@
 .nv2-tabs button { border: 0; background: #F1F5F9; color: #64748B; border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .nv2-tabs button.on { background: #0F2747; color: #fff; }
 .nv2-tbadge { min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; color: #fff; font-size: 10px; line-height: 16px; text-align: center; }
-.nv2-g { position: sticky; top: 0; margin: 8px 16px 6px; font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: .04em; background: #fff; padding: 6px 0; border-bottom: 1px solid #E5EAF1; z-index: 1; }
+.nv2-g { position: sticky; top: 0; margin: 8px 16px 6px; font-size: 12px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: .04em; background: #fff; padding: 6px 0; border-bottom: 1px solid #E5EAF1; z-index: 1; }
 .nv2-item {
   width: calc(100% - 24px); margin: 0 12px 8px; display: flex; flex-direction: column; gap: 8px; text-align: left;
   background: #fff; padding: 10px 12px; border-radius: 14px; border: 1px solid #F1F5F9; position: relative;
@@ -53,12 +53,12 @@
 .nv2-line1 { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; min-width: 0; }
 .nv2-line1 strong { font-size: 13.5px; font-weight: 700; color: #0F2747; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nv2-line2 { display: flex; align-items: center; gap: 6px; }
-.nv2-chip-sm { font-size: 11px !important; padding: 1px 6px !important; }
-.nv2-adminchip { background: #0F2747; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+.nv2-chip-sm { font-size: 12px !important; padding: 1px 6px !important; }
+.nv2-adminchip { background: #0F2747; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
 .nv2-important { border-left: 4px solid #0D9488; }
 .nv2-acts { display: none; gap: 8px; justify-content: flex-end; }
 .nv2-item:hover .nv2-acts { display: flex; }
-.nv2-acts button { border: 0; background: #F1F5F9; color: #475569; border-radius: 8px; padding: 4px 8px; font: inherit; font-size: 11px; cursor: pointer; }
+.nv2-acts button { border: 0; background: #F1F5F9; color: #475569; border-radius: 8px; padding: 4px 8px; font: inherit; font-size: 12px; cursor: pointer; }
 .nv2-cele { background: #ECFDF5; border-color: #A7F3D0; }
 .nv2-red { background: #FEF2F2; border-color: #FECACA; }
 .nv2-cta { display: inline-flex; align-items: center; margin-top: 6px; height: 28px; background: #16A34A; color: #fff; border-radius: 8px; padding: 0 10px; font-size: 12px; font-weight: 700; }
@@ -85,17 +85,17 @@
 .nv2-msg-clamp { display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
 .nv2-more { border: 0; background: none; color: #2563EB; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; padding: 2px 0 0; }
 .nv2-meta { display: flex; justify-content: space-between; gap: 8px; align-items: center; min-width: 0; }
-.nv2-chip { display: block; max-width: 100%; font-size: 11px; background: #F1F5F9; color: #0F2747; border-radius: 999px; padding: 1px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nv2-time { font-size: 11px; color: #94A3B8; margin-left: auto; white-space: nowrap; flex-shrink: 0; }
+.nv2-chip { display: block; max-width: 100%; font-size: 12px; background: #F1F5F9; color: #0F2747; border-radius: 999px; padding: 1px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nv2-time { font-size: 12px; color: #64748b; margin-left: auto; white-space: nowrap; flex-shrink: 0; }
 .nv2-dot { width: 8px; height: 8px; border-radius: 50%; background: #2563EB; margin-top: 8px; flex-shrink: 0; animation: nv2pulse 1.4s ease-in-out infinite; }
-.nv2-chev { color: #94A3B8; opacity: 0; font-size: 18px; line-height: 1; }
+.nv2-chev { color: #64748b; opacity: 0; font-size: 18px; line-height: 1; }
 .nv2-item:hover .nv2-chev { opacity: 1; }
 .nv2-empty { text-align: center; padding: 36px 16px; color: #64748B; }
 .nv2-emptyico { width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 999px; display: grid; place-items: center; background: linear-gradient(160deg, #0F2747, #2563EB); }
 .nv2-empty p { margin: 0; font-weight: 600; color: #0F2747; }
-.nv2-empty span { display: block; margin-top: 4px; font-size: 12px; color: #94A3B8; }
+.nv2-empty span { display: block; margin-top: 4px; font-size: 12px; color: #64748b; }
 .nv2-load { min-height: 140px; }
-.nv2-foot { padding: 10px 16px 14px; font-size: 11px; color: #94A3B8; text-align: center; }
+.nv2-foot { padding: 10px 16px 14px; font-size: 12px; color: #94A3B8; text-align: center; }
 .nv2-list { max-height: none; }
 .nv2-panel::-webkit-scrollbar { width: 6px; }
 .nv2-panel::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
@@ -118,7 +118,7 @@
 .nv2-toast-body { min-width: 0; }
 .nv2-toast strong { display: block; font-size: 13px; color: #0F2747; }
 .nv2-toast p { margin: 2px 0 0; font-size: 12px; color: #64748B; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.nv2-toast small { display: block; margin-top: 4px; font-size: 11px; color: #94A3B8; }
+.nv2-toast small { display: block; margin-top: 4px; font-size: 12px; color: #64748b; }
 .nv2-toast-view { border: 0; background: #2563EB; color: #fff; border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; height: 32px; }
 .nv2-toast .nv2-x { background: transparent; color: #64748B; border: 0; cursor: pointer; font-size: 18px; }
 .nv2-toast-bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: #CBD5E1; transform-origin: left; animation: nv2bar 6s linear; }
@@ -190,8 +190,8 @@
 .nt2-tbadge { min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: #DC2626; color: #fff; font-size: 10px; line-height: 16px; text-align: center; }
 .nt2-tabs button.on .nt2-tbadge { background: #fff; color: #0F2747; }
 .nt2-g {
-  margin: 0; padding: 10px 14px 4px; font-size: 11px; font-weight: 700;
-  color: #94A3B8; text-transform: uppercase; letter-spacing: .06em; background: #fff;
+  margin: 0; padding: 10px 14px 4px; font-size: 12px; font-weight: 700;
+  color: #64748b; text-transform: uppercase; letter-spacing: .06em; background: #fff;
 }
 .nt2-list { padding: 0 0 4px; overflow-x: hidden; }
 .nt2-row {
@@ -213,13 +213,13 @@
 .nt2-line1 { display: flex; min-width: 0; width: 100%; }
 .nt2-line1 strong { font-size: 13px; font-weight: 600; color: #0F2747; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nt2-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; padding-top: 2px; }
-.nt2-time { font-size: 11px; color: #94A3B8; white-space: nowrap; }
+.nt2-time { font-size: 12px; color: #64748b; white-space: nowrap; }
 .nt2-msg {
   font-size: 12px; color: #64748B; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; word-break: break-word; width: 100%;
 }
 .nt2-pills { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; max-width: 100%; }
 .nt2-chip {
-  display: inline-flex; width: auto; max-width: 100%; font-size: 11px; line-height: 16px; padding: 1px 8px;
+  display: inline-flex; width: auto; max-width: 100%; font-size: 12px; line-height: 16px; padding: 1px 8px;
   border-radius: 999px; background: #F1F5F9; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .nt2-chip-type { background: #EEF3FB; color: #334155; }
@@ -298,7 +298,7 @@ body.nt2-noscroll { overflow: hidden; }
 .nt2-sheet .nt2-tabs button { height: 32px; font-size: 13px; }
 .nt2-sheet .nt2-list { flex: 1; overflow-y: auto; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
 .nt2-sheet .nt2-empty { padding: 36px 16px calc(env(safe-area-inset-bottom, 0px) + 80px); }
-.nt2-sheet .nt2-g { font-size: 12px; color: #94A3B8; padding: 10px 16px 4px; letter-spacing: .08em; }
+.nt2-sheet .nt2-g { font-size: 12px; color: #64748b; padding: 10px 16px 4px; letter-spacing: .08em; }
 .nt2-sheet .nt2-main {
   display: grid; grid-template-columns: 36px minmax(0,1fr) auto; grid-template-rows: auto auto; gap: 0 12px;
   padding: 12px 16px; align-items: start;
@@ -308,11 +308,11 @@ body.nt2-noscroll { overflow: hidden; }
 .nt2-sheet .nt2-meta { grid-column: 3; grid-row: 1; padding-top: 2px; }
 .nt2-sheet .nt2-read, .nt2-sheet .nt2-footrow { display: none; }
 .nt2-sheet .nt2-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.nt2-sheet .nt2-chip { background: #F1F5F9; color: #64748B; font-size: 11px; }
+.nt2-sheet .nt2-chip { background: #F1F5F9; color: #64748B; font-size: 12px; }
 .nt2-sheet .nt2-line1 { align-items: center; gap: 6px; }
 .nt2-sheet .nt2-line1 strong { font-size: 15px; font-weight: 600; }
 .nt2-sheet .nt2-msg { font-size: 13px; color: #64748B; -webkit-line-clamp: 2; margin-top: 2px; }
-.nt2-sheet .nt2-time { font-size: 12px; color: #94A3B8; }
+.nt2-sheet .nt2-time { font-size: 12px; color: #64748b; }
 .nt2-sheet .nt2-udot { width: 8px; height: 8px; }
 .nt2-sheet .nt2-row { min-height: 0; }
 .nt2-sheet .nt2-row.nt2-unread { background: #F4F8FF; }

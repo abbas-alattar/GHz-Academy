@@ -6,7 +6,7 @@
 .admin-grades .agv2-csv { background:#fff; border:1px solid #CBD5E1; border-radius:10px; padding:9px 14px; font:inherit; font-weight:600; cursor:pointer; }
 .admin-grades .agv2-sel, .admin-grades .agv2-in { height:40px; border:1px solid #CBD5E1; border-radius:12px; padding:0 12px; font:inherit; background:#fff; }
 .admin-grades .agv2-in { min-width:200px; }
-.admin-grades .agv2-st { display:inline-block; border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; }
+.admin-grades .agv2-st { display:inline-block; border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; }
 .admin-grades .agv2-st.open { background:#DCFCE7; color:#166534; }
 .admin-grades .agv2-st.soon { background:#DBEAFE; color:#1D4ED8; }
 .admin-grades .agv2-st.gray { background:#E2E8F0; color:#475569; }
@@ -19,8 +19,8 @@
 .admin-grades .agv2-fail { color:#DC2626; }
 .admin-grades .agv2-card { background:#fff; border:1px solid #E5EAF1; border-radius:16px; overflow:auto; }
 .admin-grades .agv2-th, .admin-grades .agv2-row { display:grid; gap:8px; align-items:center; padding:12px 16px; }
-.admin-grades .agv2-th { position:sticky; top:0; background:#F8FAFC; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:#64748B; font-weight:700; z-index:1; }
-.admin-grades .agv2-th button { border:0; background:none; font:inherit; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:#64748B; font-weight:700; cursor:pointer; text-align:left; padding:0; white-space:nowrap; overflow:visible; }
+.admin-grades .agv2-th { position:sticky; top:0; background:#F8FAFC; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:#64748B; font-weight:700; z-index:1; }
+.admin-grades .agv2-th button { border:0; background:none; font:inherit; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:#64748B; font-weight:700; cursor:pointer; text-align:left; padding:0; white-space:nowrap; overflow:visible; }
 .admin-grades .agv2-th > * { white-space:nowrap; min-width:96px; overflow:visible; }
 .admin-grades .agv2-row { border-top:1px solid #EEF2F7; }
 .admin-grades .agv2-row:hover { background:#F8FAFC; }
@@ -28,10 +28,10 @@
 .admin-grades .agv2-foot:hover { background:#F1F5F9; }
 .admin-grades .agv2-name { font-weight:600; }
 .admin-grades .agv2-sid { display:block; font-size:12px; color:#64748B; font-family:ui-monospace,Menlo,monospace; }
-.admin-grades .agv2-w { display:block; color:#94A3B8; font-size:11px; font-weight:500; text-transform:none; letter-spacing:0; }
+.admin-grades .agv2-w { display:block; color:#64748b; font-size:12px; font-weight:500; text-transform:none; letter-spacing:0; }
 .admin-grades .agv2-avg { font-weight:700; min-width:110px; white-space:nowrap; }
 .admin-grades .agv2-low { color:#DC2626; }
-.admin-grades .agv2-z { color:#94A3B8; }
+.admin-grades .agv2-z { color:#64748b; }
 .admin-grades .agv2-pills { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
 .admin-grades .agv2-pill { display:inline-block; border-radius:999px; padding:3px 10px; font-size:12px; font-weight:700; }
 .admin-grades .agv2-pill.p { background:#DCFCE7; color:#166534; }

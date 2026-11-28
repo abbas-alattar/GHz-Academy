@@ -26,7 +26,7 @@
 .aanv2-body { margin:10px 0 0; color:#334155; line-height:1.55; white-space:pre-wrap; }
 .aanv2-body.clamp { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 .aanv2-more { border:0; background:none; color:#2563EB; font:inherit; font-weight:600; cursor:pointer; padding:6px 0 0; }
-.aanv2-meta { margin:10px 0 0; color:#94A3B8; font-size:13px; }
+.aanv2-meta { margin:10px 0 0; color:#64748b; font-size:13px; }
 .aanv2-ico { width:34px; height:34px; border:1px solid #E5EAF1; background:#fff; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0; color:#0F2747; }
 .aanv2-ico.edit { color:#2563EB; border-color:#BFDBFE; }
 .aanv2-ico.pinbtn.on { color:#B45309; background:#FFFBEB; border-color:#FCD34D; }

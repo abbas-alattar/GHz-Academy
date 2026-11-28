@@ -12,7 +12,7 @@
 .co-card,.co-sumcard,.co-nextcard{background:#fff;border:1px solid #E3E8F0;border-radius:12px;padding:16px;box-shadow:none}
 .co-steps{display:none;align-items:center;gap:0;margin:8px 0 20px}
 .co-steps .co-si{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:72px}
-.co-steps .co-si i{width:22px;height:22px;border-radius:99px;border:2px solid #CBD5E1;display:grid;place-items:center;font-size:11px;font-weight:800;background:#fff;color:#64748B;font-style:normal}
+.co-steps .co-si i{width:22px;height:22px;border-radius:99px;border:2px solid #CBD5E1;display:grid;place-items:center;font-size:12px;font-weight:800;background:#fff;color:#64748B;font-style:normal}
 .co-steps .co-si.on i{border-color:#1D4ED8;background:#1D4ED8;color:#fff}
 .co-steps .co-si.done i{border-color:#0F9D8A;background:#0F9D8A;color:#fff}
 .co-steps .co-line{flex:1;height:2px;background:#E2E8F0;margin:0 4px 18px}
@@ -32,7 +32,7 @@
 .co-tot b{font-size:20px;font-family:"Space Grotesk",sans-serif}
 .co-nextcard h3{margin:0 0 10px;font-size:14px}
 .co-nx{display:flex;gap:8px;align-items:flex-start;margin:8px 0;font-size:13px}
-.co-nx i{width:18px;height:18px;border-radius:99px;border:1.5px solid #CBD5E1;flex:0 0 18px;display:grid;place-items:center;font-size:10px;font-style:normal}
+.co-nx i{width:18px;height:18px;border-radius:99px;border:1.5px solid #CBD5E1;flex:0 0 18px;display:grid;place-items:center;font-size:11px;font-style:normal}
 .co-nx.on i{background:#0F9D8A;border-color:#0F9D8A;color:#fff}
 .co-lab{display:block;font-size:13px;font-weight:700;color:#475569;margin:12px 0 6px}
 .co-in,.co-ta{width:100%;border:1px solid #E3E8F0;border-radius:12px;padding:0 14px;font:inherit;box-sizing:border-box;background:#fff;transition:border-color .15s}
@@ -51,7 +51,7 @@
 .co-mname{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .co-radio{width:18px;height:18px;border-radius:99px;border:2px solid #94A3B8;flex-shrink:0}
 .co-meth.on .co-radio{border-color:#1D4ED8;background:radial-gradient(#1D4ED8 45%,transparent 48%)}
-.co-tag{display:inline-block;background:#E2E8F0;color:#334155;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:700;width:fit-content}
+.co-tag{display:inline-block;background:#E2E8F0;color:#334155;border-radius:99px;padding:2px 8px;font-size:12px;font-weight:700;width:fit-content}
 .co-meth.soon .co-tag{background:#E2E8F0}
 .co-ltile.co-cardmarks{gap:10px;overflow:hidden}
 .co-ltile.co-cardmarks img{height:24px;width:auto;max-height:24px;max-width:44px;object-fit:contain}

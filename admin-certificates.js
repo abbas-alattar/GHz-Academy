@@ -1,3 +1,4 @@
+import { ask, askText } from "./dialogs.js";
 import { protect } from "./auth-guard.js?v=auth10";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc, setDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -177,8 +178,8 @@ try {
         const row = rows.find((x) => x.uid === b.dataset.issue);
         let reason = "";
         if (!row.eligible) {
-          if (!confirm("This student is not eligible. Issue anyway?")) return;
-          reason = prompt("Override reason (required)") || "";
+          if (!await ask("This student is not eligible. Issue anyway?")) return;
+          reason = await askText("Override reason (required)") || "";
           if (!reason.trim()) { toast("A reason is required."); return; }
         }
         try {
@@ -193,7 +194,7 @@ try {
     box.querySelectorAll("[data-rev]").forEach((b) => {
       b.onclick = async () => {
         const row = rows.find((x) => x.uid === b.dataset.rev);
-        const reason = prompt("Revoke reason (required)") || "";
+        const reason = await askText("Revoke reason (required)") || "";
         if (!reason.trim()) { toast("A reason is required."); return; }
         try {
           const batch = writeBatch(db);
@@ -213,7 +214,7 @@ try {
     document.getElementById("issueAll").onclick = async () => {
       const eligible = rows.filter((r) => r.eligible && (!r.cert || r.cert.status === "revoked"));
       if (!eligible.length) { toast("No eligible students to issue."); return; }
-      if (!confirm(`Issue certificates for ${eligible.length} eligible student(s)?`)) return;
+      if (!await ask(`Issue certificates for ${eligible.length} eligible student(s)?`)) return;
       try {
         for (const row of eligible) await issueOne(row, course);
         toast("Issued eligible certificates.");

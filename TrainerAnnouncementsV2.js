@@ -162,7 +162,7 @@ function App({ courses, rows, loading, error, onRetry, reload, uid, tick }) {
         key: a.id, a, courses, unread: uid && !isRead(uid, a.id) && a.authorId !== uid,
         controls: mine(a), onEdit: mine(a) ? setModal : null, onPin: mine(a) ? pin : null, onDel: mine(a) ? del : null,
         onOpen: () => { if (uid && a.authorId !== uid) markAnnouncementRead(uid, a.id); }
-      })) : e("div", { className: "aanv2-empty" }, e("p", null, "No announcements yet"))
+      })) : e("div", { className: "aanv2-empty" }, e("p", null, "No announcements yet", e("span", { style: { display: "block", marginTop: 4, fontSize: 13, lineHeight: 1.45, color: "#64748b", fontWeight: 400 } }, "Post one to reach every student in your course at once.")))
     ),
     modal ? e(Modal, { row: modal.id ? modal : null, courses, onClose: () => setModal(null), onSaved: reload, uid, authorName: document.getElementById("userName")?.textContent?.trim() || "Trainer" }) : null,
     e(ConfirmDialog, { open: !!dlg, title: dlg?.title, message: dlg?.message, name: dlg?.name, tone: dlg?.tone, confirmLabel: dlg?.confirmLabel, onCancel: () => setDlg(null), onConfirm: dlg?.onConfirm })

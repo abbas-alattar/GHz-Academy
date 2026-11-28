@@ -1,3 +1,4 @@
+import { tell } from "./dialogs.js";
 import { friendlyError } from "./friendlyError.js";
 import { sortedCountries, flagUrl, parsePhone, buildPhone, validLocal, digitsOnly } from "./phoneCountries.js";
 import { showNoticeDialog } from "./ConfirmDialog.js";
@@ -269,22 +270,22 @@ async function handleFile(kind, file, opts) {
   if (!file) return;
   const max = 650 * 1024;
   if (kind === "cv") {
-    if (file.type !== "application/pdf") { alert("CV must be a PDF."); return; }
-    if (file.size > max) { alert("That PDF is over 650 KB. Please upload a smaller file."); return; }
+    if (file.type !== "application/pdf") { tell("CV must be a PDF."); return; }
+    if (file.size > max) { tell("That PDF is over 650 KB. Please upload a smaller file."); return; }
     const data = await readFileAsDataUrl(file);
     state.cv = { fileName: file.name, mimeType: file.type, size: file.size, data, updatedAt: new Date() };
   } else {
     if (file.type === "application/pdf") {
-      if (file.size > max) { alert("That PDF is over 650 KB. Please upload a smaller file."); return; }
+      if (file.size > max) { tell("That PDF is over 650 KB. Please upload a smaller file."); return; }
       const data = await readFileAsDataUrl(file);
       state.idf = { fileName: file.name, mimeType: file.type, size: file.size, data, updatedAt: new Date() };
     } else if (file.type === "image/jpeg" || file.type === "image/png") {
       const data = await compressWide(file);
       const size = sizeOfData(data);
-      if (size > max) { alert("Could not compress that image under 650 KB. Try a smaller photo."); return; }
+      if (size > max) { tell("Could not compress that image under 650 KB. Try a smaller photo."); return; }
       state.idf = { fileName: file.name.replace(/\.\w+$/, ".jpg"), mimeType: "image/jpeg", size, data, updatedAt: new Date() };
     } else {
-      alert("ID must be JPG, PNG, or PDF.");
+      tell("ID must be JPG, PNG, or PDF.");
       return;
     }
   }
@@ -361,8 +362,8 @@ export async function renderProfileV2(opts) {
       if (t.hasAttribute("data-pv2-view")) {
         const k = t.getAttribute("data-pv2-view");
         const rec = k === "cv" ? state.cv : state.idf;
-        if (!rec?.data) { alert("This file is not available to preview yet. Try Replace, then Save changes."); return; }
-        if (!openInNewTab(rec)) alert("Allow popups to view your document in a new tab.");
+        if (!rec?.data) { tell("This file is not available to preview yet. Try Replace, then Save changes."); return; }
+        if (!openInNewTab(rec)) tell("Allow popups to view your document in a new tab.");
         return;
       }
       if (t.hasAttribute("data-pv2-del")) {

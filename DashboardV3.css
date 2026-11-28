@@ -19,12 +19,12 @@
   background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:16px; padding:16px 18px;
   backdrop-filter: blur(10px);
 }
-.dv3-glass p { margin:0; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#BAE6FD; }
+.dv3-glass p { margin:0; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#BAE6FD; }
 .dv3-glass h3 { margin:6px 0 4px; font-size:18px; color:#FFFFFF; }
 .dv3-glass .when { color:#E2E8F0; font-size:13px; }
 .dv3-cd { display:flex; align-items:center; gap:8px; margin:12px 0; }
 .dv3-cd b { display:block; background:#0B1B33; border-radius:12px; padding:10px 12px; min-width:52px; text-align:center; font-size:18px; color:#FFFFFF; }
-.dv3-cd span { display:block; font-size:11px; font-weight:500; color:#94A3B8; text-transform:none; letter-spacing:0; }
+.dv3-cd span { display:block; font-size:12px; font-weight:500; color:#64748b; text-transform:none; letter-spacing:0; }
 .dv3-cd-colon { font-style:normal; font-size:22px; font-weight:700; color:#FFFFFF; line-height:1; padding:0 2px; }
 .dv3-cd-live { margin:12px 0; font-size:18px; font-weight:700; color:#FFFFFF; }
 .dv3-glass a, .dv3-btn {
@@ -65,13 +65,13 @@
 .dv3-course-meta { min-width:0; }
 .dv3-stchip, .dv3-workline, .dv3-nextphone { display:none; }
 .dv3-cover { width:190px; height:110px; border-radius:14px; position:relative; overflow:hidden; }
-.dv3-cover span { position:absolute; top:8px; left:8px; background:rgba(15,39,71,.55); color:#FFFFFF; font-size:11px; border-radius:999px; padding:3px 8px; }
+.dv3-cover span { position:absolute; top:8px; left:8px; background:rgba(15,39,71,.55); color:#FFFFFF; font-size:12px; border-radius:999px; padding:3px 8px; }
 .dv3-cover span.dv3-badge-done { background:#166534; color:#ECFDF5; }
 .dv3-ring { width:72px; height:72px; display:block; }
 .dv3-ringwrap { position:absolute; right:10px; bottom:10px; width:72px; height:72px; }
-.dv3-ringinfo { position:absolute; top:-2px; right:-2px; width:16px; height:16px; border-radius:50%; background:#FFFFFF; color:#0F2747; font-style:normal; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; line-height:1; }
+.dv3-ringinfo { position:absolute; top:-2px; right:-2px; width:16px; height:16px; border-radius:50%; background:#FFFFFF; color:#0F2747; font-style:normal; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; line-height:1; }
 .dv3-workcap { margin:0 0 6px; font-size:12px; color:#64748B; }
-.dv3-mini { display:inline-flex; margin:0 8px 6px 0; padding:3px 8px; border-radius:999px; background:#F1F5F9; color:#475569; font-size:11px; font-weight:600; }
+.dv3-mini { display:inline-flex; margin:0 8px 6px 0; padding:3px 8px; border-radius:999px; background:#F1F5F9; color:#475569; font-size:12px; font-weight:600; }
 .dv3-course h4 { margin:0 0 4px; font-size:18px; color:#0F2747; }
 .dv3-course p { margin:0; font-size:13px; color:#64748B; }
 .dv3-pass { display:flex; align-items:center; gap:10px; }
@@ -94,7 +94,7 @@
 .dv3-week { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
 .dv3-day { text-align:center; border-radius:12px; padding:8px 4px; background:#F8FAFC; border:1px solid #E5EAF1; }
 .dv3-day.on { background:#0F2747; color:#FFFFFF; border-color:#0F2747; }
-.dv3-day b { display:block; font-size:11px; font-weight:600; }
+.dv3-day b { display:block; font-size:12px; font-weight:600; }
 .dv3-day strong { display:block; font-size:16px; margin:4px 0; }
 .dv3-dots { display:flex; justify-content:center; gap:3px; min-height:8px; }
 .dv3-dots i { width:6px; height:6px; border-radius:50%; display:block; }
@@ -170,7 +170,7 @@
   .dv3-cover > span { display: none !important; }
   .dv3-ringinfo { display: none !important; }
   .dv3-ringwrap, .dv3-ring { position: static; width: 40px; height: 40px; right: auto; bottom: auto; }
-  .dv3-ring text { font-size: 10px; font-weight: 700; }
+  .dv3-ring text { font-size: 11px; font-weight: 700; }
   .dv3-course h4 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 16px; font-weight: 700; margin: 0 0 6px; }
   .dv3-nextlap, .dv3-workline, .dv3-nextphone { display: none !important; }
   .dv3-workcap { display: block !important; font-size: 13px; color: #64748B; margin: 6px 0 4px; }

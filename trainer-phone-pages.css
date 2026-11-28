@@ -206,8 +206,8 @@ body.portal-trainer .topbar-mobile { display: none; }
   body.trainer-portal .gb-kpi span { font-size: 12px; color: #64748B; white-space: nowrap; }
   body.trainer-portal .gb-kpi strong { font-size: 26px; color: #0F2747; line-height: 1.1; }
   body.trainer-portal .gb-lockline { margin: 0 0 12px; font-size: 12px; color: #64748B; }
-  body.trainer-portal .gb-lockb { font-style: normal; font-size: 11px; color: #64748B; margin-left: 4px; }
-  body.trainer-portal .gb-inwrap.lock span { font-size: 10px; }
+  body.trainer-portal .gb-lockb { font-style: normal; font-size: 12px; color: #64748B; margin-left: 4px; }
+  body.trainer-portal .gb-inwrap.lock span { font-size: 11px; }
   body.trainer-portal .gb-search { width: 100%; height: 48px; border: 1px solid #E2E8F0; border-radius: 12px; padding: 0 12px; font-size: 16px; margin-bottom: 8px; }
   body.trainer-portal .gb-seg { display: flex; height: 44px; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
   body.trainer-portal .gb-seg button { flex: 1; border: 0; background: #fff; font-weight: 600; color: #64748B; }
@@ -224,7 +224,7 @@ body.portal-trainer .topbar-mobile { display: none; }
   body.trainer-portal .gb-meta span { font-size: 12px; color: #64748B; }
   body.trainer-portal .gb-right { text-align: right; }
   body.trainer-portal .gb-right b { display: block; font-size: 20px; color: #0F2747; }
-  body.trainer-portal .gb-st { font-size: 11px; font-style: normal; font-weight: 700; }
+  body.trainer-portal .gb-st { font-size: 12px; font-style: normal; font-weight: 700; }
   body.trainer-portal .gb-st.ok { color: #16A34A; }
   body.trainer-portal .gb-st.risk { color: #EA580C; }
   body.trainer-portal .gb-st.pend { color: #64748B; }
@@ -232,7 +232,7 @@ body.portal-trainer .topbar-mobile { display: none; }
   body.trainer-portal .gb-inwrap { position: relative; width: 84px; flex: none; }
   body.trainer-portal .gb-inwrap.ch { border-left: 3px solid #2563EB; padding-left: 4px; }
   body.trainer-portal .gb-in { width: 84px; height: 48px; font-size: 16px; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0 28px 0 8px; }
-  body.trainer-portal .gb-inwrap span { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #94A3B8; }
+  body.trainer-portal .gb-inwrap span { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #64748b; }
   body.trainer-portal .gb-dot { width: 8px; height: 8px; border-radius: 50%; background: #CBD5E1; }
   body.trainer-portal .gb-dot.on { background: #16A34A; }
   body.trainer-portal .gb-savebar {

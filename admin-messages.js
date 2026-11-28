@@ -1,3 +1,4 @@
+import { ask } from "./dialogs.js";
 import { protect } from "./auth-guard.js?v=auth10";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, orderBy, limit, startAfter, getDocs, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -191,7 +192,7 @@ try {
     };
     const del = document.getElementById("delMsg");
     if (del) del.onclick = async () => {
-      if (!confirm("Delete this message?")) return;
+      if (!await ask("Delete this message?")) return;
       try { await deleteDoc(doc(db, "inquiries", r.id)); rows = rows.filter((x) => x.id !== r.id); openId = ""; paint(); }
       catch (e) { err("delete", e); }
     };

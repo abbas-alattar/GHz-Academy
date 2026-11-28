@@ -16,7 +16,7 @@
   font-size: 10px;
   font-weight: 700;
   background: #e2e8f0;
-  color: #94a3b8;
+  color: #64748b;
   letter-spacing: 0;
 }
 .dd-dot.on {
@@ -31,7 +31,7 @@
 .dd-sched { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .dd-line { display: flex; align-items: center; gap: 6px; font-size: .85rem; color: #334155; }
 .dd-ico { flex: 0 0 auto; color: #64748b; }
-.dd-zone { color: #94a3b8; font-size: .75rem; font-weight: 500; }
+.dd-zone { color: #64748b; font-size: .75rem; font-weight: 500; }
 .ghz-tz-wrap { position: relative; display: flex; align-items: center; gap: 8px; max-width: 100%; width: 100%; min-width: 0; }
 .ghz-tz-info { width: 20px; height: 20px; border-radius: 50%; border: 0; background: #E2E8F0; color: #334155; font: 700 11px/20px system-ui; cursor: pointer; flex: 0 0 20px; margin-left: auto; }
 .ghz-tz-pop { position: absolute; z-index: 40; right: 0; left: auto; top: 26px; max-width: min(280px, calc(100vw - 32px)); background: #0F2747; color: #fff; font-size: 13px; line-height: 1.4; padding: 10px 12px; border-radius: 10px; box-shadow: 0 8px 24px rgba(15,39,71,.2); }

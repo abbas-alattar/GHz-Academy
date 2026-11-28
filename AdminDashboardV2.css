@@ -137,7 +137,7 @@ body.admin-portal .side .nav-ico {
 .adv2-row:last-child { border-bottom: 0; }
 .adv2-row b { font-weight: 700; }
 .adv2-un { color: #D97706; }
-.adv2-pill { border-radius: 999px; padding: 3px 8px; font-size: 11px; font-weight: 700; display: inline-block; }
+.adv2-pill { border-radius: 999px; padding: 3px 8px; font-size: 12px; font-weight: 700; display: inline-block; }
 .adv2-pill.open { background: #DCFCE7; color: #166534; }
 .adv2-pill.soon { background: #DBEAFE; color: #1D4ED8; }
 .adv2-pill.closed { background: #FFEDD5; color: #C2410C; }
@@ -174,7 +174,7 @@ body.admin-portal .side .nav-ico {
 .adv2-health.click { cursor: pointer; }
 .adv2-health.click:hover { background: #F1F5F9; }
 .adv2-health:last-child { border-bottom: 0; }
-.adv2-health-more { margin: 8px 0 0; color: #94A3B8; font-size: 12.5px; }
+.adv2-health-more { margin: 8px 0 0; color: #64748b; font-size: 12.5px; }
 .adv2-health-l { display: flex; gap: 10px; align-items: center; }
 .adv2-health p { margin: 0; font-size: 14.5px; font-weight: 600; }
 .adv2-health small { color: #64748B; font-size: 12.5px; font-weight: 400; }

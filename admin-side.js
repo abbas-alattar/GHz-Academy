@@ -38,7 +38,7 @@ export function paintCachedAdminWho() {
   const nameEl = document.getElementById("userName");
   const roleEl = document.getElementById("userRole");
   const name = String(cached.name || "").trim() || "Abbas Alattar";
-  const role = String(cached.role || "admin").toLowerCase();
+  const role = "admin"; // this helper only runs on admin pages
   const roleLabel = role === "trainer" ? "Trainer" : role === "admin" ? "Admin" : "Student";
   if (nameEl) nameEl.textContent = name;
   if (roleEl) roleEl.textContent = roleLabel;

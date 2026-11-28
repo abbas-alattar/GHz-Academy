@@ -30,9 +30,9 @@
 .sv2-time { font-size: 18px; font-weight: 600; line-height: 1.2; }
 .sv2-time.tba { color: #64748B; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
 .sv2-time-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.sv2-dur { display: inline-block; font-size: 11px; background: #F1F5F9; color: #64748B; border-radius: 999px; padding: 2px 8px; }
+.sv2-dur { display: inline-block; font-size: 12px; background: #F1F5F9; color: #64748B; border-radius: 999px; padding: 2px 8px; }
 .sv2-title { margin: 0 0 6px; font-weight: 600; font-size: 16px; }
-.sv2-chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 8px; font-size: 11px; font-weight: 600; margin-right: 6px; background: #F1F5F9; color: #0F2747; }
+.sv2-chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin-right: 6px; background: #F1F5F9; color: #0F2747; }
 .sv2-chip.ok { background: #DCFCE7; color: #166534; }
 .sv2-chip.late { background: #FEF3C7; color: #92400E; }
 .sv2-chip.abs { background: #FEE2E2; color: #DC2626; }

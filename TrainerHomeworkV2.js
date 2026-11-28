@@ -574,7 +574,7 @@ function Page({ uid, go, assignmentId, courseId }) {
       return e("div", { className: "th2-hgrid" }, hHead, [1,2,3,4].map((i) => e("div", { key: i, className: "th2-rr th2-sk" }, e("b", { style: { gridColumn: "1 / -1" } }))));
     }
     if (!assigns.length) {
-      return e("div", { className: "th2-empty" }, e("p", null, "No homework yet"),
+      return e("div", { className: "th2-empty" }, e("p", null, "No homework yet", e("span", { style: { display: "block", marginTop: 4, fontSize: 13, lineHeight: 1.45, color: "#64748b", fontWeight: 400 } }, "Create homework and your students are notified straight away.")),
         e("button", { type: "button", className: "th2-create", disabled: createDisabled, title: createDisabled ? "Course is completed" : "", onClick: () => setForm({ courseId: pickCreateCourseId(courses, cid), title: "", dueDate: "", maxPoints: 100, status: "Published", description: "", rubric: [] }) }, e(Plus), " Create homework"));
     }
     return e("div", { className: "th2-hgrid" }, hHead,

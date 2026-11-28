@@ -39,7 +39,7 @@ const ITEMS = [
   { href: "./student.html#browse", label: "Browse courses", key: "browse" },
   { href: "./student.html#courses", label: "My courses", key: "courses" },
   { href: "./student.html#regs", label: "My registrations", key: "regs" },
-  { href: "./student.html#homework", label: "Homeworks", key: "homework" },
+  { href: "./student.html#homework", label: "Homework", key: "homework" },
   { href: "./student.html#quizzes", label: "Quizzes", key: "quizzes" },
   { href: "./student.html#grades", label: "Grades", key: "grades" },
   { href: "./student.html#schedule", label: "Schedule", key: "schedule" },

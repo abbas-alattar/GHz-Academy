@@ -146,7 +146,7 @@ body.stu-v3 .stu-usercard i {
   background: #2563EB; font-style: normal; font-weight: 700; font-size: 12px;
 }
 body.stu-v3 .stu-usercard strong { display: block; font-size: 13px; }
-body.stu-v3 .stu-usercard span { font-size: 11px; color: #94A3B8; }
+body.stu-v3 .stu-usercard span { font-size: 12px; color: #64748b; }
 body.stu-v3 .stu-shimmer {
   background: linear-gradient(90deg, #EEF2F7 0%, #F8FAFC 45%, #EEF2F7 90%);
   background-size: 200% 100%; animation: stuShimmer 1.2s linear infinite; border-radius: 16px; min-height: 72px;

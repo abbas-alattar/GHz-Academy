@@ -1,3 +1,4 @@
+import { ask } from "./dialogs.js";
 import { protect } from "./auth-guard.js?v=auth10";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -154,7 +155,7 @@ try {
     });
     box.querySelectorAll("[data-del]").forEach((b) => {
       b.onclick = async () => {
-        if (!confirm("Delete this announcement?")) return;
+        if (!await ask("Delete this announcement?")) return;
         try {
           await deleteDoc(doc(db, "announcements", b.dataset.del));
           await loadList();

@@ -1,3 +1,4 @@
+import { ask } from "./dialogs.js";
 import { friendlyError } from "./friendlyError.js";
 import { protect } from "./auth-guard.js?v=auth10";
 import { auth, db } from "./firebase-config.js?v=auth10";
@@ -116,7 +117,7 @@ try {
           });
           return;
         }
-        if (!confirm("Delete this quiz?")) return;
+        if (!await ask("Delete this quiz?")) return;
         await deleteQuizCascade(cid2, qid);
         loadList();
       } catch (e) {
@@ -353,7 +354,7 @@ try {
       };
       box.querySelectorAll("[data-retake]").forEach((b) => b.onclick = async () => {
         if (locked()) { toast("This course is completed and read-only."); return; }
-        if (!confirm("Allow this student to retake? This deletes their attempt.")) return;
+        if (!await ask("Allow this student to retake? This deletes their attempt.")) return;
         try { await deleteDoc(doc(db, "quizAttempts", b.dataset.retake)); openAttempts(quiz); }
         catch (e) { document.getElementById("attErr").hidden = false; document.getElementById("attErr").textContent = lockWriteMsg(e); }
       });
@@ -426,7 +427,7 @@ try {
         };
         const rg = document.getElementById("rmGr"); if (rg) rg.onclick = async () => {
           if (locked()) { toast("This course is completed and read-only."); return; }
-          if (!confirm("Remove this grade?")) return;
+          if (!await ask("Remove this grade?")) return;
           try {
             await updateDoc(doc(db, "quizAttempts", at.id), {
               status: "submitted",

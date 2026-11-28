@@ -4,7 +4,7 @@
 .pv2-av { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: #0F2747; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 1.45rem; flex: 0 0 96px; overflow: hidden; box-shadow: 0 0 0 4px #fff, 0 8px 20px rgba(15,39,71,.16); }
 .pv2-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pv2-name { margin: 0; font-family: "Space Grotesk", sans-serif; color: #0F2747; font-size: 1.35rem; }
-.pv2-head .pv2-sid { margin: 4px 0 0; color: #94A3B8; font-size: .85rem; font-family: ui-monospace, Menlo, monospace; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+.pv2-head .pv2-sid { margin: 4px 0 0; color: #64748b; font-size: .85rem; font-family: ui-monospace, Menlo, monospace; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
 .pv2-idrow { display: flex; gap: 8px; align-items: center; min-width: 0; width: 100%; }
 .pv2-phone { display:flex; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; }
 .pv2-cc { display:flex; align-items:center; gap:6px; padding:0 8px; background:#F8FAFC; }

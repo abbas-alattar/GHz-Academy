@@ -1,3 +1,4 @@
+import { ask, askText } from "./dialogs.js";
 import { protect } from "./auth-guard.js?v=auth10";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -210,7 +211,7 @@ try {
       a.onclick = async (ev) => {
         ev.preventDefault();
         const row = rows.find((x) => x.uid === a.dataset.anyway);
-        if (!confirm("This student has not passed. Issue anyway?")) return;
+        if (!await ask("This student has not passed. Issue anyway?")) return;
         try { await issueOne(row, course, "Issue anyway"); toast("Issued."); await load(); }
         catch (e) { box.innerHTML = `<p class="banner">issueCertificate: ${esc((e&&(e.code||e.message))||e)}</p>`; }
       };
@@ -218,8 +219,8 @@ try {
     box.querySelectorAll("[data-rev]").forEach((b) => {
       b.onclick = async () => {
         const row = rows.find((x) => x.uid === b.dataset.rev);
-        if (!confirm("Revoke this certificate?")) return;
-        const reason = prompt("Revoke reason (required)") || "";
+        if (!await ask("Revoke this certificate?")) return;
+        const reason = await askText("Revoke reason (required)") || "";
         if (!reason.trim()) { toast("A reason is required.", "err"); return; }
         try {
           const batch = writeBatch(db);
@@ -242,7 +243,7 @@ try {
     if (!course) return;
     const waiting = lastRows.filter((r) => r.st.label === "P" && !r.issued);
     if (!waiting.length) { toast("No passed students waiting."); return; }
-    if (!confirm(`Issue certificates for ${waiting.length} passed student(s)?`)) return;
+    if (!await ask(`Issue certificates for ${waiting.length} passed student(s)?`)) return;
     try {
       for (const row of waiting) await issueOne(row, course);
       toast("Issued to all passed students.");

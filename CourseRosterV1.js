@@ -1,3 +1,4 @@
+import { tell } from "./dialogs.js";
 import { friendlyError } from "./friendlyError.js";
 import { createElement as e, useEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
@@ -193,7 +194,7 @@ function App({ opts }) {
           n: String(i + 1), student: nameWithId(r.studentName, r.sid).label, email: r.email, enr: enrolledOn(r.enrolledAt), status: r.status
         }))
       });
-    } catch (ex) { alert(fbErr(ex)); }
+    } catch (ex) { tell(fbErr(ex)); }
     setBusy("");
   };
   const csv = () => {

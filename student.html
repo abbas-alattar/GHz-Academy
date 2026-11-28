@@ -37,7 +37,7 @@
         <a href="./student.html#browse" data-view="browse" id="navBrowse">Browse courses</a>
         <a href="./student.html#courses" data-view="courses">My courses</a>
         <a href="./student.html#regs" data-view="regs">My registrations</a>
-        <a href="./student.html#homework" data-view="homework">Homeworks</a>
+        <a href="./student.html#homework" data-view="homework">Homework</a>
         <a href="./student.html#quizzes" data-view="quizzes">Quizzes</a>
         <a href="./student.html#grades" data-view="grades">Grades</a>
         <a href="./student.html#schedule" data-view="schedule">Schedule</a>
@@ -85,7 +85,7 @@
         <section id="view-coursecontent" class="hidden"><div id="cc1Root"></div></section>
         <section id="view-regsv2" class="hidden"><div id="regsV2Root"><h2>My registrations</h2><div class="stu-shimmer" style="min-height:88px;border-radius:16px;margin:12px 0"></div></div></section>
         <section id="view-regs" class="hidden"><div id="regList" hidden></div></section>
-        <section id="view-homeworkv2" class="hidden"><div id="hwV2Root"><h2>Homeworks</h2><div class="hw2-skel"></div><div class="hw2-skel"></div></div></section>
+        <section id="view-homeworkv2" class="hidden"><div id="hwV2Root"><h2>Homework</h2><div class="hw2-skel"></div><div class="hw2-skel"></div></div></section>
         <div id="hd2Root"></div>
         <div id="qr2Root"></div>
         <section id="view-homework" class="hidden"><div id="allHw" hidden></div></section>
@@ -112,7 +112,7 @@
   (function () {
     var t0 = (typeof performance !== "undefined") ? performance.now() : Date.now();
     window.__ghzT0 = t0;
-    var titles = {dash:"Dashboard",browse:"Browse courses",courses:"My courses",regs:"My registrations",homework:"Homeworks",quizzes:"Quizzes",grades:"Grades",schedule:"Schedule",attendance:"Attendance",announcements:"Announcements",certificates:"Certificates",profile:"Profile",notifications:"Notifications",course:"Course content"};
+    var titles = {dash:"Dashboard",browse:"Browse courses",courses:"My courses",regs:"My registrations",homework:"Homework",quizzes:"Quizzes",grades:"Grades",schedule:"Schedule",attendance:"Attendance",announcements:"Announcements",certificates:"Certificates",profile:"Profile",notifications:"Notifications",course:"Course content"};
     var map = {dash:"view-dash",browse:"view-browsev2",courses:"view-coursesv2",regs:"view-regsv2",homework:"view-homeworkv2",quizzes:"view-quizv2",grades:"view-gradesv2",schedule:"view-schedulev2",attendance:"view-attendancev2",announcements:"view-announcements",certificates:"view-certificates",profile:"view-profilev2",notifications:"view-notifications",course:"view-coursecontent"};
     var raw = ((location.hash || "").replace("#","").split("/")[0] || "dash").replace(/v2$/, "");
     document.querySelectorAll("[id^=view-]").forEach(function (s) { s.classList.add("hidden"); });

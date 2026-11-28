@@ -35,7 +35,7 @@ export const portalStatus = (course) => {
   if (label === "Scheduled · Registration closed") {
     return { label, color: "green", group: "active", className: "badge badge-sched-closed", tooltip: "", completedLine: "" };
   }
-  if (label === "On going · Registration closed") {
+  if (label === "Ongoing · Registration closed") {
     return {
       label,
       color: "green",

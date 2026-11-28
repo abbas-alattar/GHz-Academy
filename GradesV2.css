@@ -48,7 +48,7 @@
 }
 .g2-tx td.low { color: #DC2626; }
 .g2-tx td.avg { font-weight: 700; }
-.g2-auto { display: block; font-size: 10px; color: #64748B; font-weight: 500; }
+.g2-auto { display: block; font-size: 11px; color: #64748B; font-weight: 500; }
 .g2-lock { color: #64748B; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
 .g2-nodist { padding: 16px; font-size: 13px; color: #64748B; }
 .g2-skel { height: 88px; border-radius: 16px; background: #E5EAF1; margin-bottom: 24px; }

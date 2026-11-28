@@ -216,7 +216,7 @@ export function renderMyRegistrationsV2(opts) {
       return true;
     }
 
-    const empty = `<div class="mr2-empty"><div class="ico">📋</div><p>No registrations yet</p><button class="btn btn-sm" type="button" data-mr2-browse>Browse courses</button></div>`;
+    const empty = `<div class="mr2-empty"><div class="ico">📋</div><p>No registrations yet<span style="display:block;margin-top:4px;font-size:13px;line-height:1.45;color:#64748b;font-weight:400">Find a course that fits you and register in a few steps.</span></p><button class="btn btn-sm" type="button" data-mr2-browse>Browse courses</button></div>`;
 
     host.innerHTML = `<div class="mr2-wrap">
       <div class="mr2-head">

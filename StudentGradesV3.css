@@ -20,13 +20,13 @@
 .sg3-row{border-radius:14px;margin:6px 8px;background:#FFFFFF}
 .sg3-btn{width:100%;display:grid;grid-template-columns:44px 1fr auto auto 36px 28px;align-items:center;gap:12px;border:0;background:transparent;text-align:left;padding:12px 10px;cursor:pointer;border-radius:14px}
 .sg3-print-one{width:36px;height:36px;border:1px solid #E5EAF1;background:#fff;border-radius:10px;display:inline-grid;place-items:center;cursor:pointer;color:#0F2747}
-.sg3-print-one.is-off{opacity:.4;cursor:not-allowed;color:#94A3B8}
+.sg3-print-one.is-off{opacity:.4;cursor:not-allowed;color:#64748b}
 .sg3-print{display:inline-flex;align-items:center;gap:8px}
 .sg3-btn:disabled{cursor:default}
 .sg3-tile{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700}
 .sg3-tile.ok{background:#DCFCE7;color:#16A34A}
 .sg3-tile.bad{background:#FEE2E2;color:#DC2626}
-.sg3-tile.lock{background:#F1F5F9;color:#94A3B8}
+.sg3-tile.lock{background:#F1F5F9;color:#64748b}
 .sg3-cname{font-weight:650;font-size:15px;color:#0F2747;margin:0}
 .sg3-cmeta{margin:2px 0 0;font-size:12px;color:#64748B}
 .sg3-avgnum{font-weight:700;font-size:16px;color:#0F2747;min-width:48px;text-align:right}
@@ -34,7 +34,7 @@
 .sg3-pill.ok{background:#DCFCE7;color:#15803D}
 .sg3-pill.bad{background:#FEE2E2;color:#B91C1C}
 .sg3-pill.gray{background:#F1F5F9;color:#64748B}
-.sg3-chev{color:#94A3B8;transition:transform .15s ease}
+.sg3-chev{color:#64748b;transition:transform .15s ease}
 .sg3-chev.open{transform:rotate(180deg)}
 .sg3-break{padding:0 12px 14px}
 .sg3-scroll{overflow-x:auto}
@@ -49,7 +49,7 @@
 .sg3-sc.lo{background:#FEE2E2;color:#B91C1C}
 .sg3-final.ok td{background:#E8F8EE;font-weight:700}
 .sg3-final.bad td{background:#FDECEC;font-weight:700}
-.sg3-locknote{margin:0 12px 12px;font-size:13px;color:#94A3B8}
+.sg3-locknote{margin:0 12px 12px;font-size:13px;color:#64748b}
 .sg3-sk{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
 .sg3-sk-b{height:96px;border-radius:16px;background:#F1F5F9;animation:sg3pulse 1.2s ease-in-out infinite}
 .sg3-sk-l{height:220px;border-radius:18px;background:#F8FAFC;animation:sg3pulse 1.2s ease-in-out infinite}

@@ -1,3 +1,4 @@
+import { ask } from "./dialogs.js";
 import { friendlyError } from "./friendlyError.js";
 import { bootStudentNav } from "./student-nav.js";
 import { protect } from "./auth-guard.js?v=auth10";
@@ -239,7 +240,7 @@ try {
         const msg = missing > 0
           ? `You have ${missing} unanswered question(s). Submit anyway?`
           : "Submit this quiz?";
-        if (!confirm(msg)) return;
+        if (!await ask(msg)) return;
       }
       confirmOpen = false;
       try {

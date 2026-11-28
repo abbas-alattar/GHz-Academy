@@ -20,14 +20,14 @@
 .admin-trainers .atv2-cc { display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-width:0; }
 .admin-trainers .atv2-cc strong { font-size:16px; line-height:1.2; }
 .admin-trainers .atv2-cc-pills { display:flex; flex-wrap:wrap; gap:4px; min-width:0; }
-.admin-trainers .atv2-cpill { border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; white-space:nowrap; height:20px; line-height:16px; box-sizing:border-box; }
+.admin-trainers .atv2-cpill { border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; white-space:nowrap; height:20px; line-height:16px; box-sizing:border-box; }
 .admin-trainers .atv2-cpill.blue { background:#DBEAFE; color:#1D4ED8; }
 .admin-trainers .atv2-cpill.green { background:#D1FAE5; color:#047857; }
-.admin-trainers .atv2-cpill.zero { background:#E2E8F0; color:#94A3B8; }
+.admin-trainers .atv2-cpill.zero { background:#E2E8F0; color:#64748b; }
 .admin-trainers .atv2-stu { display:flex; align-items:baseline; gap:6px; white-space:nowrap; }
 .admin-trainers .atv2-stu strong { font-size:16px; }
-.admin-trainers .atv2-miss { color:#94A3B8; }
-.admin-trainers .atv2-retry { background:none; border:0; color:#2563EB; font:inherit; font-size:11px; font-weight:700; cursor:pointer; padding:0 4px; }
+.admin-trainers .atv2-miss { color:#64748b; }
+.admin-trainers .atv2-retry { background:none; border:0; color:#2563EB; font:inherit; font-size:12px; font-weight:700; cursor:pointer; padding:0 4px; }
 .admin-trainers .atv2-act-ic { width:28px; height:28px; border-radius:8px; background:#F1F5F9; display:grid; place-items:center; flex-shrink:0; }
 .admin-trainers .atv2-actrow { display:flex; gap:10px; align-items:flex-start; }
 .admin-trainers .atv2-th { padding:12px 16px; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:#64748B; font-weight:700; border-bottom:1px solid #EEF2F7; white-space:nowrap; }
@@ -40,13 +40,13 @@
 .admin-trainers .atv2-ptxt { min-width:0; overflow:hidden; }
 .admin-trainers .atv2-person p { margin:0; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .admin-trainers .atv2-person small { color:#64748B; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.admin-trainers .atv2-spec { display:inline-block; max-width:100%; box-sizing:border-box; background:#F1F5F9; color:#475569; border-radius:999px; padding:3px 8px; font-size:11px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; height:24px; line-height:18px; }
-.admin-trainers .atv2-spec.miss { color:#94A3B8; background:#F8FAFC; }
-.admin-trainers .atv2-cp { display:inline-block; border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; margin:0 4px 4px 0; }
-.admin-trainers .atv2-more { color:#64748B; font-size:11px; font-weight:700; }
-.admin-trainers .atv2-cmeta { font-size:11px; color:#94A3B8; white-space:nowrap; }
+.admin-trainers .atv2-spec { display:inline-block; max-width:100%; box-sizing:border-box; background:#F1F5F9; color:#475569; border-radius:999px; padding:3px 8px; font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; height:24px; line-height:18px; }
+.admin-trainers .atv2-spec.miss { color:#64748b; background:#F8FAFC; }
+.admin-trainers .atv2-cp { display:inline-block; border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; margin:0 4px 4px 0; }
+.admin-trainers .atv2-more { color:#64748B; font-size:12px; font-weight:700; }
+.admin-trainers .atv2-cmeta { font-size:12px; color:#64748b; white-space:nowrap; }
 .admin-trainers .atv2-last { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
-.admin-trainers .atv2-st { display:inline-block; border-radius:999px; padding:3px 9px; font-size:11px; font-weight:700; }
+.admin-trainers .atv2-st { display:inline-block; border-radius:999px; padding:3px 9px; font-size:12px; font-weight:700; }
 .admin-trainers .atv2-st.on { background:#DCFCE7; color:#166534; }
 .admin-trainers .atv2-st.off { background:#FEF3C7; color:#B45309; }
 .admin-trainers .atv2-act { display:flex; gap:8px; align-items:center; flex-wrap:nowrap; white-space:nowrap; justify-content:flex-end; }

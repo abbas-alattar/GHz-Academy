@@ -1,3 +1,4 @@
+import { ask } from "./dialogs.js";
 import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp, deleteField, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { isSessionPastWithoutAttendance, isSessionUpcoming, needsManualQuizGrade } from "./sessionStatus.js";
@@ -174,7 +175,7 @@ export async function confirmComplete(course, toast, reload) {
 }
 
 export async function confirmReopen(course, toast, reload) {
-  if (!confirm("Reopen this course?")) return;
+  if (!await ask("Reopen this course?")) return;
   try {
     await updateDoc(doc(db, "courses", course.id), {
       status: course.previousStatus || "Open"

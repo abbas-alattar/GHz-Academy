@@ -256,7 +256,7 @@ function Form({ course, trainers: trainersProp, onClose, onSave }) {
             e(Field, { label: "Currency" }, e("input", { id: "ccur", value: currency, onChange: (ev) => setCurrency(ev.target.value) }))
           ),
           e("div", null, e("span", { style: { fontSize: 13, fontWeight: 600 } }, "Status"),
-            e("div", { className: "cfv2-pills", style: { marginTop: 8 } }, STATUSES.map((s) => e("button", { type: "button", key: s, className: "cfv2-pill" + (status === s ? " on" : ""), onClick: () => setStatus(s) }, s === "Coming soon" ? "Scheduled" : s === "Open" ? "On going" : s === "Closed" ? "On going · Registration closed" : s))),
+            e("div", { className: "cfv2-pills", style: { marginTop: 8 } }, STATUSES.map((s) => e("button", { type: "button", key: s, className: "cfv2-pill" + (status === s ? " on" : ""), onClick: () => setStatus(s) }, s === "Coming soon" ? "Scheduled" : s === "Open" ? "Ongoing" : s === "Closed" ? "Ongoing · Registration closed" : s))),
             e("input", { id: "cstat", type: "hidden", value: status })
           ),
           (status === "Open" || status === "Closed" || status === "Coming soon") ? e("div", { className: "cfv2-regsw" },

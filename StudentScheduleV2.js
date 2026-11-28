@@ -387,7 +387,7 @@ function App({ opts }) {
           );
         })
       ))
-    ) : e("p", { className: "ss2-empty" }, "No upcoming classes."),
+    ) : e("p", { className: "ss2-empty" }, "No upcoming classes.", e("span", { style: { display: "block", marginTop: 4, fontSize: 13, lineHeight: 1.45, color: "#64748b", fontWeight: 400 } }, "Class times appear here once your course schedule is set.")),
     e("button", { type: "button", className: "ss2-past", onClick: () => setPastOpen(!pastOpen) }, "Past sessions (" + past.length + ")"),
     pastOpen ? past.map((s) => e("div", { key: s.id, className: "ss2-sc", style: { marginTop: 8 } }, sessTitle(s) + " · " + s.date)) : null
   );

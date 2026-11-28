@@ -227,11 +227,11 @@ function Row({ c, users, n, actions, hi }) {
 }
 
 function isActiveStatus(st) { return st === "Open" || st === "Closed"; }
-const COURSE_TABS = ["Active", "All", "Scheduled", "On going", "Completed", "Archived"];
+const COURSE_TABS = ["Active", "All", "Scheduled", "Ongoing", "Completed", "Archived"];
 function readCourseTab() {
   try {
     let t = sessionStorage.getItem("ghz-courses-tab");
-    if (t === "Open" || t === "Closed") t = "On going";
+    if (t === "Open" || t === "Closed") t = "Ongoing";
     if (t === "Coming soon") t = "Scheduled";
     if (COURSE_TABS.includes(t)) return t;
   } catch (_) {}

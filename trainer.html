@@ -152,6 +152,7 @@ setTimeout(function () {
   <div class="drawer-bg hidden" id="drawerBg"></div>
   <aside class="drawer hidden" id="gradeDrawer"></aside>
   <script type="module">
+    import { ask } from "./dialogs.js";
     import { protect } from "./auth-guard.js?v=auth10";
     import { bootPending, bootOk, bootFail as traceFail } from "./bootTrace.js";
     import { bootNotify } from "./portal-notify.js";
@@ -467,7 +468,7 @@ setTimeout(function () {
             });
             return;
           }
-          if (!confirm("Delete this homework?")) return;
+          if (!await ask("Delete this homework?")) return;
           await deleteHomework(a.id);
           toast("Deleted."); showView("homework"); await reloadHw();
         } catch(er){ toast(lockWriteMsg(er),"err"); }
@@ -561,7 +562,7 @@ setTimeout(function () {
       const a = activeHw;
       const r = studentRows(a).find(x=>x.en.uid===uid);
       if (!r?.s) return;
-      if (!confirm("Remove this grade and feedback? The student will see this homework as submitted again and can edit their answer.")) return;
+      if (!await ask("Remove this grade and feedback? The student will see this homework as submitted again and can edit their answer.")) return;
       try {
         await updateDoc(doc(db,"submissions", r.s.id), { status:"submitted", grade: deleteField(), feedback: deleteField(), gradedBy: deleteField(), gradedAt: deleteField() });
         toast("Grade removed");
@@ -699,7 +700,7 @@ setTimeout(function () {
       document.getElementById("newSess").onclick=()=> sessionForm();
       document.querySelectorAll("[data-edits]").forEach(b=> b.onclick=()=> sessionForm(sessions.find(x=>x.id===b.dataset.edits)));
       document.querySelectorAll("[data-cancels]").forEach(b=> b.onclick=async()=>{
-        if (!confirm("Cancel this session?")) return;
+        if (!await ask("Cancel this session?")) return;
         try { await updateDoc(doc(db,"sessions", b.dataset.cancels), { status:"Cancelled" }); toast("Cancelled."); await loadCourseLists(); }
         catch(e){ toast(e.code||e.message,"err"); }
       });

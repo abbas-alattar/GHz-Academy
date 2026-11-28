@@ -5,7 +5,7 @@
 .an3-new{background:#DBEAFE;color:#1D4ED8;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:700}
 .an3-markall{border:0;background:none;color:#2563EB;font:inherit;font-size:12px;font-weight:650;cursor:pointer;padding:0}
 .an3-card.unread .an3-title{font-weight:700}
-.an3-classic{background:none;border:0;color:#94A3B8;font-size:12px;text-decoration:underline;cursor:pointer}
+.an3-classic{background:none;border:0;color:#64748b;font-size:12px;text-decoration:underline;cursor:pointer}
 .an3-tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
 .an3-sw{display:flex;background:#F1F5F9;border-radius:12px;padding:4px}
 .an3-sw button{border:0;background:transparent;padding:7px 12px;border-radius:9px;font-weight:650;color:#64748B;cursor:pointer}
@@ -27,10 +27,10 @@
 .an3-av.trainer{background:#2563EB}
 .an3-who{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .an3-name{font-weight:650}
-.an3-rp{border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700}
+.an3-rp{border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700}
 .an3-rp.admin{background:#0F2747;color:#fff}
 .an3-rp.trainer{background:#DBEAFE;color:#1D4ED8}
-.an3-ago{margin-left:auto;color:#94A3B8;font-size:12px}
+.an3-ago{margin-left:auto;color:#64748b;font-size:12px}
 .an3-title{margin:8px 0 4px;font-weight:700}
 .an3-body{color:#64748B;font-size:14px;line-height:1.45}
 .an3-body.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}

@@ -57,7 +57,7 @@
 .ap2-dd button:hover,.ap2-dd button.on { background:#F1F5F9; }
 .ap2-dd img { width:22px; height:16px; object-fit:cover; }
 .ap2-err { color:#DC2626; font-size:12px; min-height:14px; }
-.ap2-code { color:#94A3B8; font-size:11px; }
+.ap2-code { color:#64748b; font-size:12px; }
 .ap2-meter { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin:6px 0; }
 .ap2-meter i { height:6px; border-radius:99px; background:#E2E8F0; }
 .ap2-meter i.on1 { background:#DC2626; }

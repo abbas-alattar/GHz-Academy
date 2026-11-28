@@ -60,9 +60,9 @@ export function statusLabel(course, now) {
   if (st === "Coming soon") return "Scheduled · Open for registration";
   if (st === "Open") {
     if (future) return "Scheduled · Open for registration";
-    return "On going";
+    return "Ongoing";
   }
-  if (st === "Closed") return "On going · Registration closed";
+  if (st === "Closed") return "Ongoing · Registration closed";
   return st || "—";
 }
 
@@ -79,7 +79,7 @@ export function courseStatusChipLabel(statusOrCourse, now) {
 export function statusChipShort(course, now) {
   const lab = statusLabel(course, now);
   if (lab.indexOf("Scheduled") === 0) return "Scheduled";
-  if (lab.indexOf("On going") === 0) return "On going";
+  if (lab.indexOf("Ongoing") === 0) return "Ongoing";
   if (lab === "Completed" || lab === "Draft" || lab === "Archived") return lab;
   return lab;
 }
@@ -87,8 +87,8 @@ export function statusChipShort(course, now) {
 export function statusChipKind(course, now) {
   const lab = statusLabel(course, now);
   if (lab === "Scheduled · Open for registration") return "sched-open";
-  if (lab === "On going") return "ongoing";
-  if (lab === "On going · Registration closed") return "closed";
+  if (lab === "Ongoing") return "ongoing";
+  if (lab === "Ongoing · Registration closed") return "closed";
   if (lab === "Completed") return "completed";
   if (lab === "Archived") return "archived";
   if (lab === "Draft") return "draft";
@@ -113,8 +113,8 @@ export function adminCourseTabLabel(tab) {
   if (t === "Active") return "Active";
   if (t === "All") return "All";
   if (t === "Coming soon" || t === "Scheduled") return "Scheduled";
-  if (t === "Open" || t === "On going") return "On going";
-  if (t === "Closed") return "On going · Registration closed";
+  if (t === "Open" || t === "Ongoing") return "Ongoing";
+  if (t === "Closed") return "Ongoing · Registration closed";
   if (t === "Completed") return "Completed";
   if (t === "Archived") return "Archived";
   return t;
@@ -128,7 +128,7 @@ export function matchesAdminCourseTab(courseOrStatus, tab, now) {
   if (t === "Active") return st === "Open" || st === "Closed";
   const lab = statusLabel(c, now);
   if (t === "Scheduled" || t === "Coming soon") return lab.indexOf("Scheduled") === 0;
-  if (t === "On going" || t === "Open") return lab === "On going" || lab === "On going · Registration closed";
+  if (t === "Ongoing" || t === "Open") return lab === "Ongoing" || lab === "Ongoing · Registration closed";
   if (t === "Closed") return st === "Closed";
   if (t === "Completed") return st === "Completed";
   if (t === "Archived") return st === "Archived";

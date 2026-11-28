@@ -13,13 +13,13 @@
 .cv2-side p { margin: 0 0 8px; color: #64748B; font-size: 13px; }
 .cv2-code { display: inline-flex; align-items: center; gap: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #F1F5F9; border-radius: 8px; padding: 6px 10px; font-size: 12px; margin-bottom: 10px; }
 .cv2-copy { border: 1px solid #E5EAF1; background: #fff; border-radius: 8px; padding: 4px 8px; font: inherit; font-size: 12px; cursor: pointer; }
-.cv2-ok { display: inline-flex; align-items: center; gap: 4px; background: #DCFCE7; color: #16A34A; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; margin-bottom: 12px; }
+.cv2-ok { display: inline-flex; align-items: center; gap: 4px; background: #DCFCE7; color: #16A34A; border-radius: 999px; padding: 2px 8px; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
 .cv2-acts { display: flex; flex-wrap: wrap; gap: 8px; }
 .cv2-btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: 1px solid transparent; }
 .cv2-btn.pri { background: #2563EB; color: #fff; }
 .cv2-btn.out { background: #fff; color: #0F2747; border-color: #E5EAF1; }
 .cv2-rev { background: #F8FAFC; border: 1px solid #E5EAF1; border-radius: 16px; padding: 16px 18px; margin-bottom: 12px; color: #64748B; }
-.cv2-bad { display: inline-flex; background: #FEE2E2; color: #DC2626; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+.cv2-bad { display: inline-flex; background: #FEE2E2; color: #DC2626; border-radius: 999px; padding: 2px 8px; font-size: 12px; font-weight: 600; }
 .cv2-prog { display: flex; gap: 12px; align-items: flex-start; background: #fff; border: 1px solid #E5EAF1; border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; }
 .cv2-lock { width: 36px; height: 36px; border-radius: 10px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; color: #64748B; flex: 0 0 36px; }
 .cv2-prog h3 { margin: 0 0 4px; font-size: 15px; }

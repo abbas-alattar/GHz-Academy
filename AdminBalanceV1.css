@@ -38,27 +38,27 @@
 .bl1-ico.red { background:#FEE2E2; color:#DC2626; }
 .bl1-num { display:block; font-size:22px; font-weight:700; line-height:1.2; }
 .bl1-lab { font-size:12px; color:#64748B; font-weight:600; }
-.bl1-note { font-size:12px; color:#94A3B8; }
-.bl1-pilldelta { display:inline-flex; align-items:center; gap:4px; border-radius:999px; padding:1px 8px; font-size:11px; font-weight:700; }
+.bl1-note { font-size:12px; color:#64748b; }
+.bl1-pilldelta { display:inline-flex; align-items:center; gap:4px; border-radius:999px; padding:1px 8px; font-size:12px; font-weight:700; }
 .bl1-up { color:#16A34A; background:#DCFCE7; } .bl1-dn { color:#DC2626; background:#FEE2E2; }
 .bl1-strip { display:flex; flex-wrap:wrap; gap:8px; align-items:center; width:100%; margin:0; }
 .bl1-chip { background:#fff; border:1px solid #E5EAF1; border-radius:999px; padding:6px 12px; font-size:12px; color:#475569; }
-.bl1-chip.mute { background:#F8FAFC; color:#94A3B8; }
+.bl1-chip.mute { background:#F8FAFC; color:#64748b; }
 .bl1-charts { display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; width:100%; }
 @media (max-width: 900px) { .bl1-charts { grid-template-columns:1fr; } }
 .bl1-chart { background:#fff; border:1px solid #E5EAF1; border-radius:16px; padding:16px; height:260px; max-height:260px; box-sizing:border-box; display:flex; flex-direction:column; min-height:0; }
 .bl1-chart h3, .bl1-block h3 { margin:0 0 8px; font-size:15px; flex:none; }
 .bl1-plot { flex:1 1 auto; display:grid; grid-template-columns:52px 1fr; grid-template-rows:1fr auto; min-height:0; position:relative; }
-.bl1-y { display:flex; flex-direction:column; justify-content:space-between; font-size:10px; color:#94A3B8; text-align:right; padding-right:8px; min-height:0; grid-row:1; }
+.bl1-y { display:flex; flex-direction:column; justify-content:space-between; font-size:11px; color:#64748b; text-align:right; padding-right:8px; min-height:0; grid-row:1; }
 .bl1-bars { position:relative; display:flex; align-items:flex-end; gap:6px; border-bottom:1px solid #EEF2F7; min-height:0; height:100%; grid-row:1; }
 .bl1-grid { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; }
 .bl1-grid i { display:block; height:1px; background:#EEF2F7; }
 .bl1-col { flex:1; background:linear-gradient(180deg,#2563EB,#3B82F6); border-radius:6px 6px 2px 2px; min-height:0; position:relative; z-index:1; }
 .bl1-col.now { background:linear-gradient(180deg,#0F2747,#2563EB); }
 .bl1-col.empty { background:#E2E8F0; min-height:3px; height:3px !important; }
-.bl1-ml { display:flex; gap:6px; font-size:10px; color:#94A3B8; margin:6px 0 0; grid-column:2; }
+.bl1-ml { display:flex; gap:6px; font-size:11px; color:#64748b; margin:6px 0 0; grid-column:2; }
 .bl1-ml span { flex:1; text-align:center; overflow:hidden; }
-.bl1-tip { position:absolute; background:#0F2747; color:#fff; font-size:11px; padding:6px 8px; border-radius:8px; pointer-events:none; z-index:2; }
+.bl1-tip { position:absolute; background:#0F2747; color:#fff; font-size:12px; padding:6px 8px; border-radius:8px; pointer-events:none; z-index:2; }
 .bl1-donutrow { display:grid; grid-template-columns:140px 1fr; gap:16px; align-items:center; flex:1; min-height:0; height:100%; }
 .bl1-donutwrap { position:relative; width:140px; height:140px; margin:0; }
 .bl1-donutwrap span { position:absolute; inset:0; display:grid; place-items:center; font-weight:700; font-size:13px; text-align:center; padding:18px; }
@@ -66,13 +66,13 @@
 .bl1-leg li { display:grid; grid-template-columns:10px minmax(0,1fr) auto auto; gap:8px; align-items:center; font-size:12px; }
 .bl1-dot { width:8px; height:8px; border-radius:99px; }
 .bl1-trunc { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.bl1-empty { color:#94A3B8; font-size:14px; margin:auto; }
+.bl1-empty { color:#64748b; font-size:14px; margin:auto; }
 .bl1-block { background:#fff; border:1px solid #E5EAF1; border-radius:16px; overflow:hidden; width:100%; }
 .bl1-block-h { display:flex; justify-content:space-between; align-items:center; padding:14px 16px 8px; gap:8px; }
 .bl1-tog { font-size:12px; color:#2563EB; background:none; border:0; cursor:pointer; font:inherit; }
 .bl1-table { overflow:auto; width:100%; max-width:100%; }
 .bl1-th, .bl1-row { display:grid; gap:8px; padding:10px 14px; align-items:center; width:100%; box-sizing:border-box; }
-.bl1-th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#64748B; font-weight:700; border-bottom:1px solid #EEF2F7; position:sticky; top:0; background:#fff; z-index:1; }
+.bl1-th { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:#64748B; font-weight:700; border-bottom:1px solid #EEF2F7; position:sticky; top:0; background:#fff; z-index:1; }
 .bl1-row { border-bottom:1px solid #F1F5F9; font-size:13px; }
 .bl1-row:hover { background:#F8FAFC; }
 .bl1-rev { grid-template-columns:minmax(0,1.4fr) minmax(0,.9fr) minmax(90px,.6fr) minmax(0,.6fr) minmax(0,.7fr) minmax(0,.8fr) minmax(0,.6fr) minmax(90px,.7fr); }
@@ -82,12 +82,12 @@
 .bl1-tot { font-weight:700; background:#F8FAFC; }
 .bl1-barmini { height:6px; background:#EEF2F7; border-radius:99px; overflow:hidden; flex:1; min-width:40px; }
 .bl1-barmini i { display:block; height:100%; background:#2563EB; }
-.bl1-pill { border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; }
+.bl1-pill { border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; }
 .bl1-ok { background:#DCFCE7; color:#166534; }
 .bl1-wait { background:#FEF3C7; color:#B45309; }
 .bl1-no { background:#FEE2E2; color:#DC2626; }
 .bl1-off { background:#E2E8F0; color:#475569; }
-.bl1-sb { border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; white-space:nowrap; }
+.bl1-sb { border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; white-space:nowrap; }
 .bl1-open { background:#DCFCE7; color:#166534; }
 .bl1-closed { background:#FFEDD5; color:#C2410C; }
 .bl1-done { background:#0F2747; color:#fff; }
@@ -106,6 +106,6 @@
 @keyframes bl1sk { to { background-position:-200% 0; } }
 .bl1-page { display:flex; gap:8px; align-items:center; padding:10px 14px; font-size:13px; color:#64748B; }
 .bl1-page .bl1-btn { height:32px; padding:0 10px; font-size:12px; }
-.bl1-sid { font-size:11px; color:#94A3B8; }
-.bl1-mute { color:#94A3B8; }
+.bl1-sid { font-size:12px; color:#64748b; }
+.bl1-mute { color:#64748b; }
 #view-balance, #adminBalanceV1Root { max-width:100%; width:100%; }

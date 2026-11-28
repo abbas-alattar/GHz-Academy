@@ -1,3 +1,4 @@
+import { tell } from "./dialogs.js";
 import { friendlyError } from "./friendlyError.js";
 import { createElement as e, useEffect, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
@@ -509,7 +510,7 @@ function Materials({ courseId, canEdit, items, err, onRetry, onChanged, user, na
   };
   const toggleVis = async (it) => {
     try { await updateDoc(doc(db, "courseMaterials", it.id), { visible: !it.visible, updatedAt: serverTimestamp() }); onChanged(); }
-    catch (ex) { alert(ex?.code || ex?.message); }
+    catch (ex) { tell(ex?.code || ex?.message); }
   };
   const doDel = async () => {
     const it = del;

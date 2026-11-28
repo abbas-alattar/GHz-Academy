@@ -1,3 +1,4 @@
+import { ask, tell } from "./dialogs.js";
 import { friendlyError } from "./friendlyError.js";
     import { protect } from "./auth-guard.js?v=auth10";
     import { bootNotify } from "./portal-notify.js?v=stu11";
@@ -174,7 +175,7 @@ import { friendlyError } from "./friendlyError.js";
       document.querySelectorAll("[id^=view-]").forEach((s) => s.classList.add("hidden"));
       const el0 = document.getElementById(id0);
       if (el0) el0.classList.remove("hidden");
-      const titles0 = {dash:"Dashboard",browse:"Browse courses",courses:"My courses",regs:"My registrations",homework:"Homeworks",quizzes:"Quizzes",grades:"Grades",schedule:"Schedule",attendance:"Attendance",announcements:"Announcements",certificates:"Certificates",profile:"Profile",notifications:"Notifications",course:"Course content"};
+      const titles0 = {dash:"Dashboard",browse:"Browse courses",courses:"My courses",regs:"My registrations",homework:"Homework",quizzes:"Quizzes",grades:"Grades",schedule:"Schedule",attendance:"Attendance",announcements:"Announcements",certificates:"Certificates",profile:"Profile",notifications:"Notifications",course:"Course content"};
       const pt = document.getElementById("pageTitle"); if (pt) pt.textContent = titles0[raw0] || "Student";
       document.querySelectorAll(".side a").forEach((a) => a.classList.toggle("on", (a.dataset.view||"").replace(/v2$/,"") === raw0));
     } catch (_) {}
@@ -194,7 +195,7 @@ import { friendlyError } from "./friendlyError.js";
     const paintSkel = (name) => {
       if (name === "homeworkv2") {
         const h = document.getElementById("hwV2Root");
-        if (h && !h.querySelector(".hw2-wrap, .hw2-skel")) h.innerHTML = `<h2>Homeworks</h2><div class="hw2-skel"></div><div class="hw2-skel"></div>`;
+        if (h && !h.querySelector(".hw2-wrap, .hw2-skel")) h.innerHTML = `<h2>Homework</h2><div class="hw2-skel"></div><div class="hw2-skel"></div>`;
         try { void renderHomeworkV2({ host: h, loading: true }); } catch (_) {}
       }
       if (name === "attendancev2") {
@@ -247,7 +248,7 @@ import { friendlyError } from "./friendlyError.js";
           if (ir.top < nr.top || ir.bottom > nr.bottom) on.scrollIntoView({ block: "nearest" });
         }
       }
-      const titles = {dash:"Dashboard",browse:"Browse courses",browsev2:"Browse courses",courses:"My courses",coursesv2:"My courses",course:"Course",coursecontent:"Course content",regs:"My registrations",regsv2:"My registrations",homework:"Homeworks",homeworkv2:"Homeworks",quizzes:"Quizzes",quizv2:"Quizzes",quiztake:"Quiz",grades:"Grades",gradesv2:"Grades",schedule:"Schedule",schedulev2:"Schedule",attendance:"Attendance",attendancev2:"Attendance",announcements:"Announcements",notifications:"Notifications",certificates:"Certificates",profile:"Profile",profilev2:"Profile"};
+      const titles = {dash:"Dashboard",browse:"Browse courses",browsev2:"Browse courses",courses:"My courses",coursesv2:"My courses",course:"Course",coursecontent:"Course content",regs:"My registrations",regsv2:"My registrations",homework:"Homework",homeworkv2:"Homework",quizzes:"Quizzes",quizv2:"Quizzes",quiztake:"Quiz",grades:"Grades",gradesv2:"Grades",schedule:"Schedule",schedulev2:"Schedule",attendance:"Attendance",attendancev2:"Attendance",announcements:"Announcements",notifications:"Notifications",certificates:"Certificates",profile:"Profile",profilev2:"Profile"};
       document.getElementById("pageTitle").textContent = titles[name]||"Student";
       if (!keepHash) {
         const canon = (typeof highlightStudentNav === "function") ? null : null;
@@ -438,7 +439,7 @@ import { friendlyError } from "./friendlyError.js";
       return `<button class="btn btn-sm" type="button" data-reopen="${r.id}">Register again</button>`;
     };
     const reopenReg = async (rid, btn) => {
-      if (!confirm("Register again for this course? You will then receive payment instructions.")) return;
+      if (!await ask("Register again for this course? You will then receive payment instructions.")) return;
       if (btn) { btn.disabled = true; btn.textContent = "Registering…"; }
       try {
         await updateDoc(doc(db,"registrations", rid), { status:"pending_payment", createdAt: serverTimestamp() });
@@ -447,7 +448,7 @@ import { friendlyError } from "./friendlyError.js";
         location.reload();
       } catch (e) {
         if (btn) { btn.disabled = false; btn.textContent = "Register again"; }
-        alert("Could not register. " + (e.code||"") + " " + (e.message||""));
+        tell("Could not register. " + (e.code||"") + " " + (e.message||""));
       }
     };
     const bindBrowse = () => {
@@ -1269,7 +1270,7 @@ import { friendlyError } from "./friendlyError.js";
       </article>`).join("") : "<p>No registrations yet.</p>";
         document.querySelectorAll("[data-reopen]").forEach(b=> b.onclick=()=> reopenReg(b.dataset.reopen, b));
         document.querySelectorAll("[data-cancel]").forEach(b=> b.onclick=async()=>{
-          if (!confirm("Cancel this registration?")) return;
+          if (!await ask("Cancel this registration?")) return;
           await updateDoc(doc(db,"registrations", b.dataset.cancel), { status:"cancelled" });
           location.reload();
         });
@@ -1332,10 +1333,10 @@ import { friendlyError } from "./friendlyError.js";
               if (us.exists()) profile = us.data();
             } catch (_) {}
             try { await downloadReceiptPdf({ reg: r, course: c, profile, user: currentUser }); }
-            catch (e) { alert("Could not download receipt."); }
+            catch (e) { tell("Could not download receipt."); }
           },
           onCancel: async (id) => {
-            if (!confirm("Cancel this registration?")) return;
+            if (!await ask("Cancel this registration?")) return;
             await updateDoc(doc(db,"registrations", id), { status:"cancelled" });
             location.reload();
           },

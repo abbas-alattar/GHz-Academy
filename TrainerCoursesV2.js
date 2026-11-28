@@ -196,7 +196,7 @@ function Page({ uid, go }) {
           e("div", { className: "tr2-meta" }, e(Mini, { kind: "users", tone: "violet" }),
             e("span", { className: "tr2-avs" }, nameList.slice(0, 3).map((nm) => e("span", { className: "tr2-av", key: nm }, initials(nm)))),
             nameList.join(", ") || "—"),
-          e("div", { className: "tr2-meta" }, e(Mini, { kind: "clock", tone: "blue" }), e("span", null, (days || time) ? ((days || "") + (time ? (days ? " · " : "") + time : "")) : "Schedule to be announced", e("span", { className: "tr2-tz" }, "Beirut time"))),
+          e("div", { className: "tr2-meta" }, e(Mini, { kind: "clock", tone: "blue" }), e("span", null, (days || time) ? ((days || "") + (time ? (days ? " · " : "") + time : "")) : "Schedule to be announced", " ", e("span", { className: "tr2-tz" }, "· Beirut time"))),
           e("div", { className: "tr2-meta" }, e(Mini, { kind: "cal", tone: "teal" }), (formatCourseDate(c.startDate) || formatCourseDate(c.endDate)) ? ((formatCourseDate(c.startDate) || "Dates to be announced") + " – " + (formatCourseDate(c.endDate) || "Dates to be announced")) : "Dates to be announced"),
           e("div", { className: "tr2-meta" }, e(Mini, { kind: "users", tone: "violet" }), pack.extrasReady ? (pack.enrErr ? e("span", null, "— ", refreshIco) : nLab) : e("i", { className: "tr2-sk tr2-mini" })),
           pack.extrasReady

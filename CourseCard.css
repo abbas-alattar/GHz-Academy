@@ -66,7 +66,7 @@
 .cc1-tag {
   position: absolute; left: 12px; bottom: 10px;
   background: rgba(7,26,51,.72); color: #e0f2fe;
-  font-size: 11px; font-weight: 700; letter-spacing: .04em;
+  font-size: 12px; font-weight: 700; letter-spacing: .04em;
   padding: 4px 8px; border-radius: 999px;
 }
 .cc1-body {

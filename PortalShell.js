@@ -45,7 +45,7 @@ function sectionsFor(role) {
     { t: "Browse courses", h: "./student.html#browse" },
     { t: "My courses", h: "./student.html#courses" },
     { t: "My registrations", h: "./student.html#regs" },
-    { t: "Homeworks", h: "./student.html#homework" },
+    { t: "Homework", h: "./student.html#homework" },
     { t: "Quizzes", h: "./student-quizzes.html" },
     { t: "Grades", h: "./student-grades.html" },
     { t: "Schedule", h: "./student.html#schedule" },
@@ -246,7 +246,8 @@ function ensureContentScroller() {
 export function bootPortalShell() {
   ensureSideBrandRow();
   ensureContentScroller();
-  const role = readShell().role || roleFromPath();
+  // The page you are on decides the role (a value remembered from another portal page could be stale).
+  const role = roleFromPath();
   document.body.classList.remove("portal-student", "portal-trainer", "portal-admin");
   document.body.classList.add("portal-" + role);
   const name = readShell().name;
@@ -256,7 +257,7 @@ export function bootPortalShell() {
   const shell = readShell();
   const shown = name || shell.name;
   if (nameEl && shown) nameEl.textContent = shown;
-  if (roleEl) roleEl.textContent = role === "student" ? "student" : role;
+  if (roleEl) roleEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
 
   const top = document.querySelector(".top");
   if (top && !top.querySelector(".ghz-menu")) {

@@ -45,7 +45,7 @@
 .tfv2-search { position:relative; margin:8px 0 10px; }
 .tfv2-search svg { position:absolute; left:12px; top:11px; }
 .tfv2-search input { height:40px; padding-left:38px; }
-.tfv2-g { font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#64748B; margin:8px 0 4px; }
+.tfv2-g { font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#64748B; margin:8px 0 4px; }
 .tfv2-clist { display:grid; gap:8px; }
 .tfv2-pick.nest .tfv2-clist { max-height:320px; overflow:auto; }
 .tfv2-ccard { display:grid; grid-template-columns:22px 1fr auto; gap:10px; align-items:center; border:1px solid #E5EAF1; border-radius:12px; padding:12px 14px; background:#fff; cursor:pointer; text-align:left; font:inherit; }
@@ -55,7 +55,7 @@
 .tfv2-ccard.on .tfv2-ck { border-color:#2563EB; background:#2563EB; }
 .tfv2-ctitle { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:14.5px; font-weight:600; }
 .tfv2-cmeta { display:block; font-size:12.5px; color:#64748B; margin-top:2px; }
-.tfv2-st { border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; white-space:nowrap; }
+.tfv2-st { border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; white-space:nowrap; }
 .tfv2-st.open { background:#DCFCE7; color:#166534; }
 .tfv2-st.soon { background:#DBEAFE; color:#1D4ED8; }
 .tfv2-st.gray { background:#E2E8F0; color:#475569; }

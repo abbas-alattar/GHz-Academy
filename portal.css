@@ -97,7 +97,7 @@ input { width:100%; padding:12px 14px; border:1px solid var(--line); border-radi
   background: #2563EB; color: #fff; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 14px; white-space: nowrap;
 }
 .pay-notice-x {
-  border: 0; background: transparent; color: #94A3B8; font-size: 22px; line-height: 1; cursor: pointer; padding: 4px 8px;
+  border: 0; background: transparent; color: #64748b; font-size: 22px; line-height: 1; cursor: pointer; padding: 4px 8px;
 }
 @media (max-width: 767px) {
   .pay-notice { flex-wrap: wrap; }
@@ -140,7 +140,7 @@ body.portal-trainer .side nav::-webkit-scrollbar, body.portal-admin .side nav::-
 .who-sub { display:flex; align-items:center; gap:6px; font-size:12px; color:#64748B; line-height:1.2; }
 .who #userRole, .who-sid { font-size:12px; font-weight:400; letter-spacing:0; text-transform:none; color:#64748B; background:none; border-radius:0; padding:0; width:auto; }
 .who-sid { font-family:ui-monospace,Menlo,monospace; }
-.who-copy { opacity:0; border:0; background:none; cursor:pointer; color:#64748B; padding:0; font-size:11px; line-height:1; }
+.who-copy { opacity:0; border:0; background:none; cursor:pointer; color:#64748B; padding:0; font-size:12px; line-height:1; }
 .who:hover .who-copy { opacity:1; }
 .who.role-student span, .who.role-trainer span, .who.role-admin span { background:none; color:#64748B; }
 @media (max-width: 720px) { .who-sub { display:none; } }

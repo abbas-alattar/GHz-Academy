@@ -117,7 +117,7 @@ function groupCards(list) {
     const pack = list.filter((x) => !used.has(x.id) && x.type === n.type && x.courseTitle === n.courseTitle && bucketDay(x.time) === day);
     if (pack.length >= 2 && !n.celebrate) {
       pack.forEach((x) => used.add(x.id));
-      const label = n.category === "Quizzes" ? "quizzes" : n.category === "Homework" ? "homeworks" : n.category === "Announcements" ? "announcements" : n.category === "Grades" ? "grades" : n.category.toLowerCase();
+      const label = n.category === "Quizzes" ? "quizzes" : n.category === "Homework" ? "homework items" : n.category === "Announcements" ? "announcements" : n.category === "Grades" ? "grades" : n.category.toLowerCase();
       const title = prettyCourse(n);
       out.push({
         kind: "group",

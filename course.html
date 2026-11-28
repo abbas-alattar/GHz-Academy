@@ -99,6 +99,7 @@
   </nav>
   <main id="box"><div class="cd-state cd-card"><p>Loading course…</p></div></main>
   <script type="module">
+    import { ask } from "./dialogs.js";
     import { auth, db } from "./firebase-config.js?v=auth10";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -183,7 +184,7 @@
               }
               area.innerHTML = `<button class="btn" id="regBtn" type="button" style="width:auto;padding:12px 20px">Register again</button><p id="regMsg"></p>`;
               document.getElementById("regBtn").onclick = async () => {
-                if (!confirm("Register again for this course? You will then receive payment instructions.")) return;
+                if (!await ask("Register again for this course? You will then receive payment instructions.")) return;
                 const btn = document.getElementById("regBtn");
                 btn.disabled = true; btn.textContent = "Registering…";
                 try {
@@ -202,7 +203,7 @@
           }
           area.innerHTML = `<button class="btn" id="regBtn" type="button" style="width:auto;padding:12px 20px">Register</button><p id="regMsg"></p>`;
           document.getElementById("regBtn").onclick = async () => {
-            if (!confirm("Register for this course? You will then receive payment instructions.")) return;
+            if (!await ask("Register for this course? You will then receive payment instructions.")) return;
             const btn = document.getElementById("regBtn");
             btn.disabled = true; btn.textContent = "Registering…";
             try {

@@ -36,13 +36,13 @@
 .an2-av { width: 40px; height: 40px; border-radius: 50%; background: #0F2747; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
 .an2-title { margin: 0 0 6px; font-size: 18px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .an2-meta { font-size: 13px; color: #64748B; margin: 0 0 8px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.an2-role { border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+.an2-role { border-radius: 999px; padding: 2px 8px; font-size: 12px; font-weight: 600; }
 .an2-role.admin { background: #0F2747; color: #fff; }
 .an2-role.trainer { background: #DBEAFE; color: #2563EB; }
-.an2-scope { border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+.an2-scope { border-radius: 999px; padding: 2px 8px; font-size: 12px; font-weight: 600; }
 .an2-scope.all { background: #DCFCE7; color: #16A34A; }
 .an2-scope.course { background: #DBEAFE; color: #2563EB; }
-.an2-new { background: #FEF3C7; color: #D97706; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+.an2-new { background: #FEF3C7; color: #D97706; border-radius: 999px; padding: 2px 8px; font-size: 12px; font-weight: 600; }
 .an2-body { margin: 0; font-size: 15px; color: #0F2747; line-height: 1.5; white-space: pre-wrap; }
 .an2-body.clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .an2-more { border: 0; background: none; color: #2563EB; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; padding: 6px 0 0; }

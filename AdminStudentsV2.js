@@ -1,3 +1,4 @@
+import { tell } from "./dialogs.js";
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { db } from "./firebase-config.js?v=auth10";
@@ -328,7 +329,7 @@ function Drawer({ s, courseById, lastMs, lastLabel, lastErr, onClose, onToggle, 
       });
     } catch (err) {
       try { if (preview && !preview.closed) preview.close(); } catch (_) {}
-      alert(err?.code || err?.message || String(err));
+      tell(err?.code || err?.message || String(err));
     }
     setPdfBusy(false);
   };

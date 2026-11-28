@@ -55,9 +55,9 @@ function cardsHtml(rows, opts) {
       try { acts = String(opts.cardActions?.(c) || ""); } catch {}
       const chip = (acts.match(/<span class="v2-enrolled"[^>]*>[\s\S]*?<\/span>/) || [""])[0];
       const btns = acts.replace(/<span class="v2-enrolled"[^>]*>[\s\S]*?<\/span>/, "");
-      const badges = (lab === "On going · Registration closed" || kind === "closed")
-        ? `<span class="v2-stchip ongoing"><i class="v2-dot green"></i>On going</span><span class="v2-stchip closed"><i class="v2-dot amber"></i>Closed</span>`
-        : `<span class="v2-stchip ${esc(kind)}"><i class="v2-dot ${kind === "sched-open" ? "blue" : (kind === "ongoing" ? "green" : "amber")}"></i>${esc(lab.indexOf("Scheduled") === 0 ? "Scheduled" : (lab.indexOf("On going") === 0 ? "On going" : lab))}</span>`;
+      const badges = (lab === "Ongoing · Registration closed" || kind === "closed")
+        ? `<span class="v2-stchip ongoing"><i class="v2-dot green"></i>Ongoing</span><span class="v2-stchip closed"><i class="v2-dot amber"></i>Closed</span>`
+        : `<span class="v2-stchip ${esc(kind)}"><i class="v2-dot ${kind === "sched-open" ? "blue" : (kind === "ongoing" ? "green" : "amber")}"></i>${esc(lab.indexOf("Scheduled") === 0 ? "Scheduled" : (lab.indexOf("Ongoing") === 0 ? "Ongoing" : lab))}</span>`;
       let clock = "To be announced";
       try { clock = timeLine(c); } catch { clock = "To be announced"; }
       const clockMain = String(clock).replace(/ Beirut time$/i, "");

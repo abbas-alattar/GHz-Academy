@@ -125,7 +125,7 @@ function sectionHtml(c, assigns, subs, q, status) {
   const readonly = group === "completed";
   const body = shown.length
     ? shown.map((a) => cardHtml(a, subFor(a, subs), readonly, c?.title)).join("")
-    : `<p class="hw2-none">No homework yet</p>`;
+    : `<p class="hw2-none">No homework yet<span style="display:block;margin-top:4px;font-size:13px;line-height:1.45;color:#64748b;font-weight:400">Your trainer will post assignments here.</span></p>`;
   const w = list.length ? Math.round((submittedN / list.length) * 100) : 0;
   return `<section class="hw2-sec">
     <button type="button" class="hw2-sec-h" data-hw2-tog="${esc(cid)}">
@@ -161,14 +161,14 @@ export function renderHomeworkV2(opts) {
     const nDone = courses.filter((c) => courseGroup(c) === "completed").length;
 
     const emptyTab = tab === "active"
-      ? `<div class="hw2-empty"><div class="ico">📡</div><p>No active courses</p></div>`
+      ? `<div class="hw2-empty"><div class="ico">📡</div><p>No active courses<span style="display:block;margin-top:4px;font-size:13px;line-height:1.45;color:#64748b;font-weight:400">Homework appears here once you are enrolled in a course.</span></p></div>`
       : `<div class="hw2-empty"><div class="ico">🎓</div><p>No completed courses</p></div>`;
 
     host.innerHTML = `<div class="hw2-wrap${opts.stale ? " is-stale" : ""}">
       ${opts.stale ? `<p class="hw2-sub" style="opacity:.7">Updating homework…</p>` : ""}
       <div class="hw2-head">
         <div>
-          <h2>Homeworks</h2>
+          <h2>Homework</h2>
           <p class="hw2-sub">Your assignments, grouped by course</p>
         </div>
       </div>
@@ -239,7 +239,7 @@ export function renderHomeworkV2(opts) {
           return (bn > 0) - (an > 0);
         });
         const emptyNow = tabNow === "active"
-          ? `<div class="hw2-empty"><div class="ico">📡</div><p>No active courses</p></div>`
+          ? `<div class="hw2-empty"><div class="ico">📡</div><p>No active courses<span style="display:block;margin-top:4px;font-size:13px;line-height:1.45;color:#64748b;font-weight:400">Homework appears here once you are enrolled in a course.</span></p></div>`
           : `<div class="hw2-empty"><div class="ico">🎓</div><p>No completed courses</p></div>`;
         listEl.innerHTML = rows.length ? rows.map((c) => sectionHtml(c, assigns, subs, qq, st)).join("") : emptyNow;
       }

@@ -78,7 +78,7 @@
           <div id="adminCoursesClassic" class="hidden">
           <div class="toolbar">
             <input id="courseSearch" placeholder="Search courses" />
-            <select id="courseStatus"><option value="">All statuses</option><option value="Draft">Draft</option><option value="Open">On going</option><option value="Coming soon">Scheduled</option><option value="Closed">On going · Registration closed</option><option value="Completed">Completed</option><option value="Archived">Archived</option></select>
+            <select id="courseStatus"><option value="">All statuses</option><option value="Draft">Draft</option><option value="Open">Ongoing</option><option value="Coming soon">Scheduled</option><option value="Closed">Ongoing · Registration closed</option><option value="Completed">Completed</option><option value="Archived">Archived</option></select>
             <button class="btn btn-sm" id="addCourse" type="button">Add</button>
           </div>
           <div class="table-wrap"><table class="data"><thead><tr><th>Title</th><th>Trainer</th><th>Duration</th><th>Level</th><th>Status</th><th>Start</th><th>Delivery</th><th></th></tr></thead><tbody id="courseRows"><tr><td colspan="8">Loading…</td></tr></tbody></table></div>
@@ -143,6 +143,7 @@
   <div id="courseFormV2Host"></div>
   <div id="trainerFormV2Host"></div>
   <script type="module">
+    import { ask, askText } from "./dialogs.js";
     import { protect } from "./auth-guard.js?v=auth10";
     import { bootPortalSpa } from "./portal-spa.js";
     bootPortalSpa();
@@ -617,7 +618,7 @@
         <label>Currency</label><input id="ccur" value="${c.currency||"USD"}" />
         <label>Start date</label><input id="cstart" type="date" value="${c.startDate||""}" />
         <label>End date</label><input id="cend" type="date" value="${c.endDate||""}" />
-        <label>Status</label><select id="cstat"><option value="Draft">Draft</option><option value="Open">On going</option><option value="Coming soon">Scheduled</option><option value="Closed">On going · Registration closed</option><option value="Completed">Completed</option><option value="Archived">Archived</option></select>
+        <label>Status</label><select id="cstat"><option value="Draft">Draft</option><option value="Open">Ongoing</option><option value="Coming soon">Scheduled</option><option value="Closed">Ongoing · Registration closed</option><option value="Completed">Completed</option><option value="Archived">Archived</option></select>
         <label>Assigned trainers</label><select id="ctrain" multiple style="height:90px">${trainers.map(t=>`<option value="${t.id}" ${(c.trainerIds||[]).includes(t.id)?"selected":""}>${t.name}</option>`).join("")}</select>
         <button class="btn" id="saveCourse" type="button">Save</button>
         <button class="btn btn-ghost" type="button" id="cancelM">Cancel</button></div>`;
@@ -727,7 +728,7 @@
     };
     document.getElementById("addCourse").onclick = () => openCourse();
     const archiveCourse = async (id) => {
-      if (!confirm("Archive this course? Students will no longer see it as open.")) return;
+      if (!await ask("Archive this course? Students will no longer see it as open.")) return;
       try { await updateDoc(doc(db,"courses",id), { status:"Archived" }); toast("Course archived."); await load(); }
       catch(e){ toast("Could not archive.","err"); }
     };
@@ -982,9 +983,9 @@
     document.getElementById("addTrainer").onclick = () => openTrainer();
     const setTrainerActive = async (id, next) => {
       if (next) {
-        if (!confirm("Activate this trainer? They will be able to log in again.")) return;
+        if (!await ask("Activate this trainer? They will be able to log in again.")) return;
       } else {
-        if (!confirm("Deactivate this trainer? They will not be able to log in.")) return;
+        if (!await ask("Deactivate this trainer? They will not be able to log in.")) return;
       }
       try { await updateDoc(doc(db,"users",id), { active: next }); toast(next ? "Trainer activated." : "Trainer deactivated."); await load(); }
       catch(e){ toast("Could not update trainer. "+(e.code||e.message),"err"); }
@@ -1064,7 +1065,7 @@
     const enId = (r) => (r.uid || "") + "_" + (r.courseId || "");
     const confirmEnrollment = async (r) => {
       if (!r) return;
-      if (!confirm("Confirm this enrollment?")) return;
+      if (!await ask("Confirm this enrollment?")) return;
       try {
         const batch = writeBatch(db);
         const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -1093,9 +1094,9 @@
     };
     const rejectRegistration = async (r, givenNote) => {
       if (!r) return;
-      const note = givenNote != null ? String(givenNote) : prompt("Rejection note for the student:");
+      const note = givenNote != null ? String(givenNote) : await askText("Rejection note for the student:");
       if (note === null) return;
-      if (givenNote == null && !confirm("Reject this registration?")) return;
+      if (givenNote == null && !await ask("Reject this registration?")) return;
       try {
         const batch = writeBatch(db);
         batch.update(doc(db,"registrations", r.id), { status:"rejected", rejectNote: note || "", cancelledBy: auth.currentUser.uid, cancelledAt: serverTimestamp() });

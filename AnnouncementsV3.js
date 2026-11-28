@@ -181,7 +181,7 @@ function App({ opts }) {
     ),
     !filtered.length ? e("div", { className: "an3-empty" },
       e("svg", { width: "48", height: "48", viewBox: "0 0 24 24", fill: "none" }, e("path", { d: "M4 6h16v12H4z", stroke: "#94A3B8", "stroke-width": "1.8" }), e("path", { d: "M4 9h16M8 13h8", stroke: "#94A3B8", "stroke-width": "1.8" })),
-      e("p", { style: { fontWeight: 700, color: "#0F2747" } }, "No announcements yet"),
+      e("p", { style: { fontWeight: 700, color: "#0F2747" } }, "No announcements yet", e("span", { style: { display: "block", marginTop: 4, fontSize: 13, lineHeight: 1.45, color: "#64748b", fontWeight: 400 } }, "News from your trainers and the academy will appear here.")),
       e("p", null, "When your academy posts an update, it will show up here.")
     ) : ["Today", "This week", "Earlier"].map((g) => groups[g].length ? e("div", { key: g }, e("div", { className: "an3-gh" }, g), groups[g].map(card)) : null)
   );

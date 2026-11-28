@@ -593,7 +593,7 @@ function Page({ uid, go, quizId, courseId }) {
   const table = () => {
     if (pack?.quizErr && pack?.extrasReady) return e("div", { className: "th2-err" }, pack.quizErr, " ", e("button", { className: "th2-btn", onClick: () => refreshTrainerStore(uid) }, "Try again"));
     if (!pack || !pack.extrasReady) return e("div", { className: "th2-qgrid" }, qHead, [1,2,3].map((i) => e("div", { key: i, className: "th2-rr th2-sk" }, e("b", { style: { gridColumn: "1 / -1" } }))));
-    if (!list.length) return e("div", { className: "th2-empty" }, e("p", null, "No quizzes yet"), e("button", { className: "th2-create", disabled: createDisabled, title: createDisabled ? "Course is completed" : "", onClick: () => openForm() }, e(Plus), " Create quiz"));
+    if (!list.length) return e("div", { className: "th2-empty" }, e("p", null, "No quizzes yet", e("span", { style: { display: "block", marginTop: 4, fontSize: 13, lineHeight: 1.45, color: "#64748b", fontWeight: 400 } }, "Create a quiz; it reaches your students when you publish it.")), e("button", { className: "th2-create", disabled: createDisabled, title: createDisabled ? "Course is completed" : "", onClick: () => openForm() }, e(Plus), " Create quiz"));
     return e("div", { className: "th2-qgrid" }, qHead,
       list.map((qz) => {
         const c = course(qz.courseId);

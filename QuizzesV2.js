@@ -163,7 +163,7 @@ function sectionHtml(c, quizzes, attempts, q, status) {
   const readonly = group === "completed";
   const body = shown.length
     ? shown.map((x) => cardHtml(x, attFor(x, attempts), readonly)).join("")
-    : `<p class="qz2-none">No quizzes yet</p>`;
+    : `<p class="qz2-none">No quizzes yet<span style="display:block;margin-top:4px;font-size:13px;line-height:1.45;color:#64748b;font-weight:400">Quizzes appear here when your trainer publishes them.</span></p>`;
   const w = list.length ? Math.round((doneN / list.length) * 100) : 0;
   return `<section class="qz2-sec">
     <button type="button" class="qz2-sec-h" data-qz2-tog="${esc(cid)}">

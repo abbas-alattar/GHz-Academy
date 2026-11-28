@@ -230,9 +230,9 @@ function cardHtml(c, opts) {
   const noAct = !pendingProg && att == null && !hw.total && (qzTxt === "—" || !qzTxt);
   const stBadges = showCompleted
     ? `<span class="mc2-stchip completed-ok"><i class="v2-dot green"></i>Completed</span>`
-    : (chipLab === "On going · Registration closed" || chipKind === "closed")
-      ? `<span class="mc2-stchip ongoing"><i class="v2-dot green"></i>On going</span><span class="mc2-stchip closed"><i class="v2-dot amber"></i>Closed</span>`
-      : `<span class="mc2-stchip ${esc(chipKind)}"><i class="v2-dot ${chipKind === "sched-open" ? "blue" : (chipKind === "ongoing" ? "green" : "amber")}"></i>${esc(chipLab.indexOf("Scheduled") === 0 ? "Scheduled" : (chipLab.indexOf("On going") === 0 ? "On going" : chipLab))}</span>`;
+    : (chipLab === "Ongoing · Registration closed" || chipKind === "closed")
+      ? `<span class="mc2-stchip ongoing"><i class="v2-dot green"></i>Ongoing</span><span class="mc2-stchip closed"><i class="v2-dot amber"></i>Closed</span>`
+      : `<span class="mc2-stchip ${esc(chipKind)}"><i class="v2-dot ${chipKind === "sched-open" ? "blue" : (chipKind === "ongoing" ? "green" : "amber")}"></i>${esc(chipLab.indexOf("Scheduled") === 0 ? "Scheduled" : (chipLab.indexOf("Ongoing") === 0 ? "Ongoing" : chipLab))}</span>`;
   return `<article class="mc2-card${done ? " muted" : ""}">
     <div class="mc2-cover">
       ${coverBlock(c)}
@@ -289,7 +289,7 @@ export function renderMyCoursesV2(opts) {
     };
 
     const empty = tab === "completed"
-      ? `<div class="mc2-empty"><p>No completed courses yet</p></div>`
+      ? `<div class="mc2-empty"><p>No completed courses yet<span style="display:block;margin-top:4px;font-size:13px;line-height:1.45;color:#64748b;font-weight:400">Finished courses, results and certificates will show here.</span></p></div>`
       : `<div class="mc2-empty"><p>You're not enrolled in an active course yet</p><button class="btn btn-sm" type="button" data-mc2-browse>Browse courses</button></div>`;
 
     host.innerHTML = `<div class="mc2-wrap${opts.stale ? " is-stale" : ""}">

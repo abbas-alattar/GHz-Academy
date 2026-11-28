@@ -6,7 +6,7 @@
 .tr2-boxtbl { width:100%; border-collapse:collapse; font-size:12px; }
 .tr2-boxtbl th, .tr2-boxtbl td { border-bottom:1px solid #EEF2F7; padding:8px 10px; text-align:left; vertical-align:top; color:#0F2747; }
 .tr2-boxtbl th { color:#64748B; font-weight:600; white-space:nowrap; }
-.tr2-id { font-size:11px; color:#94A3B8; margin-top:2px; }
+.tr2-id { font-size:12px; color:#64748b; margin-top:2px; }
 .tr2-pend { font-size:13px; color:#0F2747; margin:0 0 8px !important; }
 .tr2-why { margin:0; padding-left:18px; font-size:12px; color:#64748B; }
 .tr2-timeout h3 { margin:0 0 8px; font-size:18px; }
@@ -14,7 +14,7 @@
 .tr2-timeout-acts { display:flex; gap:12px; align-items:center; }
 .tr2-boot { list-style:none; margin:0 0 16px; padding:0; font-size:13px; }
 .tr2-boot li { display:flex; flex-wrap:wrap; gap:6px; padding:6px 0; border-bottom:1px solid #EEF2F7; color:#0F2747; }
-.tr2-boot li span { color:#94A3B8; margin-left:auto; }
+.tr2-boot li span { color:#64748b; margin-left:auto; }
 .tr2-boot li.ok b { color:#15803D; }
 .tr2-boot li.pend { color:#B45309; background:#FFFBEB; padding:6px 8px; border-radius:8px; }
 .tr2-boot li.fail { color:#B91C1C; background:#FEF2F2; padding:6px 8px; border-radius:8px; }
@@ -70,9 +70,9 @@
 .tr2-mi.blue { background:#DBEAFE; color:#2563EB; }
 .tr2-mi.teal { background:#D1FAE5; color:#059669; }
 .tr2-avs { display:flex; align-items:center; }
-.tr2-av { width:22px; height:22px; border-radius:50%; background:#0F2747; color:#fff; font-size:9px; font-weight:700; display:grid; place-items:center; border:2px solid #fff; margin-left:-6px; }
+.tr2-av { width:22px; height:22px; border-radius:50%; background:#0F2747; color:#fff; font-size:11px; font-weight:700; display:grid; place-items:center; border:2px solid #fff; margin-left:-6px; }
 .tr2-av:first-child { margin-left:0; }
-.tr2-sb { display:inline-flex; width:auto; border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; flex:none; }
+.tr2-sb { display:inline-flex; width:auto; border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; flex:none; }
 .tr2-open { background:#DCFCE7; color:#166534; }
 .tr2-closed { background:#FFEDD5; color:#C2410C; }
 .tr2-done { background:#0F2747; color:#fff; }
@@ -112,4 +112,4 @@
 .tr2-next strong { font-size:18px; display:block; }
 .tr2-next .tr2-next-sub { font-size:12px; color:#64748B; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
 .tr2-mini { display:inline-block; width:48px; height:10px; }
-.tr2-refresh { width:22px; height:22px; border:0; background:transparent; color:#94A3B8; cursor:pointer; padding:0; display:inline-grid; place-items:center; }
+.tr2-refresh { width:22px; height:22px; border:0; background:transparent; color:#64748b; cursor:pointer; padding:0; display:inline-grid; place-items:center; }
