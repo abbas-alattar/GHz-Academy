@@ -78,7 +78,7 @@ function priHtml(st) {
 
 export function publicCardActions(c, ctx = {}) {
   const slug = courseSlug(c);
-  const view = `<a class="v2-details" href="./courses.html?course=${encodeURIComponent(slug)}" data-view="${esc(c.id)}">View course</a>`;
+  const view = `<a class="v2-details" href="./course.html?id=${encodeURIComponent(c.id)}" data-view="${esc(c.id)}">View course</a>`;
   const st = getCourseAction(c, { ...ctx, forDetails: false });
   const chip = st.enrolled ? `<span class="v2-enrolled">Enrolled</span>` : (st.kind === "pending" ? `<span class="v2-enrolled" style="background:#FEF3C7;color:#92400E">Pending</span>` : (String(c?.status) === "Completed" ? `<span class="v2-enrolled" style="background:#E5E7EB;color:#374151">Completed</span>` : ""));
   return `${chip}${view}${priHtml(st)}`;

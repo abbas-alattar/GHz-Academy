@@ -3,7 +3,7 @@ import { collection, getDocs, query, where, doc, getDoc } from "https://www.gsta
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { renderBrowseCoursesV2 } from "./BrowseCoursesV2.js?v=r2";
 import { stripCoverFields, hydrateCovers } from "./coverFor.js?v=stu11-r2";
-import { publicCardActions, moneyLabel } from "./courseCardActions.js";
+import { publicCardActions, moneyLabel } from "./courseCardActions.js?v=r3";
 
 const PUBLIC = ["Open", "Coming soon", "Closed"];
 
@@ -95,16 +95,14 @@ try {
     if (!a) return;
     ev.preventDefault();
     const id = a.getAttribute("data-view");
-    const c = list.find((x) => x.id === id);
-    if (!c) return;
-    const { openModal } = await import("./PublicCoursesV1.js?v=21");
-    openModal(c, ctx.role, list);
+    if (!id) return;
+    location.href = "./course.html?id=" + encodeURIComponent(id);
   });
   const want = new URLSearchParams(location.search).get("course");
   if (want) {
-    const { openModal, applyCourseParam } = await import("./PublicCoursesV1.js?v=21");
+    const { openModal, applyCourseParam } = await import("./PublicCoursesV1.js?v=21-r3");
     const c = list.find((x) => String(x.id) === want || String(x.slug || "").toLowerCase() === want.toLowerCase() || String(x.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === want.toLowerCase());
-    if (c) openModal(c, ctx.role, list, true);
+    if (c) location.replace("./course.html?id=" + encodeURIComponent(c.id));
     else applyCourseParam(false);
   }
 

@@ -8,7 +8,7 @@ import { formatBeirutTimeLine, timeInfoButton, bindTimePopovers } from "./course
 import { courseCardHtml, coverHtml } from "./CourseCard.js";
 import { stripCoverFields, hydrateCovers } from "./coverFor.js?v=stu11-r2";
 import { renderBrowseCoursesV2 } from "./BrowseCoursesV2.js?v=r2";
-import { publicCardActions, moneyLabel, getCourseAction, courseSlug } from "./courseCardActions.js";
+import { publicCardActions, moneyLabel, getCourseAction, courseSlug } from "./courseCardActions.js?v=r3";
 import { statusLabel, statusChipKind, canRegisterForCourse } from "./courseStatusLabel.js?v=r2";
 import { icon } from "./ghz-icons.js";
 
@@ -680,7 +680,8 @@ export function applyCourseParam(fromPop) {
   if (open && openSlug === want) return;
   if (open) return;
   const c = findByParam(lastList, want);
-  if (c) openModal(c, lastRole, lastList, true);
+  // Old "?course=" links now forward to the course's own page.
+  if (c) location.replace("./course.html?id=" + encodeURIComponent(c.id));
   else if (lastList.length) openMissing();
 }
 
@@ -863,8 +864,8 @@ export async function bootPublicCourses() {
     if (!id) return;
     if (ev.target?.closest?.("a.v2-pri, a.btn, button")) return;
     ev.preventDefault();
-    const c = list.find((x) => x.id === id);
-    if (c) openModal(c, role, list);
+    // Each course has its own page now (shareable link, more room than a popup).
+    location.href = "./course.html?id=" + encodeURIComponent(id);
   });
   lastList = list;
   lastRole = role;

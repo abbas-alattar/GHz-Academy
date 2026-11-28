@@ -66,6 +66,14 @@
     #regArea .banner, #regArea p { margin-top: 10px; font-size: .9rem; }
     .cd-side .dd-wrap, .cd-side [class*="dd-"] { max-width: 100%; }
     .cd-state { max-width: 640px; margin: 60px auto; padding: 0 24px; }
+    .cd-trainers { display: flex; flex-wrap: wrap; gap: 12px; }
+    .cd-trainer { display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 10px; border: 1px solid #e2e8f0; border-radius: 14px; background: #f8fafc; }
+    .cd-ini { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1d4ed8, #0ea5e9); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: "Space Grotesk", sans-serif; }
+    .cd-trainer strong { display: block; color: #0F2747; }
+    .cd-trainer span { font-size: .85rem; color: #64748b; }
+    .cd-trainer .cd-ini { color: #fff; font-size: .95rem; }
+    .cd-share { margin-top: 12px; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; border-radius: 12px; border: 1px solid #cbd5e1; background: #fff; color: #0F2747; font: inherit; font-weight: 600; cursor: pointer; }
+    .cd-share:hover { background: #f1f5f9; }
     @media (max-width: 900px) {
       .cd-hero-in { grid-template-columns: 1fr; gap: 22px; padding: 26px 16px 32px; }
       .cd-body { grid-template-columns: 1fr; padding: 22px 16px 60px; gap: 20px; }
@@ -105,7 +113,7 @@
     import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { isPublicCourse, unavailableHtml } from "./public-course.js";
     import { deliveryDaysHtml } from "./DeliveryDays.js";
-    import { startsEndsLine } from "./courseDates.js";
+    import { startsEndsLine, formatCourseDate } from "./courseDates.js";
     import { canRegisterForCourse, courseStatusLabel } from "./courseStatusLabel.js?v=r2";
     import { coverMarkup, hydrateCovers } from "./coverFor.js?v=r2";
     const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
@@ -126,8 +134,13 @@
         const priceNum = Number(c.price);
         const priceHtml = c.price && Number.isFinite(priceNum) && priceNum > 0
           ? `${esc(c.price)} <small>${esc(c.currency || "")}</small>` : `<small style="font-size:1rem;color:#0F2747">Price on request</small>`;
-        const dates = startsEndsLine(c);
-        const facts = [["Level", c.level], ["Duration", c.duration], ["Dates", dates]]
+        const startTxt = formatCourseDate(c.startDate) || "To be announced";
+        const endTxt = formatCourseDate(c.endDate);
+        const perWeek = Number(c.sessionsPerWeek) || (Array.isArray(c.days) ? c.days.filter(Boolean).length : 0);
+        const sessTxt = perWeek ? (perWeek === 1 ? "Once a week" : perWeek === 2 ? "Twice a week" : perWeek + " times a week") : "";
+        const trainers = (Array.isArray(c.trainerNames) ? c.trainerNames : []).filter(Boolean);
+        const initials = (n) => String(n).split(/\s+/).map((p) => p[0] || "").join("").slice(0, 2).toUpperCase();
+        const facts = [["Level", c.level], ["Duration", c.duration], ["Starts", startTxt], ["Ends", endTxt], ["Sessions", sessTxt]]
           .filter(([, v]) => v && String(v).trim())
           .map(([k, v]) => `<li><span>${k}</span><b>${esc(v)}</b></li>`).join("");
         const outline = (c.outline || []).filter((m) => m && (m.title || m.description));
@@ -144,6 +157,7 @@
           <div class="cd-body">
             <div>
               <section class="cd-card"><h2>About this course</h2><p>${para(c.full || c.short || "Details will be announced soon.")}</p></section>
+              <section class="cd-card"><h2>Your trainers</h2>${trainers.length ? `<div class="cd-trainers">${trainers.map((n) => `<div class="cd-trainer"><span class="cd-ini" aria-hidden="true">${esc(initials(n))}</span><div><strong>${esc(n)}</strong><span>Instructor</span></div></div>`).join("")}</div>` : `<p>To be announced.</p>`}</section>
               ${outline.length ? `<section class="cd-card"><h2>Course outline</h2><ol class="cd-outline">${outline.map((m) => `<li><div><strong>${esc(m.title || "")}</strong><span>${esc(m.description || "")}</span></div></li>`).join("")}</ol></section>` : ""}
               <section class="cd-card"><h2>Prerequisites</h2><p>${para(c.prerequisites || "Listed on registration.")}</p></section>
             </div>
@@ -152,9 +166,21 @@
               <ul class="cd-facts">${facts}</ul>
               ${deliveryDaysHtml(c, { emptyMode: "hide" })}
               <div id="regArea" style="margin-top:18px"></div>
+              <button type="button" class="cd-share" id="cdShare"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share this course</button>
             </div></aside>
           </div>`;
         try { hydrateCovers(box, { thumb: false, eager: 1 }); } catch (_) {}
+        const shareBtn = document.getElementById("cdShare");
+        if (shareBtn) shareBtn.onclick = async () => {
+          const url = location.origin + location.pathname + "?id=" + encodeURIComponent(id);
+          const label = shareBtn.lastChild;
+          try {
+            if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) { await navigator.share({ title: c.title + " — GHz Academy", text: "Check out this course at GHz Academy", url }); return; }
+            await navigator.clipboard.writeText(url);
+            label.textContent = "Link copied";
+          } catch (_) { label.textContent = "Copy failed — use the address bar"; }
+          setTimeout(() => { label.textContent = "Share this course"; }, 2200);
+        };
         const area = document.getElementById("regArea");
         onAuthStateChanged(auth, async (user) => {
           if (!canRegisterForCourse(c.status)) {

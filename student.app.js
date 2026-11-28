@@ -590,7 +590,7 @@ import { friendlyError } from "./friendlyError.js?v=r2";
         ev.preventDefault();
         const c = (Array.isArray(catalog) ? catalog : []).find((x) => x.id === decodeURIComponent(id));
         if (!c) return;
-        const { openModal } = await import("./PublicCoursesV1.js?v=12");
+        const { openModal } = await import("./PublicCoursesV1.js?v=12-r3");
         openModal(c, "student", catalog);
       };
     };
