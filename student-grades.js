@@ -1,8 +1,8 @@
-import { bootStudentNav } from "./student-nav.js";
-import { protect } from "./auth-guard.js?v=auth10";
+import { bootStudentNav } from "./student-nav.js?v=r2";
+import { protect } from "./auth-guard.js?v=auth10-r2";
 import { db } from "./firebase-config.js?v=auth10";
 import { getDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { loadStudentDash, whenStudentStore } from "./student-dash-data.js?v=stu11";
+import { loadStudentDash, whenStudentStore } from "./student-dash-data.js?v=stu11-r2";
 import { esc, attPct, ring } from "./grades-shell.js";
 import { homeworkGradeItem, quizGradeItem, courseAverageResolved, getParent } from "./student-grade-math.js";
 import { studentGradeDistributionHtml } from "./student-grade-distribution.js";

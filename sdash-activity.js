@@ -1,4 +1,4 @@
-import { bound } from "./student-dash-data.js?v=stu11";
+import { bound } from "./student-dash-data.js?v=stu11-r2";
 
 function dayKey(d) { return d.toISOString().slice(0,10); }
 

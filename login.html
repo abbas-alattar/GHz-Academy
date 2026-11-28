@@ -20,10 +20,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./portal.css" />
+  <link rel="stylesheet" href="./portal.css?v=r2" />
   <link rel="stylesheet" href="./ghz-responsive.css" />
-  <link rel="stylesheet" href="./AuthPageV2.css" />
-  <link rel="stylesheet" href="./ghz-mobile.css" />
+  <link rel="stylesheet" href="./AuthPageV2.css?v=r2" />
+  <link rel="stylesheet" href="./ghz-mobile.css?v=r2" />
 </head>
 <body>
   <div id="authV2Root"></div>
@@ -93,7 +93,7 @@
     import { ensureLocalPersistence, broadcastLogin, watchCrossTab } from "./auth-sync.js?v=auth9";
     import { markLoginActivity } from "./lastActive.js";
     import { assignStudentIdTx } from "./studentId.js";
-    import { renderAuthPageV2 } from "./AuthPageV2.js";
+    import { renderAuthPageV2 } from "./AuthPageV2.js?v=r2";
 
     const err = document.getElementById("err");
     const ok = document.getElementById("ok");

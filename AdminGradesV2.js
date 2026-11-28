@@ -5,7 +5,7 @@ import { collection, query, where, getDocs, getDoc, doc, setDoc, serverTimestamp
 import { parseScore, computeAverage, computeStatus, mergedSectionValues, fmt1, gradeCalc, averageTip, readPublished, publishedPayload, storedCourseResult } from "./gradeCalc.js";
 import { AdminPdfButton } from "./AdminPdfExport.js";
 import { csvDown } from "./grades-shell.js";
-import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js?v=r2";
 
 function showSecErr(host, err, retry) {
   if (!host) return;

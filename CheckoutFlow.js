@@ -3,7 +3,7 @@ import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gst
 import { createPayment, normalizeMethods, DEFAULT_METHODS, methodInstructions, isFreeCourse, makeTransferRef } from "./paymentProviders.js?v=stu30";
 import { dateRangeLine } from "./courseDates.js?v=stu11";
 import { formatSchedule } from "./DeliveryDays.js";
-import { coverMarkup, hydrateCovers } from "./coverFor.js?v=stu11";
+import { coverMarkup, hydrateCovers } from "./coverFor.js?v=stu11-r2";
 
 function el(html) {
   const d = document.createElement("div");
@@ -148,7 +148,7 @@ export async function openCheckout({ user, profile, course, existing }) {
           status: "pending_payment",
           createdAt: serverTimestamp()
         });
-        await import("./notify.js").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: course.id, courseTitle: course.title, studentName: details.name }))).catch(() => {});
+        await import("./notify.js?v=r2").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: course.id, courseTitle: course.title, studentName: details.name }))).catch(() => {});
       } catch (e) { throw new Error(fmtFsErr("create", createFields, e)); }
     }
     if (status !== "payment_submitted") return;
@@ -169,7 +169,7 @@ export async function openCheckout({ user, profile, course, existing }) {
     };
     try { await updateDoc(ref, patch); }
     catch (e) { throw new Error(fmtFsErr("update", ["status", "paymentMethod", "paymentRef", "paymentDate"], e)); }
-    await import("./notify.js").then((m) => m.settle(m.notifyPaymentSubmitted({ regId: rid, courseId: course.id, courseTitle: course.title, studentName: details.name }))).catch(() => {});
+    await import("./notify.js?v=r2").then((m) => m.settle(m.notifyPaymentSubmitted({ regId: rid, courseId: course.id, courseTitle: course.title, studentName: details.name }))).catch(() => {});
   }
 
   function flashCopy(btn, text) {

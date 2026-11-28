@@ -1,4 +1,4 @@
-import { friendlyError } from "./friendlyError.js";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { createElement as e, useMemo, useState, useEffect, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { db, auth } from "./firebase-config.js?v=auth10";
@@ -56,7 +56,7 @@ function Modal({ row, courses, onClose, onSaved, uid, authorName }) {
         const annRef = await addDoc(collection(db, "announcements"), {
           courseId, title: ttl, body: msg, authorId: uid, authorName, authorRole: "trainer", pinned, createdAt: serverTimestamp()
         });
-        import("./notify.js").then((m) => m.notifyAnnouncement({ id: annRef.id, courseId, title: ttl, body: msg })).catch(() => {});
+        import("./notify.js?v=r2").then((m) => m.notifyAnnouncement({ id: annRef.id, courseId, title: ttl, body: msg })).catch(() => {});
       }
       try { window.__ghzBumpActive?.(); } catch (_) {}
       onSaved(); onClose();

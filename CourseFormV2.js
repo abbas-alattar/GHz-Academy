@@ -2,7 +2,7 @@ import { createElement as e, useEffect, useMemo, useState, Component } from "htt
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { coverFor, cropCoverFile, loadCourseCover } from "./coverFor.js?v=stu11";
+import { coverFor, cropCoverFile, loadCourseCover } from "./coverFor.js?v=stu11-r2";
 
 class Boundary extends Component {
   constructor(p) { super(p); this.state = { err: null }; }

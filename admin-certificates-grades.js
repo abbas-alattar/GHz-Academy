@@ -1,5 +1,5 @@
-import { ask, askText } from "./dialogs.js";
-import { protect } from "./auth-guard.js?v=auth10";
+import { ask, askText } from "./dialogs.js?v=r2";
+import { protect } from "./auth-guard.js?v=auth10-r2";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { computeAverage, computeStatus, gradeCalc, formatGrade } from "./gradeCalc.js";
@@ -82,7 +82,7 @@ try {
       status: "issued"
     });
     await batch.commit();
-    import("./notify.js").then((m) => m.notifyCertificateIssued({ certId: `${row.uid}_${course.id}`, uid: row.uid, courseId: course.id, courseTitle: course.title || "" })).catch(() => {});
+    import("./notify.js?v=r2").then((m) => m.notifyCertificateIssued({ certId: `${row.uid}_${course.id}`, uid: row.uid, courseId: course.id, courseTitle: course.title || "" })).catch(() => {});
   };
 
   const load = async () => {

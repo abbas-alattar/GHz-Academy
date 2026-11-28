@@ -1,7 +1,7 @@
-import { coverMarkup, hydrateCovers } from "./coverFor.js?v=stu11";
-import { portalStatus } from "./portal-status.js";
+import { coverMarkup, hydrateCovers } from "./coverFor.js?v=stu11-r2";
+import { portalStatus } from "./portal-status.js?v=r2";
 import { formatCourseDate } from "./courseDates.js";
-import { statusChipShort, statusChipKind } from "./courseStatusLabel.js";
+import { statusChipShort, statusChipKind } from "./courseStatusLabel.js?v=r2";
 import { icon } from "./ghz-icons.js";
 import { attendancePct, formatGrade } from "./gradeCalc.js";
 

@@ -1,6 +1,6 @@
-import { friendlyError } from "./friendlyError.js";
-import { protect } from "./auth-guard.js?v=auth10";
-import { renderTrainerAnnouncementsV2 } from "./TrainerAnnouncementsV2.js";
+import { friendlyError } from "./friendlyError.js?v=r2";
+import { protect } from "./auth-guard.js?v=auth10-r2";
+import { renderTrainerAnnouncementsV2 } from "./TrainerAnnouncementsV2.js?v=r2";
 import { bootNotify } from "./portal-notify.js";
 import { loadAnnouncementReads } from "./announcementReads.js";
 

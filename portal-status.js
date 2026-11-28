@@ -1,4 +1,4 @@
-import { statusLabel } from "./courseStatusLabel.js";
+import { statusLabel } from "./courseStatusLabel.js?v=r2";
 
 export const completedOn = (course) => {
   try {

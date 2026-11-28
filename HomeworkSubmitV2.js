@@ -4,7 +4,7 @@ import { db } from "./firebase-config.js?v=auth10";
 import { doc, setDoc, updateDoc, deleteDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { FileDropzone, typeOf, tileColor } from "./FileDropzone.js";
 import { HomeworkFilesViewer } from "./HomeworkFilesViewer.js";
-import { AssignmentFilesCards } from "./HomeworkFormV2.js";
+import { AssignmentFilesCards } from "./HomeworkFormV2.js?v=r2";
 
 const MAX = 650 * 1024;
 const MAXB64 = 900000;
@@ -176,7 +176,7 @@ function Drawer({ opts }) {
         }
       } else {
         await setDoc(doc(db, "submissions", subId), payload);
-        await import("./notify.js").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: subId, courseId: a.courseId, assignmentTitle: a.title, studentName: payload.studentName }))).catch(() => {});
+        await import("./notify.js?v=r2").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: subId, courseId: a.courseId, assignmentTitle: a.title, studentName: payload.studentName }))).catch(() => {});
       }
       try { window.__ghzPingActivity?.(); } catch (_) {}
       setDone(true);

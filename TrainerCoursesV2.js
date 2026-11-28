@@ -3,8 +3,8 @@ import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTrainerStore } from "./TrainerStore.js";
 import { formatCourseDate } from "./courseDates.js";
 import { getBootSteps, isDebugBoot } from "./bootTrace.js";
-import { getBoxDebugSnap } from "./TrainerResultBox.js";
-import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+import { getBoxDebugSnap } from "./TrainerResultBox.js?v=r2";
+import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js?v=r2";
 
 class Boundary extends Component {
   constructor(p) { super(p); this.state = { err: null }; }

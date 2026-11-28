@@ -1,5 +1,5 @@
-import { ask } from "./dialogs.js";
-import { protect } from "./auth-guard.js?v=auth10";
+import { ask } from "./dialogs.js?v=r2";
+import { protect } from "./auth-guard.js?v=auth10-r2";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { mountPdfButton, fmtPdfDate } from "./AdminPdfExport.js";
@@ -91,7 +91,7 @@ try {
             pinned: false,
             createdAt: serverTimestamp()
           });
-          import("./notify.js").then((m) => m.notifyAnnouncement({ id: annRef.id, courseId, title: ttl, body: msg })).catch(() => {});
+          import("./notify.js?v=r2").then((m) => m.notifyAnnouncement({ id: annRef.id, courseId, title: ttl, body: msg })).catch(() => {});
         }
         box.classList.add("hidden");
         toast("Saved.");

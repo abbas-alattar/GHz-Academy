@@ -6,7 +6,7 @@ import { parseScore, formatGrade, storedCourseResult } from "./gradeCalc.js";
 import { loadGradeCourses, loadGradePack } from "./AdminGradesV2.js";
 import { AdminPdfButton, fmtPdfDate } from "./AdminPdfExport.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
-import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js?v=r2";
 
 function showSecErr(host, err, retry) {
   if (!host) return;
@@ -222,7 +222,7 @@ async function issueOne(row, course, opts) {
     status: "issued"
   });
   await batch.commit();
-  import("./notify.js").then((m) => m.notifyCertificateIssued({ certId: `${row.uid}_${course.id}`, uid: row.uid, courseId: course.id, courseTitle: course.title || "" })).catch(() => {});
+  import("./notify.js?v=r2").then((m) => m.notifyCertificateIssued({ certId: `${row.uid}_${course.id}`, uid: row.uid, courseId: course.id, courseTitle: course.title || "" })).catch(() => {});
 }
 
 async function revokeOne(row, courseId, reason) {

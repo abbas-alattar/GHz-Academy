@@ -1,18 +1,18 @@
-import { notifyHomeworkGraded, notifyHomeworkPosted } from "./notify.js";
-import { friendlyError } from "./friendlyError.js";
+import { notifyHomeworkGraded, notifyHomeworkPosted } from "./notify.js?v=r2";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { createElement as e, useEffect, useLayoutEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
 import { db } from "./firebase-config.js?v=auth10";
 import { addDoc, collection, deleteDoc, doc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { HomeworkFormV2, AssignmentFilesCards } from "./HomeworkFormV2.js";
+import { HomeworkFormV2, AssignmentFilesCards } from "./HomeworkFormV2.js?v=r2";
 import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTrainerStore, setTrainerCourseId, resolveTrainerCourseId } from "./TrainerStore.js";
 import { isCourseLocked } from "./course-lock.js";
 import { showConfirmDialog } from "./ConfirmDialog.js";
 import { HomeworkFilesViewer } from "./HomeworkFilesViewer.js";
 import { exportAdminPdf } from "./AdminPdfExport.js";
 import { RowMenu } from "./TrainerRowMenu.js";
-import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js?v=r2";
 
 const HW_KEY = "ghz-trainer-hw-course";
 const CHIP_KEY = "ghz-trainer-fb-chips";

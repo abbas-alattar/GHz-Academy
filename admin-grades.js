@@ -1,9 +1,9 @@
-import { protect } from "./auth-guard.js?v=auth10";
+import { protect } from "./auth-guard.js?v=auth10-r2";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { parseScore, computeAverage, computeStatus, gradeCalc, formatGrade } from "./gradeCalc.js";
 import { mountPdfButton } from "./AdminPdfExport.js";
-import { courseStatusLabel } from "./courseStatusLabel.js";
+import { courseStatusLabel } from "./courseStatusLabel.js?v=r2";
 
 const root = document.getElementById("root");
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");

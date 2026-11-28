@@ -6,7 +6,7 @@ import {
   asArray, asObject, getStudentStore, getCompletedCourses,
   ensureEnrollments, ensureRegistrations, ensureAssignments, ensureQuizzes,
   ensureSubmissions, ensureQuizAttempts, ensureAnnouncements, ensureCertificates, ensureCatalog
-} from "./student-dash-data.js?v=stu11";
+} from "./student-dash-data.js?v=stu11-r2";
 
 const TTL = 60000;
 const cache = new Map();

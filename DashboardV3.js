@@ -1,6 +1,6 @@
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { onDashData, loadStudentDash, asArray, asObject, ensureSectionData, getEnrolledCourses, getActiveCourses, getCompletedCourses, enrollmentsReady, datasetStatus, getCourseResult } from "./student-dash-data.js?v=stu11";
+import { onDashData, loadStudentDash, asArray, asObject, ensureSectionData, getEnrolledCourses, getActiveCourses, getCompletedCourses, enrollmentsReady, datasetStatus, getCourseResult } from "./student-dash-data.js?v=stu11-r2";
 import { getFirstName } from "./displayName.js";
 import { getReadSet, unreadCount, onAnnouncementReads, loadAnnouncementReads, annTimeAgo } from "./announcementReads.js?v=stu7";
 import { db } from "./firebase-config.js?v=auth10";

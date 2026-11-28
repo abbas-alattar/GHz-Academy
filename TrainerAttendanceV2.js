@@ -1,11 +1,11 @@
-import { friendlyError } from "./friendlyError.js";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
 import { db } from "./firebase-config.js?v=auth10";
 import { addDoc, collection, deleteDoc, doc, serverTimestamp, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTrainerStore, setTrainerCourseId, resolveTrainerCourseId } from "./TrainerStore.js";
-import { CourseSelect, StatusBadge } from "./TrainerHomeworkV2.js";
+import { CourseSelect, StatusBadge } from "./TrainerHomeworkV2.js?v=r2";
 import { isCourseLocked } from "./course-lock.js";
 import { attendancePct, fmt1 } from "./gradeCalc.js";
 import { exportAttendanceSessionPdf, exportAttendanceMatrixPdf, nameWithId } from "./AdminPdfExport.js";

@@ -2,7 +2,7 @@ import { createElement as e, useEffect, useState, Component } from "https://esm.
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, getDocs, query, where, limit, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js?v=r2";
 
 function showSecErr(host, err, retry) {
   if (!host) return;

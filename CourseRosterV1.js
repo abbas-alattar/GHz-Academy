@@ -1,5 +1,5 @@
-import { tell } from "./dialogs.js";
-import { friendlyError } from "./friendlyError.js";
+import { tell } from "./dialogs.js?v=r2";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { createElement as e, useEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { auth, db } from "./firebase-config.js?v=auth10";
@@ -8,7 +8,7 @@ import { storedCourseResult } from "./gradeCalc.js";
 import { loadGradePack } from "./AdminGradesV2.js";
 import { exportAdminPdf, nameWithId } from "./AdminPdfExport.js";
 import { startsEndsLine, formatCourseDate } from "./courseDates.js";
-import { statusBadgeHtml } from "./portal-status.js";
+import { statusBadgeHtml } from "./portal-status.js?v=r2";
 
 export const COURSE_ROSTER_V1_CACHE = "v2";
 
@@ -270,7 +270,7 @@ export function renderCourseRosterV1(opts) {
   const host = opts?.host;
   if (!host) return false;
   if (!document.getElementById("cr1-css")) {
-    const l = document.createElement("link"); l.id = "cr1-css"; l.rel = "stylesheet"; l.href = "./CourseRosterV1.css?v=2"; document.head.appendChild(l);
+    const l = document.createElement("link"); l.id = "cr1-css"; l.rel = "stylesheet"; l.href = "./CourseRosterV1.css?v=2-r2"; document.head.appendChild(l);
   }
   let root = roots.get(host);
   if (!root) { root = createRoot(host); roots.set(host, root); }

@@ -1,7 +1,7 @@
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { parseScore, computeAverage, fmt1, gradeCalc, averageTip, scoresFromDoc, resultFromStored } from "./gradeCalc.js";
-import { getCourseResult } from "./student-dash-data.js?v=stu11";
+import { getCourseResult } from "./student-dash-data.js?v=stu11-r2";
 import { exportStudentGradesPdf } from "./AdminPdfExport.js";
 
 const asArray = (x) => Array.isArray(x) ? x : [];

@@ -1,5 +1,5 @@
-import { friendlyError } from "./friendlyError.js";
-import { protect } from "./auth-guard.js?v=auth10";
+import { friendlyError } from "./friendlyError.js?v=r2";
+import { protect } from "./auth-guard.js?v=auth10-r2";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { esc, pct, score100, attPct, cellColor, csvDown } from "./grades-shell.js";

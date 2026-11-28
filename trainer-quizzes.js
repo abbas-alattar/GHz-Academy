@@ -1,6 +1,6 @@
-import { ask } from "./dialogs.js";
-import { friendlyError } from "./friendlyError.js";
-import { protect } from "./auth-guard.js?v=auth10";
+import { ask } from "./dialogs.js?v=r2";
+import { friendlyError } from "./friendlyError.js?v=r2";
+import { protect } from "./auth-guard.js?v=auth10-r2";
 import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, setDoc, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { isCourseLocked, CompletedBanner, lockBtn, lockWriteMsg } from "./course-lock.js";
@@ -97,7 +97,7 @@ try {
       const q = quizzes.find((x) => x.id === b.dataset.pub);
       try {
         await updateDoc(doc(db, "quizzes", q.id), { status: q.status === "Published" ? "Draft" : "Published" });
-        if (q.status !== "Published") import("./notify.js").then((m) => m.notifyQuizPosted({ id: q.id, courseId: q.courseId, title: q.title })).catch(() => {});
+        if (q.status !== "Published") import("./notify.js?v=r2").then((m) => m.notifyQuizPosted({ id: q.id, courseId: q.courseId, title: q.title })).catch(() => {});
         loadList();
       } catch (e) {
         box.insertAdjacentHTML("afterbegin", `<p class="banner">publish: ${lockWriteMsg(e)}</p>`);
@@ -246,7 +246,7 @@ try {
             qid = ref.id;
             quiz.id = qid;
           }
-          if (payload.status === "Published") import("./notify.js").then((m) => m.notifyQuizPosted({ id: qid, courseId: payload.courseId, title: payload.title })).catch(() => {});
+          if (payload.status === "Published") import("./notify.js?v=r2").then((m) => m.notifyQuizPosted({ id: qid, courseId: payload.courseId, title: payload.title })).catch(() => {});
           const old = await getDocs(query(collection(db, "quizQuestions"), where("courseId", "==", cid), where("quizId", "==", qid)));
           for (const d of old.docs) await deleteDoc(d.ref);
           const answers = {};
@@ -344,7 +344,7 @@ try {
               gradedBy: user.uid, gradedAt: serverTimestamp(),
               status: hasText ? "partial" : "graded"
             });
-            if (!hasText) import("./notify.js").then((m) => m.notifyQuizGraded({ attemptId: at.id, studentUid: at.uid, quizId: at.quizId, courseId: at.courseId, score: Number(score), maxPoints: Number(maxAll) })).catch(() => {});
+            if (!hasText) import("./notify.js?v=r2").then((m) => m.notifyQuizGraded({ attemptId: at.id, studentUid: at.uid, quizId: at.quizId, courseId: at.courseId, score: Number(score), maxPoints: Number(maxAll) })).catch(() => {});
             at.questionScores = questionScores; at.score = score; at.maxScore = maxAll; at.status = hasText ? "partial" : "graded";
             n++;
           }
@@ -420,7 +420,7 @@ try {
               gradedBy: user.uid, gradedAt: serverTimestamp(),
               feedback: fb, status: all ? "graded" : "partial"
             });
-            if (all) import("./notify.js").then((m) => m.notifyQuizGraded({ attemptId: at.id, studentUid: at.uid, quizId: at.quizId, courseId: at.courseId, score: Number(score), maxPoints: Number(maxAll) })).catch(() => {});
+            if (all) import("./notify.js?v=r2").then((m) => m.notifyQuizGraded({ attemptId: at.id, studentUid: at.uid, quizId: at.quizId, courseId: at.courseId, score: Number(score), maxPoints: Number(maxAll) })).catch(() => {});
             at.questionScores = questionScores; at.score = score; at.maxScore = maxAll; at.status = all ? "graded" : "partial"; at.feedback = fb;
             openAttempts(quiz);
           } catch (e) { err.hidden = false; err.textContent = "save grade: " + lockWriteMsg(e); }

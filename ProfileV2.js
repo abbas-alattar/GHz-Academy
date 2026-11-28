@@ -1,5 +1,5 @@
-import { tell } from "./dialogs.js";
-import { friendlyError } from "./friendlyError.js";
+import { tell } from "./dialogs.js?v=r2";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { sortedCountries, flagUrl, parsePhone, buildPhone, validLocal, digitsOnly } from "./phoneCountries.js";
 import { showNoticeDialog } from "./ConfirmDialog.js";
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");

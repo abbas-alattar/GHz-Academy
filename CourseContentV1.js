@@ -1,5 +1,5 @@
-import { tell } from "./dialogs.js";
-import { friendlyError } from "./friendlyError.js";
+import { tell } from "./dialogs.js?v=r2";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { createElement as e, useEffect, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { auth, db } from "./firebase-config.js?v=auth10";
@@ -8,11 +8,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { ConfirmDialog, showNoticeDialog } from "./ConfirmDialog.js";
 import { formatCourseDate } from "./courseDates.js";
-import { courseStatusLabel } from "./courseStatusLabel.js";
+import { courseStatusLabel } from "./courseStatusLabel.js?v=r2";
 import { sessionStatus } from "./sessionStatus.js";
 import { formatGrade } from "./gradeCalc.js";
-import { getCourseResult } from "./student-dash-data.js?v=stu11";
-import { maybeShowCourseResult } from "./CourseResultBox.js?v=stu11";
+import { getCourseResult } from "./student-dash-data.js?v=stu11-r2";
+import { maybeShowCourseResult } from "./CourseResultBox.js?v=stu11-r2";
 
 const roots = new WeakMap();
 const TYPES = [
@@ -83,7 +83,7 @@ async function pdfPagesFromFile(file, onProgress) {
 function ensureCss() {
   if (document.getElementById("cc1-css")) return;
   const l = document.createElement("link");
-  l.id = "cc1-css"; l.rel = "stylesheet"; l.href = "./CourseContentV1.css";
+  l.id = "cc1-css"; l.rel = "stylesheet"; l.href = "./CourseContentV1.css?v=r2";
   document.head.appendChild(l);
 }
 class Boundary extends Component {

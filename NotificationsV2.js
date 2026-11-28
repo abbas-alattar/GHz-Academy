@@ -1,9 +1,9 @@
-import { loadNotifications, loadNotifPrefs, saveSeen, clearNotifCache, studentNotifsFromStore, CAT } from "./useNotifications.js";
+import { loadNotifications, loadNotifPrefs, saveSeen, clearNotifCache, studentNotifsFromStore, CAT } from "./useNotifications.js?v=r2";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, orderBy, limit, onSnapshot, doc, updateDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { onDashData, getStudentStore, datasetsReady } from "./student-dash-data.js?v=stu11";
+import { onDashData, getStudentStore, datasetsReady } from "./student-dash-data.js?v=stu11-r2";
 import { NotificationBell } from "./NotificationBell.js";
-import { NotificationPanel } from "./NotificationPanel.js";
+import { NotificationPanel } from "./NotificationPanel.js?v=r2";
 import { NotificationToast, pushNotificationToast } from "./NotificationToast.js";
 import { h, create } from "./nv2-h.js";
 export { h };

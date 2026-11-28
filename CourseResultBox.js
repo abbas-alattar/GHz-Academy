@@ -1,5 +1,5 @@
 import { formatGrade } from "./gradeCalc.js";
-import { getStudentStore, getCourseResult } from "./student-dash-data.js?v=stu11";
+import { getStudentStore, getCourseResult } from "./student-dash-data.js?v=stu11-r2";
 import { db } from "./firebase-config.js?v=auth10";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { loadSeenBoxes, baselineStudentSeen, markResultSeen, seenResult, completionRound } from "./seenBoxes.js";

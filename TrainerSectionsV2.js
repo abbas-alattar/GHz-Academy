@@ -1,8 +1,8 @@
-import { friendlyError } from "./friendlyError.js";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { createElement as e, useEffect, useState } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTrainerStore } from "./TrainerStore.js";
-import { renderTrainerAnnouncementsV2 } from "./TrainerAnnouncementsV2.js";
+import { renderTrainerAnnouncementsV2 } from "./TrainerAnnouncementsV2.js?v=r2";
 
 function usePack(uid) {
   const [pack, setPack] = useState(getTrainerStore());

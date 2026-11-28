@@ -1,5 +1,5 @@
-import { protect } from "./auth-guard.js?v=auth10";
-import { bootAdminSide } from "./admin-side.js";
+import { protect } from "./auth-guard.js?v=auth10-r2";
+import { bootAdminSide } from "./admin-side.js?v=r2";
 
 bootAdminSide("announcements");
 protect("admin").catch((e) => console.error("protect", e));
@@ -11,7 +11,7 @@ const classicWanted = new URLSearchParams(location.search).has("classic");
 if (classicWanted) {
   if (v2) v2.hidden = true;
   if (root) root.classList.remove("hidden");
-  import("./admin-announcements.js").catch((e) => {
+  import("./admin-announcements.js?v=r2").catch((e) => {
     console.error("classic announcements", e);
     if (root) root.innerHTML = `<p class="banner">Classic view could not load<br>${e && (e.message || e)}</p>`;
   });
@@ -20,7 +20,7 @@ if (classicWanted) {
   const onClassic = () => { location.href = "./admin-announcements.html?classic=1"; };
   (async () => {
     try {
-      const mod = await import("./AdminAnnouncementsV2.js");
+      const mod = await import("./AdminAnnouncementsV2.js?v=r2");
       mod.renderAdminAnnouncementsV2(v2, { onClassic });
     } catch (e) {
       console.error("AdminAnnouncementsV2.js", e);

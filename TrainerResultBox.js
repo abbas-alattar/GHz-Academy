@@ -3,7 +3,7 @@ import { db } from "./firebase-config.js?v=auth10";
 import { collection, doc, getDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { gradeCalc, fmt1 } from "./gradeCalc.js";
 import { loadSeenBoxes, baselineTrainerSeen, markAssignedSeen, markCompletedSeen, markReopenedSeen, dropAssignedSeen, seenAssigned, seenCompleted, seenReopened, reopenEventId, patchSeenBoxes, assignedBoxKey, reopenedBoxKey, completedBoxKey } from "./seenBoxes.js";
-import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js?v=r2";
 
 
 function msOf(t) {
@@ -130,7 +130,7 @@ function ensureCss() {
   document.head.appendChild(l);
   if (!document.getElementById("rs-tr-css")) {
     const l2 = document.createElement("link");
-    l2.id = "rs-tr-css"; l2.rel = "stylesheet"; l2.href = "./TrainerResultBox.css";
+    l2.id = "rs-tr-css"; l2.rel = "stylesheet"; l2.href = "./TrainerResultBox.css?v=r2";
     document.head.appendChild(l2);
   }
 }

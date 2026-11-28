@@ -1,5 +1,5 @@
-import { friendlyError } from "./friendlyError.js";
-import { bound } from "./student-dash-data.js?v=stu11";
+import { friendlyError } from "./friendlyError.js?v=r2";
+import { bound } from "./student-dash-data.js?v=stu11-r2";
 import { db } from "./firebase-config.js?v=auth10";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { courseAverage, courseAttendancePct } from "./student-dash-average.js";

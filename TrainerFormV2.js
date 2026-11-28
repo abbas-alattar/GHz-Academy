@@ -1,7 +1,7 @@
 import { createElement as e, useEffect, useMemo, useState, Component, useRef } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { sortedCountries, detectCountry, flagUrl, buildPhone } from "./phoneCountries.js";
-import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js?v=r2";
 
 function showSecErr(host, err, retry) {
   if (!host) return;

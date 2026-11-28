@@ -1,5 +1,5 @@
-import { friendlyError } from "./friendlyError.js";
-import { bound } from "./student-dash-data.js?v=stu11";
+import { friendlyError } from "./friendlyError.js?v=r2";
+import { bound } from "./student-dash-data.js?v=stu11-r2";
 import { resolveGradedItems } from "./student-grade-math.js";
 
 export function mountGrades(el) {

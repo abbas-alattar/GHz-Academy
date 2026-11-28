@@ -5,7 +5,7 @@ import { db } from "./firebase-config.js?v=auth10";
 import { collection, getDocs, getDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { AdminPdfButton } from "./AdminPdfExport.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
-import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js?v=r2";
 
 function showSecErr(host, err, retry) {
   if (!host) return;

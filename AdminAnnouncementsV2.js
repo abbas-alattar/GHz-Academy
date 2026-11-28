@@ -81,7 +81,7 @@ function Modal({ row, courses, onClose, onSaved }) {
           pinned,
           createdAt: serverTimestamp()
         });
-        import("./notify.js").then((m) => m.notifyAnnouncement({ id: annRef.id, courseId, title: ttl, body: msg })).catch(() => {});
+        import("./notify.js?v=r2").then((m) => m.notifyAnnouncement({ id: annRef.id, courseId, title: ttl, body: msg })).catch(() => {});
       }
       onSaved();
       onClose();

@@ -3,8 +3,8 @@ import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
 import { AdminPdfButton, fmtPdfDate } from "./AdminPdfExport.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
-import { statusLabel, statusChipKind, statusChipShort, adminCourseTabLabel, matchesAdminCourseTab, registrationOpenLabel, canRegisterForCourse } from "./courseStatusLabel.js";
-import { coverMarkup, hydrateCovers } from "./coverFor.js?v=stu11";
+import { statusLabel, statusChipKind, statusChipShort, adminCourseTabLabel, matchesAdminCourseTab, registrationOpenLabel, canRegisterForCourse } from "./courseStatusLabel.js?v=r2";
+import { coverMarkup, hydrateCovers } from "./coverFor.js?v=stu11-r2";
 import { icon } from "./ghz-icons.js";
 
 function showSecErr(host, err, retry) {

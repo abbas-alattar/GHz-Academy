@@ -1,10 +1,10 @@
-import { friendlyError } from "./friendlyError.js";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { auth, db } from "./firebase-config.js?v=auth10";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { collection, query, where, getDocs, getDoc, doc, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { studentCacheClear, studentCacheGet, studentCacheSet, logFail } from "./student-fetch.js";
 import { ghzPerf, timedQuery } from "./ghz-perf.js";
-import { stripCoverFields, slimListCourse } from "./coverFor.js?v=stu11";
+import { stripCoverFields, slimListCourse } from "./coverFor.js?v=stu11-r2";
 import { getDisplayName } from "./displayName.js";
 
 const listeners = new Set();

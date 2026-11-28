@@ -1,6 +1,6 @@
 import { createElement as e, useState } from "https://esm.sh/react@18.3.1";
 import { showConfirmDialog } from "./ConfirmDialog.js";
-import { courseStatusLabel } from "./courseStatusLabel.js";
+import { courseStatusLabel } from "./courseStatusLabel.js?v=r2";
 import { formatGrade } from "./gradeCalc.js";
 
 const JSPDF = "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js";

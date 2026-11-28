@@ -1,31 +1,31 @@
-import { ask, tell } from "./dialogs.js";
-import { friendlyError } from "./friendlyError.js";
-    import { protect } from "./auth-guard.js?v=auth10";
+import { ask, tell } from "./dialogs.js?v=r2";
+import { friendlyError } from "./friendlyError.js?v=r2";
+    import { protect } from "./auth-guard.js?v=auth10-r2";
     import { bootNotify } from "./portal-notify.js?v=stu11";
     import { bootPageMotion } from "./PageTransition.js?v=stu11";
     import { bootPageShell } from "./PageShell.js?v=stu11";
     import { swapLoadingText } from "./WaveLoader.js?v=stu11";
-    import { bootStudentNav, highlightStudentNav } from "./student-nav.js?v=stu11";
-    import { bootPortalShell } from "./PortalShell.js?v=stu11";
+    import { bootStudentNav, highlightStudentNav } from "./student-nav.js?v=stu11-r2";
+    import { bootPortalShell } from "./PortalShell.js?v=stu11-r2";
     import { auth, db } from "./firebase-config.js?v=auth10";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { collection, query, where, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-    import { portalStatus, statusBadgeHtml, completedOn } from "./portal-status.js?v=stu11";
-    import { courseStatusLabel, canRegisterForCourse } from "./courseStatusLabel.js?v=stu11";
-    import { bootStudentDash } from "./student-dash-boot.js?v=stu11";
+    import { portalStatus, statusBadgeHtml, completedOn } from "./portal-status.js?v=stu11-r2";
+    import { courseStatusLabel, canRegisterForCourse } from "./courseStatusLabel.js?v=stu11-r2";
+    import { bootStudentDash } from "./student-dash-boot.js?v=stu11-r2";
     import { deliveryDaysHtml } from "./DeliveryDays.js?v=stu11";
     import { startsEndsLine, formatCourseDate } from "./courseDates.js?v=stu11";
-    import { maybeShowCourseResult } from "./CourseResultBox.js?v=stu11";
+    import { maybeShowCourseResult } from "./CourseResultBox.js?v=stu11-r2";
     import { sessionStatus } from "./sessionStatus.js?v=stu11";
-    import { loadStudentDash as loadStore, loadListPage, whenStudentStore, getStudentStore, asArray, ensureSectionData, ensureSessions, ensureAssignments, ensureQuizzes, ensureAttendance, ensureSubmissions, ensureQuizAttempts, ensureCatalog, ensureEnrollments, ensureRegistrations, ensureCertificates, ensureAnnouncements, ensureGrades, getCourseResult, getEnrolledCourses, getActiveCourses, getCompletedCourses, getActiveEnrollments, enrollmentsReady, prefetchStudentCore } from "./student-dash-data.js?v=stu11";
+    import { loadStudentDash as loadStore, loadListPage, whenStudentStore, getStudentStore, asArray, ensureSectionData, ensureSessions, ensureAssignments, ensureQuizzes, ensureAttendance, ensureSubmissions, ensureQuizAttempts, ensureCatalog, ensureEnrollments, ensureRegistrations, ensureCertificates, ensureAnnouncements, ensureGrades, getCourseResult, getEnrolledCourses, getActiveCourses, getCompletedCourses, getActiveEnrollments, enrollmentsReady, prefetchStudentCore } from "./student-dash-data.js?v=stu11-r2";
     import { healOwnNameOnce, liveStudentName } from "./nameSync.js?v=stu11";
     import { computeAverage, computeStatus, mergedSectionValues, autoValuesForStudent, parseScore, gradeCalc } from "./gradeCalc.js?v=stu11";
-    import { loadStudentDash, startDashRefresh, onDashData } from "./student-dash-data.js?v=stu11";
+    import { loadStudentDash, startDashRefresh, onDashData } from "./student-dash-data.js?v=stu11-r2";
     import "./ghz-perf.js";
     import { startLastActiveHeartbeat } from "./lastActive.js?v=stu11";
     const L = (p) => import(p);
-    const renderBrowseCoursesV2 = async (a) => (await L("./BrowseCoursesV2.js?v=stu11")).renderBrowseCoursesV2(a);
-    const renderMyCoursesV2 = async (a) => (await L("./MyCoursesV2.js?v=stu11")).renderMyCoursesV2(a);
+    const renderBrowseCoursesV2 = async (a) => (await L("./BrowseCoursesV2.js?v=stu11-r2")).renderBrowseCoursesV2(a);
+    const renderMyCoursesV2 = async (a) => (await L("./MyCoursesV2.js?v=stu11-r2")).renderMyCoursesV2(a);
     (async () => {
       const h = ((location.hash || "").replace("#","").split("/")[0] || "").replace(/v2$/, "");
       if (h !== "courses") return;
@@ -39,25 +39,25 @@ import { friendlyError } from "./friendlyError.js";
       });
       try { console.log("[ghz-perf] painted from cache in " + Math.round(((typeof performance !== "undefined") ? performance.now() : Date.now()) - (window.__ghzT0 || tPaint)) + " ms"); } catch (_) {}
     })();
-    const renderMyRegistrationsV2 = async (a) => (await L("./MyRegistrationsV2.js?v=stu26")).renderMyRegistrationsV2(a);
+    const renderMyRegistrationsV2 = async (a) => (await L("./MyRegistrationsV2.js?v=stu26-r2")).renderMyRegistrationsV2(a);
     const downloadReceiptPdf = async (a) => (await L("./ReceiptPdf.js?v=stu20")).downloadReceiptPdf(a);
-    const openCheckout = async (a) => (await L("./CheckoutFlow.js?v=stu30")).openCheckout(a);
-    const renderHomeworkV2 = async (a) => (await L("./HomeworkV2.js?v=stu11")).renderHomeworkV2(a);
+    const openCheckout = async (a) => (await L("./CheckoutFlow.js?v=stu30-r2")).openCheckout(a);
+    const renderHomeworkV2 = async (a) => (await L("./HomeworkV2.js?v=stu11-r2")).renderHomeworkV2(a);
     const renderHomeworkDetailV2 = async (a) => (await L("./HomeworkDetailV2.js?v=stu11")).renderHomeworkDetailV2(a);
     const closeHomeworkDetailV2 = async () => { try { (await L("./HomeworkDetailV2.js?v=stu11")).closeHomeworkDetailV2(); } catch (_) {} };
-    const renderHomeworkSubmitV2 = async (a) => (await L("./HomeworkSubmitV2.js?v=stu11")).renderHomeworkSubmitV2(a);
+    const renderHomeworkSubmitV2 = async (a) => (await L("./HomeworkSubmitV2.js?v=stu11-r2")).renderHomeworkSubmitV2(a);
     const renderQuizResultV2 = async (a) => (await L("./QuizResultV2.js?v=stu11")).renderQuizResultV2(a);
     const closeQuizResultV2 = async () => { try { (await L("./QuizResultV2.js?v=stu11")).closeQuizResultV2(); } catch (_) {} };
-    const renderStudentQuizTake = async (h, a) => (await L("./StudentQuizTake.js?v=stu11")).renderStudentQuizTake(h, a);
-    const unmountStudentQuizTake = async () => { try { (await L("./StudentQuizTake.js?v=stu11")).unmountStudentQuizTake(); } catch (_) {} };
-    const renderStudentScheduleV2 = async (a) => (await L("./StudentScheduleV2.js?v=stu11")).renderStudentScheduleV2(a);
+    const renderStudentQuizTake = async (h, a) => (await L("./StudentQuizTake.js?v=stu11-r2")).renderStudentQuizTake(h, a);
+    const unmountStudentQuizTake = async () => { try { (await L("./StudentQuizTake.js?v=stu11-r2")).unmountStudentQuizTake(); } catch (_) {} };
+    const renderStudentScheduleV2 = async (a) => (await L("./StudentScheduleV2.js?v=stu11-r2")).renderStudentScheduleV2(a);
     const renderAttendanceV2 = async (a) => (await L("./AttendanceV2.js?v=stu11")).renderAttendanceV2(a);
-    const renderProfileV2 = async (a) => (await L("./ProfileV2.js?v=stu11")).renderProfileV2(a);
-    const renderQuizzesV2 = async (a) => (await L("./QuizzesV2.js?v=stu11")).renderQuizzesV2(a);
+    const renderProfileV2 = async (a) => (await L("./ProfileV2.js?v=stu11-r2")).renderProfileV2(a);
+    const renderQuizzesV2 = async (a) => (await L("./QuizzesV2.js?v=stu11-r2")).renderQuizzesV2(a);
     const renderStudentGradesV3 = async (a) => (await L("./StudentGradesV3.js?v=stu11")).renderStudentGradesV3(a);
     const renderStudentGradesV4 = async (a) => (await L("./StudentGradesV4.js?v=stu11")).renderStudentGradesV4(a);
     const renderAnnouncementsV2 = async (a) => (await L("./AnnouncementsV2.js?v=stu11")).renderAnnouncementsV2(a);
-    const renderStudentAnnouncementsV2 = async (h, a) => (await L("./StudentAnnouncementsV2.js?v=stu11")).renderStudentAnnouncementsV2(h, a);
+    const renderStudentAnnouncementsV2 = async (h, a) => (await L("./StudentAnnouncementsV2.js?v=stu11-r2")).renderStudentAnnouncementsV2(h, a);
     const renderCertificatesV2 = async (a) => (await L("./CertificatesV2.js?v=stu11")).renderCertificatesV2(a);
     window.__ghzBootOk = false;
     const fmtErr = (err, extra) => {
@@ -164,7 +164,7 @@ import { friendlyError } from "./friendlyError.js";
     }).catch(() => {});
     document.addEventListener("pointerenter", (ev) => {
       const a = ev.target && ev.target.closest && ev.target.closest('a[data-view="schedule"], a[href*="schedule"]');
-      if (a) import("./StudentScheduleV2.js?v=stu11").catch(() => {});
+      if (a) import("./StudentScheduleV2.js?v=stu11-r2").catch(() => {});
     }, true);
     const startHash = (location.hash || "").replace("#", "") || "dash";
     bootStudentNav(startHash.replace(/v2$/, "") || "dash");
@@ -443,7 +443,7 @@ import { friendlyError } from "./friendlyError.js";
       if (btn) { btn.disabled = true; btn.textContent = "Registering…"; }
       try {
         await updateDoc(doc(db,"registrations", rid), { status:"pending_payment", createdAt: serverTimestamp() });
-        await import("./notify.js").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: rid.split("_").slice(1).join("_"), studentName: currentUser?.displayName || "" }))).catch(() => {});
+        await import("./notify.js?v=r2").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: rid.split("_").slice(1).join("_"), studentName: currentUser?.displayName || "" }))).catch(() => {});
         location.hash = "regs";
         location.reload();
       } catch (e) {
@@ -684,7 +684,7 @@ import { friendlyError } from "./friendlyError.js";
       const payload = { assignmentId:a.id, courseId:a.courseId, uid:currentUser.uid, studentName: window.__ghzLiveName || document.getElementById("userName").textContent||"", text, link, submittedAt: serverTimestamp(), status:"submitted" };
       try {
         await setDoc(doc(db,"submissions", a.id+"_"+currentUser.uid), payload, { merge: true });
-        await import("./notify.js").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: a.id + "_" + currentUser.uid, courseId: a.courseId, assignmentTitle: a.title, studentName: payload.studentName }))).catch(() => {});
+        await import("./notify.js?v=r2").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: a.id + "_" + currentUser.uid, courseId: a.courseId, assignmentTitle: a.title, studentName: payload.studentName }))).catch(() => {});
         toastOk = true; closeHomeworkDetailV2(); location.reload();
       } catch(e){
         if (errTarget) { errTarget.hidden = false; errTarget.style.display="block"; errTarget.textContent=(e.code||"")+" "+(e.message||""); }
@@ -715,7 +715,7 @@ import { friendlyError } from "./friendlyError.js";
           onSave: async ({ text, link, assignment, onError }) => {
             try {
               await setDoc(doc(db,"submissions", assignment.id+"_"+uid), { assignmentId:assignment.id, courseId:assignment.courseId, uid, studentName: window.__ghzLiveName || "", text, link, submittedAt: serverTimestamp(), status:"submitted" }, { merge: true });
-              await import("./notify.js").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: assignment.id + "_" + uid, courseId: assignment.courseId, assignmentTitle: assignment.title, studentName: window.__ghzLiveName || "" }))).catch(() => {});
+              await import("./notify.js?v=r2").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: assignment.id + "_" + uid, courseId: assignment.courseId, assignmentTitle: assignment.title, studentName: window.__ghzLiveName || "" }))).catch(() => {});
               toastOk = true; closeHomeworkDetailV2(); location.hash = "homework"; loadStore(true);
             } catch (e) { onError?.((e.code||"")+" "+(e.message||"")); }
           }
@@ -799,7 +799,7 @@ import { friendlyError } from "./friendlyError.js";
             const payload = { assignmentId:assignment.id, courseId:assignment.courseId, uid:currentUser.uid, studentName: window.__ghzLiveName || document.getElementById("userName").textContent||"", text, link, submittedAt: serverTimestamp(), status:"submitted" };
             try {
               await setDoc(doc(db,"submissions", assignment.id+"_"+currentUser.uid), payload, { merge: true });
-              await import("./notify.js").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: assignment.id + "_" + currentUser.uid, courseId: assignment.courseId, assignmentTitle: assignment.title, studentName: payload.studentName }))).catch(() => {});
+              await import("./notify.js?v=r2").then((m) => m.settle(m.notifyHomeworkSubmitted({ submissionId: assignment.id + "_" + currentUser.uid, courseId: assignment.courseId, assignmentTitle: assignment.title, studentName: payload.studentName }))).catch(() => {});
               toastOk = true; closeHomeworkDetailV2(); location.reload();
             } catch(e){ onError?.((e.code||"")+" "+(e.message||"")); }
           }
@@ -961,7 +961,7 @@ import { friendlyError } from "./friendlyError.js";
         const cidRaw = window.__ccCourseId || ((location.hash||"").match(/^#course\/([^/?#]+)/)||[])[1];
         const cid = cidRaw ? decodeURIComponent(cidRaw) : "";
         try {
-          const m = await import("./CourseContentV1.js?v=docx2");
+          const m = await import("./CourseContentV1.js?v=docx2-r2");
           try { m.renderCourseContentV1({ host, loading: true }); } catch (_) {}
           if (!cid) return;
           m.renderCourseContentV1({ host, courseId: cid, role: "student", uid: user.uid, name: window.__ghzLiveName || "" });
@@ -1293,7 +1293,7 @@ import { friendlyError } from "./friendlyError.js";
             paymentRef: document.getElementById("pr").value,
             paymentDate: document.getElementById("pd").value
           });
-          await import("./notify.js").then((m) => m.settle(m.notifyPaymentSubmitted({ regId: rid, courseId: rid.split("_").slice(1).join("_"), studentName: currentUser?.displayName || "" }))).catch(() => {});
+          await import("./notify.js?v=r2").then((m) => m.settle(m.notifyPaymentSubmitted({ regId: rid, courseId: rid.split("_").slice(1).join("_"), studentName: currentUser?.displayName || "" }))).catch(() => {});
           location.reload();
         };
       };

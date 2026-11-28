@@ -8,21 +8,21 @@
   <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" type="image/png" href="./favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./portal.css" />
+  <link rel="stylesheet" href="./portal.css?v=r2" />
   <link rel="stylesheet" href="./ghz-responsive.css" />
   <link rel="stylesheet" href="./PageTransition.css" />
-  <link rel="stylesheet" href="./DeliveryDays.css" />
-  <link rel="stylesheet" href="./HomeworkSubmitV2.css" />
-  <link rel="stylesheet" href="./CourseContentV1.css" />
+  <link rel="stylesheet" href="./DeliveryDays.css?v=r2" />
+  <link rel="stylesheet" href="./HomeworkSubmitV2.css?v=r2" />
+  <link rel="stylesheet" href="./CourseContentV1.css?v=r2" />
   <link rel="stylesheet" href="./TrainerShellV2.css" />
-  <link rel="stylesheet" href="./TrainerCoursesV2.css" />
-  <link rel="stylesheet" href="./TrainerHomeworkV2.css" />
-  <link rel="stylesheet" href="./HomeworkFormV2.css" />
-  <link rel="stylesheet" href="./AdminAnnouncementsV2.css" />
+  <link rel="stylesheet" href="./TrainerCoursesV2.css?v=r2" />
+  <link rel="stylesheet" href="./TrainerHomeworkV2.css?v=r2" />
+  <link rel="stylesheet" href="./HomeworkFormV2.css?v=r2" />
+  <link rel="stylesheet" href="./AdminAnnouncementsV2.css?v=r2" />
   <link rel="stylesheet" href="./ConfirmDialog.css" />
-  <link rel="stylesheet" href="./ghz-mobile.css" />
-  <link rel="stylesheet" href="./trainer-phone-pages.css" />
-  <link rel="stylesheet" href="./ProfileV2.css" />
+  <link rel="stylesheet" href="./ghz-mobile.css?v=r2" />
+  <link rel="stylesheet" href="./trainer-phone-pages.css?v=r2" />
+  <link rel="stylesheet" href="./ProfileV2.css?v=r2" />
 </head>
 <body class="trainer-portal portal-trainer">
 <script>
@@ -152,23 +152,23 @@ setTimeout(function () {
   <div class="drawer-bg hidden" id="drawerBg"></div>
   <aside class="drawer hidden" id="gradeDrawer"></aside>
   <script type="module">
-    import { ask } from "./dialogs.js";
-    import { protect } from "./auth-guard.js?v=auth10";
+    import { ask } from "./dialogs.js?v=r2";
+    import { protect } from "./auth-guard.js?v=auth10-r2";
     import { bootPending, bootOk, bootFail as traceFail } from "./bootTrace.js";
     import { bootNotify } from "./portal-notify.js";
     import { bootPageMotion } from "./PageTransition.js";
     import { bootPageShell } from "./PageShell.js";
-    import { bootPortalShell } from "./PortalShell.js";
+    import { bootPortalShell } from "./PortalShell.js?v=r2";
     import { swapLoadingText } from "./WaveLoader.js";
     import { auth, db } from "./firebase-config.js?v=auth10";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, setDoc, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { isCourseLocked, CompletedBanner, completedDate, lockBtn, lockWriteMsg } from "./course-lock.js";
-    import { portalStatus, statusBadgeHtml } from "./portal-status.js";
-    import { courseStatusLabel } from "./courseStatusLabel.js";
+    import { portalStatus, statusBadgeHtml } from "./portal-status.js?v=r2";
+    import { courseStatusLabel } from "./courseStatusLabel.js?v=r2";
     import { deliveryDaysHtml } from "./DeliveryDays.js";
-    const renderCourseContentV1 = async (a) => (await import("./CourseContentV1.js?v=docx2")).renderCourseContentV1(a);
-    const renderCourseRosterV1 = async (a) => (await import("./CourseRosterV1.js?v=2")).renderCourseRosterV1(a);
+    const renderCourseContentV1 = async (a) => (await import("./CourseContentV1.js?v=docx2-r2")).renderCourseContentV1(a);
+    const renderCourseRosterV1 = async (a) => (await import("./CourseRosterV1.js?v=2-r2")).renderCourseRosterV1(a);
     import { bootTrainerShellV2 } from "./TrainerShellV2.js?v=kpi2";
     window.__trainerBooted = true;
     const bootFail = (step, e) => {
@@ -385,7 +385,7 @@ setTimeout(function () {
           let savedHwId = a.id;
           if (a.id) { const { courseId, ...rest } = payload; await updateDoc(doc(db,"assignments", a.id), rest); }
           else { const hwRef = await addDoc(collection(db,"assignments"), { ...payload, createdAt: serverTimestamp() }); savedHwId = hwRef.id; }
-          if (payload.status === "Published") import("./notify.js").then((m) => m.notifyHomeworkPosted({ id: savedHwId, courseId: payload.courseId || a.courseId, title: payload.title })).catch(() => {});
+          if (payload.status === "Published") import("./notify.js?v=r2").then((m) => m.notifyHomeworkPosted({ id: savedHwId, courseId: payload.courseId || a.courseId, title: payload.title })).catch(() => {});
           modal.classList.add("hidden"); toast("Homework saved."); await reloadHw();
         } catch(e){ document.getElementById("herr").style.display="block"; document.getElementById("herr").textContent = lockWriteMsg(e); }
       };
@@ -475,7 +475,7 @@ setTimeout(function () {
       };
       const ph = document.getElementById("pubHw"); if (ph) ph.onclick=async()=>{
         if (isCourseLocked(active)) { toast("This course is completed and read-only.","err"); return; }
-        try { await updateDoc(doc(db,"assignments", a.id), { status: a.status==="Published"?"Draft":"Published" }); a.status = a.status==="Published"?"Draft":"Published"; if (a.status === "Published") import("./notify.js").then((m) => m.notifyHomeworkPosted({ id: a.id, courseId: a.courseId, title: a.title })).catch(() => {}); toast("Updated."); renderHwDetail(); renderHw(); }
+        try { await updateDoc(doc(db,"assignments", a.id), { status: a.status==="Published"?"Draft":"Published" }); a.status = a.status==="Published"?"Draft":"Published"; if (a.status === "Published") import("./notify.js?v=r2").then((m) => m.notifyHomeworkPosted({ id: a.id, courseId: a.courseId, title: a.title })).catch(() => {}); toast("Updated."); renderHwDetail(); renderHw(); }
         catch(er){ toast(lockWriteMsg(er),"err"); }
       };
       document.getElementById("hwSum").innerHTML = [
@@ -634,7 +634,7 @@ setTimeout(function () {
           }
           try {
             await updateDoc(doc(db,"submissions", s.id), { grade, feedback: document.getElementById("gfb").value, status:"graded", gradedBy: user.uid, gradedAt: serverTimestamp() });
-            import("./notify.js").then((m) => m.notifyHomeworkGraded({ submissionId: s.id, studentUid: s.uid, assignmentId: a.id, assignmentTitle: a.title, courseId: a.courseId, grade, maxPoints: a.maxPoints })).catch(() => {});
+            import("./notify.js?v=r2").then((m) => m.notifyHomeworkGraded({ submissionId: s.id, studentUid: s.uid, assignmentId: a.id, assignmentTitle: a.title, courseId: a.courseId, grade, maxPoints: a.maxPoints })).catch(() => {});
             toast("Grade saved");
             submissions = submissions.map(x=> x.id===s.id ? {...x, grade, feedback: document.getElementById("gfb").value, status:"graded"} : x);
             renderHw(); renderHwDetail();

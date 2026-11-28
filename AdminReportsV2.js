@@ -5,7 +5,7 @@ import { collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/f
 import { attendancePct, homeworkAuto, formatGrade, storedCourseResult } from "./gradeCalc.js";
 import { AdminPdfButton } from "./AdminPdfExport.js";
 import { csvDown } from "./grades-shell.js";
-import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js?v=r2";
 
 function showSecErr(host, err, retry) {
   if (!host) return;

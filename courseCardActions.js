@@ -1,4 +1,4 @@
-import { canRegisterForCourse } from "./courseStatusLabel.js";
+import { canRegisterForCourse } from "./courseStatusLabel.js?v=r2";
 
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
 

@@ -1,11 +1,11 @@
-import { friendlyError } from "./friendlyError.js";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { createElement as e, useEffect, useLayoutEffect, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTrainerStore, setTrainerCourseId, resolveTrainerCourseId } from "./TrainerStore.js";
-import { CourseSelect, StatusBadge } from "./TrainerHomeworkV2.js";
+import { CourseSelect, StatusBadge } from "./TrainerHomeworkV2.js?v=r2";
 import { isCourseLocked } from "./course-lock.js";
 import { parseScore, homeworkFinal, quizFinal, attendancePct, fmt1, formatGrade, roundGradeInput, bestNTip, publishedHomework, homeworkBestN, publishedQuizzes, quizBestN, gradeCalc, averageTip, computeAverage, gradeCoverage, numericScores, kindFrom, isLockedAuto } from "./gradeCalc.js";
 import { exportAdminPdf, nameWithId } from "./AdminPdfExport.js";

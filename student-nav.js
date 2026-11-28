@@ -73,7 +73,7 @@ export function mountStudentNav(active) {
 export function bootStudentNav(active) {
   const run = () => {
     mountStudentNav(active);
-    import("./PortalShell.js").then((m) => { try { m.bootPortalShell(); } catch (_) {} }).catch(() => {});
+    import("./PortalShell.js?v=r2").then((m) => { try { m.bootPortalShell(); } catch (_) {} }).catch(() => {});
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run);
   else run();

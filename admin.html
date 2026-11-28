@@ -8,26 +8,26 @@
   <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" type="image/png" href="./favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./portal.css" />
+  <link rel="stylesheet" href="./portal.css?v=r2" />
   <link rel="stylesheet" href="./ghz-responsive.css" />
   <link rel="stylesheet" href="./PageTransition.css" />
-  <link rel="stylesheet" href="./AdminDashboardV2.css" />
-  <link rel="stylesheet" href="./AdminCoursesV2.css" />
+  <link rel="stylesheet" href="./AdminDashboardV2.css?v=r2" />
+  <link rel="stylesheet" href="./AdminCoursesV2.css?v=r2" />
   <link rel="stylesheet" href="./CourseFormV2.css" />
-  <link rel="stylesheet" href="./AdminRegistrationsV2.css" />
-  <link rel="stylesheet" href="./AdminStudentsV2.css?v=3" />
-  <link rel="stylesheet" href="./AdminTrainersV2.css" />
+  <link rel="stylesheet" href="./AdminRegistrationsV2.css?v=r2" />
+  <link rel="stylesheet" href="./AdminStudentsV2.css?v=3-r2" />
+  <link rel="stylesheet" href="./AdminTrainersV2.css?v=r2" />
   <link rel="stylesheet" href="./AdminPdfExport.css" />
-  <link rel="stylesheet" href="./TrainerFormV2.css" />
-  <link rel="stylesheet" href="./AdminReportsV2.css?v=5" />
-  <link rel="stylesheet" href="./AdminBalanceV1.css" />
-  <link rel="stylesheet" href="./AdminGradesV2.css" />
-  <link rel="stylesheet" href="./AdminAnnouncementsV2.css" />
-  <link rel="stylesheet" href="./AdminCertificatesV2.css" />
-  <link rel="stylesheet" href="./AdminMessagesV2.css" />
+  <link rel="stylesheet" href="./TrainerFormV2.css?v=r2" />
+  <link rel="stylesheet" href="./AdminReportsV2.css?v=5-r2" />
+  <link rel="stylesheet" href="./AdminBalanceV1.css?v=r2" />
+  <link rel="stylesheet" href="./AdminGradesV2.css?v=r2" />
+  <link rel="stylesheet" href="./AdminAnnouncementsV2.css?v=r2" />
+  <link rel="stylesheet" href="./AdminCertificatesV2.css?v=r2" />
+  <link rel="stylesheet" href="./AdminMessagesV2.css?v=r2" />
   <link rel="stylesheet" href="./AdminSettingsV2.css" />
-  <link rel="stylesheet" href="./CourseContentV1.css" />
-  <link rel="stylesheet" href="./ghz-mobile.css" />
+  <link rel="stylesheet" href="./CourseContentV1.css?v=r2" />
+  <link rel="stylesheet" href="./ghz-mobile.css?v=r2" />
 </head>
 <body class="admin-portal portal-admin">
   <div class="portal">
@@ -143,36 +143,36 @@
   <div id="courseFormV2Host"></div>
   <div id="trainerFormV2Host"></div>
   <script type="module">
-    import { ask, askText } from "./dialogs.js";
-    import { protect } from "./auth-guard.js?v=auth10";
+    import { ask, askText } from "./dialogs.js?v=r2";
+    import { protect } from "./auth-guard.js?v=auth10-r2";
     import { bootPortalSpa } from "./portal-spa.js";
     bootPortalSpa();
     import { bootNotify } from "./portal-notify.js";
     import { bootPageMotion } from "./PageTransition.js";
     import { bootPageShell } from "./PageShell.js";
-    import { bootPortalShell } from "./PortalShell.js";
+    import { bootPortalShell } from "./PortalShell.js?v=r2";
     import { swapLoadingText } from "./WaveLoader.js";
     import { auth, db, firebaseConfig } from "./firebase-config.js?v=auth10";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut as so } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, deleteField, writeBatch, query, where, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { backfillMissingIds, adminChangeStudentId } from "./studentId.js";
-    import { confirmComplete, confirmReopen } from "./admin-complete-course.js";
-    import { deleteCourseIfEmpty } from "./admin-delete-course.js";
+    import { confirmComplete, confirmReopen } from "./admin-complete-course.js?v=r2";
+    import { deleteCourseIfEmpty } from "./admin-delete-course.js?v=r2";
     import { openGradeDistribution } from "./admin-grade-distribution.js";
     import { bootAdminDashboardV2 } from "./AdminDashboardV2.js?v=opt2";
-    import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js";
+    import { courseStatusLabel, statusChipShort } from "./courseStatusLabel.js?v=r2";
     import { showConfirmDialog } from "./ConfirmDialog.js";
     const LA = (p) => import(p);
-    const renderAdminCoursesV2 = async (host, opts) => (await LA("./AdminCoursesV2.js?v=opt2")).renderAdminCoursesV2(host, opts);
-    const renderCourseContentV1 = async (a) => (await LA("./CourseContentV1.js?v=docx2")).renderCourseContentV1(a);
-    const renderCourseRosterV1 = async (a) => (await LA("./CourseRosterV1.js?v=2")).renderCourseRosterV1(a);
-    const bootCourseFormV2 = async (host, opts) => (await LA("./CourseFormV2.js?v=opt3")).bootCourseFormV2(host, opts || {});
-    const unmountCourseFormV2 = async () => { try { (await LA("./CourseFormV2.js?v=opt3")).unmountCourseFormV2(); } catch (_) {} };
+    const renderAdminCoursesV2 = async (host, opts) => (await LA("./AdminCoursesV2.js?v=opt2-r2")).renderAdminCoursesV2(host, opts);
+    const renderCourseContentV1 = async (a) => (await LA("./CourseContentV1.js?v=docx2-r2")).renderCourseContentV1(a);
+    const renderCourseRosterV1 = async (a) => (await LA("./CourseRosterV1.js?v=2-r2")).renderCourseRosterV1(a);
+    const bootCourseFormV2 = async (host, opts) => (await LA("./CourseFormV2.js?v=opt3-r2")).bootCourseFormV2(host, opts || {});
+    const unmountCourseFormV2 = async () => { try { (await LA("./CourseFormV2.js?v=opt3-r2")).unmountCourseFormV2(); } catch (_) {} };
     const bootTrainerFormV2 = async (a) => (await LA("./TrainerFormV2.js?v=opt2")).bootTrainerFormV2(a);
     const unmountTrainerFormV2 = async () => { try { (await LA("./TrainerFormV2.js?v=opt2")).unmountTrainerFormV2(); } catch (_) {} };
     const renderAdminRegistrationsV2 = async (host, opts) => (await LA("./AdminRegistrationsV2.js?v=opt7")).renderAdminRegistrationsV2(host, opts);
-    const renderAdminStudentsV2 = async (host, opts) => (await LA("./AdminStudentsV2.js?v=opt2")).renderAdminStudentsV2(host, opts);
+    const renderAdminStudentsV2 = async (host, opts) => (await LA("./AdminStudentsV2.js?v=opt2-r2")).renderAdminStudentsV2(host, opts);
     const renderAdminTrainersV2 = async (host, opts) => (await LA("./AdminTrainersV2.js?v=act1")).renderAdminTrainersV2(host, opts);
     const loadTrainerExtras = async (a) => (await LA("./AdminTrainersV2.js?v=opt2")).loadTrainerExtras(a);
     const mountPdfButton = async (a) => (await LA("./AdminPdfExport.js")).mountPdfButton(a);
@@ -180,8 +180,8 @@
     const renderAdminReportsV2 = async (a) => (await LA("./AdminReportsV2.js?v=opt2")).renderAdminReportsV2(a);
     const renderAdminBalanceV1 = async (a) => (await LA("./AdminBalanceV1.js?v=opt2")).renderAdminBalanceV1(a);
     const renderAdminGradesV2 = async (a) => (await LA("./AdminGradesV2.js?v=opt2")).renderAdminGradesV2(a);
-    const renderAdminAnnouncementsV2 = async (a) => (await LA("./AdminAnnouncementsV2.js?v=opt2")).renderAdminAnnouncementsV2(a);
-    const renderAdminCertificatesV2 = async (a) => (await LA("./AdminCertificatesV2.js?v=opt2")).renderAdminCertificatesV2(a);
+    const renderAdminAnnouncementsV2 = async (a) => (await LA("./AdminAnnouncementsV2.js?v=opt2-r2")).renderAdminAnnouncementsV2(a);
+    const renderAdminCertificatesV2 = async (a) => (await LA("./AdminCertificatesV2.js?v=opt2-r2")).renderAdminCertificatesV2(a);
     const renderAdminMessagesV2 = async (a) => (await LA("./AdminMessagesV2.js?v=opt2")).renderAdminMessagesV2(a);
     const renderAdminSettingsV2 = async (a) => (await LA("./AdminSettingsV2.js?v=opt9")).renderAdminSettingsV2(a);
     const syncTrainerNamesOnce = async (a) => (await LA("./trainerNamesSync.js")).syncTrainerNamesOnce(a);
@@ -189,7 +189,7 @@
     protect("admin").then(({ user }) => {
       import("./lastActive.js").then((m) => { try { m.startLastActiveHeartbeat(user?.uid); } catch (e) { console.error("lastActiveAt", e); } }).catch((e) => console.error(e));
       try { bootNotify({ role: "admin", uid: user?.uid }); } catch (e) { console.error("bootNotify", e?.code || e?.message || e); }
-      import("./notify.js").then((m) => m.publishAdminList()).catch(() => {});
+      import("./notify.js?v=r2").then((m) => m.publishAdminList()).catch(() => {});
       import("./announcementReads.js").then((m) => { try { m.loadAnnouncementReads(user?.uid); } catch (e) { console.error("announcementReads", e?.code || e?.message || e); } }).catch((e) => console.error("announcementReads", e?.code || e?.message || e));
       window.__ghzAdminUid = user?.uid || "admin";
       setTimeout(() => { try { syncTrainerNamesOnce(toast).catch((e) => console.error(e?.code || e?.message || e)); } catch (e) { console.error(e); } }, 400);
@@ -1075,7 +1075,7 @@
         batch.update(doc(db,"registrations", r.id), { status:"enrolled", confirmedBy: auth.currentUser.uid, confirmedAt: serverTimestamp(), receiptNo });
         batch.set(doc(db,"enrollments", enId(r)), { uid:r.uid, courseId:r.courseId, studentName:r.studentName||"", studentEmail:r.studentEmail||"", studentId:r.studentId||"", enrolledAt: serverTimestamp() });
         await batch.commit();
-        import("./notify.js").then((m) => m.notifyEnrolled({ uid: r.uid, courseId: r.courseId, courseTitle: r.courseTitle || "" })).catch(() => {});
+        import("./notify.js?v=r2").then((m) => m.notifyEnrolled({ uid: r.uid, courseId: r.courseId, courseTitle: r.courseTitle || "" })).catch(() => {});
         toast("Enrollment confirmed."); await load();
       } catch(e){ toast("Could not confirm. "+(e.code||e.message||""),"err"); }
     };
@@ -1102,7 +1102,7 @@
         batch.update(doc(db,"registrations", r.id), { status:"rejected", rejectNote: note || "", cancelledBy: auth.currentUser.uid, cancelledAt: serverTimestamp() });
         batch.delete(doc(db,"enrollments", enId(r)));
         await batch.commit();
-        import("./notify.js").then((m) => m.notifyRegistrationRejected({ regId: r.id, uid: r.uid, courseId: r.courseId, courseTitle: r.courseTitle || "", note })).catch(() => {});
+        import("./notify.js?v=r2").then((m) => m.notifyRegistrationRejected({ regId: r.id, uid: r.uid, courseId: r.courseId, courseTitle: r.courseTitle || "", note })).catch(() => {});
         toast("Rejected."); await load();
       } catch(e){ toast("Could not reject. "+(e.code||e.message||""),"err"); }
     };

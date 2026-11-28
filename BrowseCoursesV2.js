@@ -1,8 +1,8 @@
 import { formatDuration, formatSchedule } from "./DeliveryDays.js";
 import { formatBeirutTimeLine, timeInfoButton, bindTimePopovers } from "./courseTimeFacts.js";
 import { formatCourseDate } from "./courseDates.js";
-import { coverMarkup, hydrateCovers } from "./coverFor.js?v=stu11";
-import { courseStatusLabel, statusChipKind, canRegisterForCourse } from "./courseStatusLabel.js";
+import { coverMarkup, hydrateCovers } from "./coverFor.js?v=stu11-r2";
+import { courseStatusLabel, statusChipKind, canRegisterForCourse } from "./courseStatusLabel.js?v=r2";
 import { icon } from "./ghz-icons.js";
 
 const asArray = (x) => Array.isArray(x) ? x : [];

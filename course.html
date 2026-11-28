@@ -9,12 +9,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./portal.css" />
-  <link rel="stylesheet" href="./DeliveryDays.css" />
-  <link rel="stylesheet" href="./CourseCard.css" />
+  <link rel="stylesheet" href="./portal.css?v=r2" />
+  <link rel="stylesheet" href="./DeliveryDays.css?v=r2" />
+  <link rel="stylesheet" href="./CourseCard.css?v=r2" />
   <link rel="stylesheet" href="./ghz-responsive.css" />
   <link rel="stylesheet" href="./public-header.css" />
-  <link rel="stylesheet" href="./ghz-mobile.css" />
+  <link rel="stylesheet" href="./ghz-mobile.css?v=r2" />
   <style id="page-course">
     body.page-course { margin: 0; padding-top: 0 !important; background: #f4f7fb; font-family: "IBM Plex Sans", sans-serif; color: #0F2747; }
     body.page-course nav#siteNav, body.page-course nav#siteNav.scrolled {
@@ -99,15 +99,15 @@
   </nav>
   <main id="box"><div class="cd-state cd-card"><p>Loading course…</p></div></main>
   <script type="module">
-    import { ask } from "./dialogs.js";
+    import { ask } from "./dialogs.js?v=r2";
     import { auth, db } from "./firebase-config.js?v=auth10";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { isPublicCourse, unavailableHtml } from "./public-course.js";
     import { deliveryDaysHtml } from "./DeliveryDays.js";
     import { startsEndsLine } from "./courseDates.js";
-    import { canRegisterForCourse, courseStatusLabel } from "./courseStatusLabel.js";
-    import { coverMarkup, hydrateCovers } from "./coverFor.js";
+    import { canRegisterForCourse, courseStatusLabel } from "./courseStatusLabel.js?v=r2";
+    import { coverMarkup, hydrateCovers } from "./coverFor.js?v=r2";
     const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
     const para = (v) => esc(v).replace(/\n/g, "<br>");
     const id = new URLSearchParams(location.search).get("id");
@@ -189,7 +189,7 @@
                 btn.disabled = true; btn.textContent = "Registering…";
                 try {
                   await updateDoc(doc(db, "registrations", rid), { status: "pending_payment", createdAt: serverTimestamp() });
-                  await import("./notify.js").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: id, courseTitle: c.title, studentName: user.displayName || "" }))).catch(() => {});
+                  await import("./notify.js?v=r2").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: id, courseTitle: c.title, studentName: user.displayName || "" }))).catch(() => {});
                   location.href = "./student.html#regs";
                 } catch (e) {
                   document.getElementById("regMsg").textContent = "Could not register. " + (e.code||"") + " " + (e.message||"");
@@ -215,7 +215,7 @@
                 courseId: id, courseTitle: c.title, amount: Number.isFinite(amount) ? amount : 0, currency: c.currency||"USD",
                 status: "pending_payment", createdAt: serverTimestamp()
               });
-              await import("./notify.js").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: id, courseTitle: c.title, studentName: name }))).catch(() => {});
+              await import("./notify.js?v=r2").then((m) => m.settle(m.notifyRegistrationReceived({ regId: rid, courseId: id, courseTitle: c.title, studentName: name }))).catch(() => {});
               location.href = "./student.html#regs";
             } catch (e) {
               document.getElementById("regMsg").textContent = "Could not register. " + (e.code||"") + " " + (e.message||"");

@@ -228,7 +228,7 @@ export function protect(requiredRole) {
           writeNameCache(next);
           applyDisplayName(next);
           try {
-            import("./student-dash-data.js?v=stu11").then((m) => m.applyLiveProfile?.(next)).catch(() => {});
+            import("./student-dash-data.js?v=stu11-r2").then((m) => m.applyLiveProfile?.(next)).catch(() => {});
           } catch (_) {}
         });
       } catch (_) {}

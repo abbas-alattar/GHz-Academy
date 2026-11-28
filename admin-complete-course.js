@@ -1,4 +1,4 @@
-import { ask } from "./dialogs.js";
+import { ask } from "./dialogs.js?v=r2";
 import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp, deleteField, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { isSessionPastWithoutAttendance, isSessionUpcoming, needsManualQuizGrade } from "./sessionStatus.js";

@@ -1,5 +1,5 @@
-import { notifyQuizGraded, notifyQuizPosted } from "./notify.js";
-import { friendlyError } from "./friendlyError.js";
+import { notifyQuizGraded, notifyQuizPosted } from "./notify.js?v=r2";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { createElement as e, useEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
@@ -9,7 +9,7 @@ import { getTrainerStore, loadTrainerStore, refreshTrainerStore, subscribeTraine
 import { isCourseLocked } from "./course-lock.js";
 import { showConfirmDialog } from "./ConfirmDialog.js";
 import { exportAdminPdf } from "./AdminPdfExport.js";
-import { CourseSelect, pickCreateCourseId, StatusBadge } from "./TrainerHomeworkV2.js";
+import { CourseSelect, pickCreateCourseId, StatusBadge } from "./TrainerHomeworkV2.js?v=r2";
 import { RowMenu } from "./TrainerRowMenu.js";
 
 const QZ_KEY = "ghz-trainer-qz-course";

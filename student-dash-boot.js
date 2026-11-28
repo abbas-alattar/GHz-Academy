@@ -1,4 +1,4 @@
-import { friendlyError } from "./friendlyError.js";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { bootUniDash } from "./student-uni-dash.js";
 import { bootDashboardV3 } from "./DashboardV3.js?v=stu9";
 

@@ -1,4 +1,4 @@
-import { protect } from "./auth-guard.js?v=auth10";
+import { protect } from "./auth-guard.js?v=auth10-r2";
 import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { isCourseLocked, CompletedBanner } from "./course-lock.js";

@@ -92,26 +92,26 @@ export function bootTrainerShellV2({ uid, name } = {}) {
     if (tm) tm.textContent = label;
     const cid = info.courseId || info.params.get("course") || "";
     if (nameV === "courses") {
-      runSection(document.getElementById("tr2CoursesRoot"), () => import("./TrainerCoursesV2.js").then((m) => () => m.renderTrainerCoursesV2(document.getElementById("tr2CoursesRoot"), { uid, go, name })));
+      runSection(document.getElementById("tr2CoursesRoot"), () => import("./TrainerCoursesV2.js?v=r2").then((m) => () => m.renderTrainerCoursesV2(document.getElementById("tr2CoursesRoot"), { uid, go, name })));
     }
     if (nameV === "coursecontent" && cid) {
       const host = document.getElementById("cc1Root");
-      runSection(host, () => import("./CourseContentV1.js?v=docx2").then((m) => () => { m.renderCourseContentV1({ host, loading: true }); m.renderCourseContentV1({ host, courseId: cid, role: "trainer", uid, name }); }));
+      runSection(host, () => import("./CourseContentV1.js?v=docx2-r2").then((m) => () => { m.renderCourseContentV1({ host, loading: true }); m.renderCourseContentV1({ host, courseId: cid, role: "trainer", uid, name }); }));
     }
     if (nameV === "roster" && cid) {
       const host = document.getElementById("cr1Root");
-      runSection(host, () => import("./CourseRosterV1.js?v=2").then((m) => () => { m.renderCourseRosterV1({ host, loading: true }); m.renderCourseRosterV1({ host, courseId: cid, role: "trainer", uid, backHref: "#courses" }); }));
+      runSection(host, () => import("./CourseRosterV1.js?v=2-r2").then((m) => () => { m.renderCourseRosterV1({ host, loading: true }); m.renderCourseRosterV1({ host, courseId: cid, role: "trainer", uid, backHref: "#courses" }); }));
     }
-    if (nameV === "homework") runSection(document.getElementById("tr2HwRoot"), () => import("./TrainerHomeworkV2.js").then((m) => () => m.renderTrainerHomeworkV2(document.getElementById("tr2HwRoot"), { uid, go, assignmentId: info.assignmentId, courseId: cid })));
-    if (nameV === "hwavg") runSection(document.getElementById("tr2HwAvgRoot"), () => import("./HomeworkAveragesV1.js").then((m) => () => m.renderHomeworkAveragesV1(document.getElementById("tr2HwAvgRoot"), { uid, go, courseId: info.courseId || "", courses: getTrainerStore()?.courses || [] })));
-    if (nameV === "quizzes") runSection(document.getElementById("tr2QuizRoot"), () => import("./TrainerQuizzesV2.js").then((m) => () => m.renderTrainerQuizzesV2(document.getElementById("tr2QuizRoot"), { uid, go, quizId: info.quizId, courseId: cid })));
-    if (nameV === "qzavg") runSection(document.getElementById("tr2QzAvgRoot"), () => import("./QuizAveragesV1.js").then((m) => () => m.renderQuizAveragesV1(document.getElementById("tr2QzAvgRoot"), { uid, go, courseId: info.courseId || "", courses: getTrainerStore()?.courses || [] })));
-    if (nameV === "grades") runSection(document.getElementById("tr2GradesRoot"), () => import("./TrainerGradesV2.js?v=proj3").then((m) => () => m.renderTrainerGradesV2(document.getElementById("tr2GradesRoot"), { uid, go, courseId: info.courseId || "", listCourse: cid })));
-    if (nameV === "attendance") runSection(document.getElementById("tr2AttRoot"), () => import("./TrainerAttendanceV2.js").then((m) => () => m.renderTrainerAttendanceV2(document.getElementById("tr2AttRoot"), { uid, go, courseId: cid, sessionId: info.sessionId || "" })));
-    if (nameV === "announcements") runSection(document.getElementById("tr2AnnRoot"), () => import("./TrainerSectionsV2.js").then((m) => () => m.renderTrainerAnnouncementsSection(document.getElementById("tr2AnnRoot"), { uid, name })));
+    if (nameV === "homework") runSection(document.getElementById("tr2HwRoot"), () => import("./TrainerHomeworkV2.js?v=r2").then((m) => () => m.renderTrainerHomeworkV2(document.getElementById("tr2HwRoot"), { uid, go, assignmentId: info.assignmentId, courseId: cid })));
+    if (nameV === "hwavg") runSection(document.getElementById("tr2HwAvgRoot"), () => import("./HomeworkAveragesV1.js?v=r2").then((m) => () => m.renderHomeworkAveragesV1(document.getElementById("tr2HwAvgRoot"), { uid, go, courseId: info.courseId || "", courses: getTrainerStore()?.courses || [] })));
+    if (nameV === "quizzes") runSection(document.getElementById("tr2QuizRoot"), () => import("./TrainerQuizzesV2.js?v=r2").then((m) => () => m.renderTrainerQuizzesV2(document.getElementById("tr2QuizRoot"), { uid, go, quizId: info.quizId, courseId: cid })));
+    if (nameV === "qzavg") runSection(document.getElementById("tr2QzAvgRoot"), () => import("./QuizAveragesV1.js?v=r2").then((m) => () => m.renderQuizAveragesV1(document.getElementById("tr2QzAvgRoot"), { uid, go, courseId: info.courseId || "", courses: getTrainerStore()?.courses || [] })));
+    if (nameV === "grades") runSection(document.getElementById("tr2GradesRoot"), () => import("./TrainerGradesV2.js?v=proj3-r2").then((m) => () => m.renderTrainerGradesV2(document.getElementById("tr2GradesRoot"), { uid, go, courseId: info.courseId || "", listCourse: cid })));
+    if (nameV === "attendance") runSection(document.getElementById("tr2AttRoot"), () => import("./TrainerAttendanceV2.js?v=r2").then((m) => () => m.renderTrainerAttendanceV2(document.getElementById("tr2AttRoot"), { uid, go, courseId: cid, sessionId: info.sessionId || "" })));
+    if (nameV === "announcements") runSection(document.getElementById("tr2AnnRoot"), () => import("./TrainerSectionsV2.js?v=r2").then((m) => () => m.renderTrainerAnnouncementsSection(document.getElementById("tr2AnnRoot"), { uid, name })));
     if (nameV === "profile") {
       runSection(document.getElementById("tr2ProfileRoot"), () => Promise.all([
-        import("./ProfileV2.js"),
+        import("./ProfileV2.js?v=r2"),
         import("./firebase-config.js?v=auth10"),
         import("https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js")
       ]).then(([m, fb, fs]) => () => m.renderProfileV2({
@@ -154,7 +154,7 @@ export function bootTrainerShellV2({ uid, name } = {}) {
   });
 
   loadTrainerStore(uid);
-  import("./TrainerResultBox.js").then((m) => m.bootTrainerResultBoxes({ uid, name, go })).catch(() => {});
+  import("./TrainerResultBox.js?v=r2").then((m) => m.bootTrainerResultBoxes({ uid, name, go })).catch(() => {});
   const pack = getTrainerStore();
   try {
     window.__ghzDash = { courseList: pack?.courses || [], assignments: pack?.assignments || [], quizzes: pack?.quizzes || [], announcements: pack?.announcements || [] };

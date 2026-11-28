@@ -1,5 +1,5 @@
 import { h, create } from "./nv2-h.js";
-import { toneFor } from "./NotificationPanel.js";
+import { toneFor } from "./NotificationPanel.js?v=r2";
 
 function shownSet() {
   try { return new Set(JSON.parse(sessionStorage.getItem("ghz-toast-shown") || "[]")); } catch { return new Set(); }

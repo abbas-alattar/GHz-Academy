@@ -2,7 +2,7 @@ import { createElement as e, useEffect, useMemo, useRef, useState, memo, Compone
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { getStudentStore, onDashData, loadStudentDash, asArray } from "./student-dash-data.js?v=stu11";
+import { getStudentStore, onDashData, loadStudentDash, asArray } from "./student-dash-data.js?v=stu11-r2";
 import { sessionStatus } from "./sessionStatus.js";
 
 const roots = new WeakMap();

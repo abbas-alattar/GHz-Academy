@@ -1,6 +1,6 @@
 import { createElement as e, useEffect, useMemo, useRef, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { getStudentStore, onDashData } from "./student-dash-data.js?v=stu11";
+import { getStudentStore, onDashData } from "./student-dash-data.js?v=stu11-r2";
 import { loadAnnouncementReads, markAnnouncementRead, markAllAnnouncementsRead, isRead, unreadCount, onAnnouncementReads } from "./announcementReads.js";
 
 const roots = new WeakMap();

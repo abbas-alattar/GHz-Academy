@@ -88,7 +88,7 @@ export async function bootNotify({ role, uid }) {
   if (!host.querySelector(".notify-btn, .nv2-bell")) fallbackBell(role, uid, host);
   if (window.__ghzNotifyV2) return;
   try {
-    const { mountNotificationsV2 } = await import("./NotificationsV2.js");
+    const { mountNotificationsV2 } = await import("./NotificationsV2.js?v=r2");
     const ok = mountNotificationsV2({ role, uid, host });
     if (ok) { window.__ghzNotifyV2 = true; return; }
   } catch (e) { console.error("NotificationsV2", e); }

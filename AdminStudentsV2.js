@@ -1,4 +1,4 @@
-import { tell } from "./dialogs.js";
+import { tell } from "./dialogs.js?v=r2";
 import { createElement as e, useEffect, useMemo, useState, Component } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { db } from "./firebase-config.js?v=auth10";
@@ -7,7 +7,7 @@ import { AdminPdfButton, fmtPdfDate, exportStudentProfilePdf } from "./AdminPdfE
 import { loadGradePack } from "./AdminGradesV2.js";
 import { storedCourseResult, formatGrade } from "./gradeCalc.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
-import { courseStatusLabel } from "./courseStatusLabel.js";
+import { courseStatusLabel } from "./courseStatusLabel.js?v=r2";
 
 function showSecErr(host, err, retry) {
   if (!host) return;

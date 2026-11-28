@@ -3,7 +3,7 @@ import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { sortedCountries, detectCountry, flagUrl, digitsOnly, buildPhone, validLocal } from "./phoneCountries.js";
 import { db } from "./firebase-config.js?v=auth10";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { courseStatusLabel } from "./courseStatusLabel.js";
+import { courseStatusLabel } from "./courseStatusLabel.js?v=r2";
 
 class Boundary extends Component {
   constructor(p) { super(p); this.state = { err: null }; }

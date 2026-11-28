@@ -1,6 +1,6 @@
 import { formatSchedule } from "./DeliveryDays.js";
-import { canRegisterForCourse } from "./courseStatusLabel.js";
-import { coverMarkup, hydrateCovers } from "./coverFor.js?v=stu11";
+import { canRegisterForCourse } from "./courseStatusLabel.js?v=r2";
+import { coverMarkup, hydrateCovers } from "./coverFor.js?v=stu11-r2";
 
 const esc = (s) => String(s ?? "").replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/"/g,"&"+"quot;");
 

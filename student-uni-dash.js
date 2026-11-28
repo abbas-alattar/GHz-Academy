@@ -1,4 +1,4 @@
-import { bound, loadStudentDash } from "./student-dash-data.js?v=stu11";
+import { bound, loadStudentDash } from "./student-dash-data.js?v=stu11-r2";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { gradeCalc, formatGrade } from "./gradeCalc.js";

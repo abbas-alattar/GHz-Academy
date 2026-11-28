@@ -1,4 +1,4 @@
-import { bound } from "./student-dash-data.js?v=stu11";
+import { bound } from "./student-dash-data.js?v=stu11-r2";
 
 function badge(due) {
   if (!due) return { cls: "sdash-later", text: "—" };

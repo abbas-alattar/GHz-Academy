@@ -1,6 +1,6 @@
 import { beginNav, endNav, swapLoadingText } from "./NavLoader.js";
 import { idlePrefetch, hoverPrefetch } from "./usePrefetch.js";
-import { loadStudentDash } from "./student-dash-data.js?v=stu11";
+import { loadStudentDash } from "./student-dash-data.js?v=stu11-r2";
 
 function roleOf() {
   const p = location.pathname || "";
@@ -46,8 +46,8 @@ export function bootPageShell(root) {
     swapLoadingText();
     const role = roleOf();
     hoverPrefetch(nav, (href) => {
-      if (/schedule/i.test(href)) import("./StudentScheduleV2.js").catch(() => {});
-      if (/homework/i.test(href)) import("./HomeworkV2.js").catch(() => {});
+      if (/schedule/i.test(href)) import("./StudentScheduleV2.js?v=r2").catch(() => {});
+      if (/homework/i.test(href)) import("./HomeworkV2.js?v=r2").catch(() => {});
       if (/grade/i.test(href)) import("./StudentGradesV3.js").catch(() => {});
     });
     idlePrefetch(role);

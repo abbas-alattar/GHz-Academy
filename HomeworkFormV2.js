@@ -1,4 +1,4 @@
-import { notifyHomeworkPosted } from "./notify.js";
+import { notifyHomeworkPosted } from "./notify.js?v=r2";
 import { createElement as e, useEffect, useRef, useState } from "https://esm.sh/react@18.3.1";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
 import { db } from "./firebase-config.js?v=auth10";

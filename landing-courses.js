@@ -1,8 +1,8 @@
 import { auth, db } from "./firebase-config.js?v=auth10";
 import { collection, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { renderBrowseCoursesV2 } from "./BrowseCoursesV2.js";
-import { stripCoverFields, hydrateCovers } from "./coverFor.js?v=stu11";
+import { renderBrowseCoursesV2 } from "./BrowseCoursesV2.js?v=r2";
+import { stripCoverFields, hydrateCovers } from "./coverFor.js?v=stu11-r2";
 import { publicCardActions, moneyLabel } from "./courseCardActions.js";
 
 const PUBLIC = ["Open", "Coming soon", "Closed"];

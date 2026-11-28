@@ -1,5 +1,5 @@
-import { bootStudentNav } from "./student-nav.js";
-import { protect } from "./auth-guard.js?v=auth10";
+import { bootStudentNav } from "./student-nav.js?v=r2";
+import { protect } from "./auth-guard.js?v=auth10-r2";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, query, where, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { parseScore, computeAverage, computeStatus, gradeCalc, formatGrade, isLockedAuto } from "./gradeCalc.js";

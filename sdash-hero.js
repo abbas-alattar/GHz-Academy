@@ -1,4 +1,4 @@
-import { bound } from "./student-dash-data.js?v=stu11";
+import { bound } from "./student-dash-data.js?v=stu11-r2";
 import { getFirstName } from "./displayName.js";
 
 function greeting(d) {
@@ -61,6 +61,6 @@ export function mountHero(el) {
     const lab = root.querySelector("#sdashUpdated");
     const t = data.loadedAt ? new Date(data.loadedAt) : new Date();
     lab.textContent = "Last updated " + t.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    root.querySelector("#sdashRefresh").onclick = () => import("./student-dash-data.js?v=stu11").then((m) => m.loadStudentDash(true));
+    root.querySelector("#sdashRefresh").onclick = () => import("./student-dash-data.js?v=stu11-r2").then((m) => m.loadStudentDash(true));
   });
 }

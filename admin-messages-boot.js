@@ -1,5 +1,5 @@
-import { protect } from "./auth-guard.js?v=auth10";
-import { bootAdminSide } from "./admin-side.js";
+import { protect } from "./auth-guard.js?v=auth10-r2";
+import { bootAdminSide } from "./admin-side.js?v=r2";
 
 bootAdminSide("msg");
 protect("admin").catch((e) => console.error("protect", e));
@@ -11,7 +11,7 @@ const classicWanted = new URLSearchParams(location.search).has("classic");
 if (classicWanted) {
   if (v2) v2.hidden = true;
   if (root) root.classList.remove("hidden");
-  import("./admin-messages.js").catch((e) => {
+  import("./admin-messages.js?v=r2").catch((e) => {
     console.error("classic messages", e);
     if (root) root.innerHTML = `<p class="banner">Classic view could not load<br>${e && (e.message || e)}</p>`;
   });

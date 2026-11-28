@@ -1,5 +1,5 @@
-import { friendlyError } from "./friendlyError.js";
-import { bound } from "./student-dash-data.js?v=stu11";
+import { friendlyError } from "./friendlyError.js?v=r2";
+import { bound } from "./student-dash-data.js?v=stu11-r2";
 
 function animate(el, target) {
   if (target === "—" || target == null) { el.textContent = "—"; return; }

@@ -6,10 +6,10 @@ import { formatCourseDate, startsEndsLine } from "./courseDates.js";
 import { formatDuration, formatPrice, formatSchedule, parseCourseDays, sessionsPerWeekWords } from "./DeliveryDays.js";
 import { formatBeirutTimeLine, timeInfoButton, bindTimePopovers } from "./courseTimeFacts.js";
 import { courseCardHtml, coverHtml } from "./CourseCard.js";
-import { stripCoverFields, hydrateCovers } from "./coverFor.js?v=stu11";
-import { renderBrowseCoursesV2 } from "./BrowseCoursesV2.js";
+import { stripCoverFields, hydrateCovers } from "./coverFor.js?v=stu11-r2";
+import { renderBrowseCoursesV2 } from "./BrowseCoursesV2.js?v=r2";
 import { publicCardActions, moneyLabel, getCourseAction, courseSlug } from "./courseCardActions.js";
-import { statusLabel, statusChipKind, canRegisterForCourse } from "./courseStatusLabel.js";
+import { statusLabel, statusChipKind, canRegisterForCourse } from "./courseStatusLabel.js?v=r2";
 import { icon } from "./ghz-icons.js";
 
 const PUBLIC = ["Open", "Coming soon", "Closed"];

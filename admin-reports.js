@@ -1,5 +1,5 @@
-import { protect } from "./auth-guard.js?v=auth10";
-import { bootAdminSide } from "./admin-side.js";
+import { protect } from "./auth-guard.js?v=auth10-r2";
+import { bootAdminSide } from "./admin-side.js?v=r2";
 
 bootAdminSide("reports");
 protect("admin").catch((e) => console.error("protect", e));

@@ -1,10 +1,10 @@
-import { friendlyError } from "./friendlyError.js";
+import { friendlyError } from "./friendlyError.js?v=r2";
 import { createElement as e, useEffect, useRef, useState } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createPortal } from "https://esm.sh/react-dom@18.3.1";
 import { db } from "./firebase-config.js?v=auth10";
 import { collection, doc, getDocs, query, serverTimestamp, setDoc, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { statusBadgeHtml } from "./portal-status.js";
+import { statusBadgeHtml } from "./portal-status.js?v=r2";
 
 function fbErr(er) { return friendlyError(er); }
 
@@ -166,7 +166,7 @@ function TakeApp({ quiz, course, uid, studentName, onBack, onSubmitted }) {
         status: "submitted",
         submittedAt: serverTimestamp()
       });
-      import("./notify.js").then((m) => m.notifyQuizSubmitted({ attemptId: id, courseId: quiz.courseId, quizTitle: quiz.title, studentName: studentName || "" })).catch(() => {});
+      import("./notify.js?v=r2").then((m) => m.notifyQuizSubmitted({ attemptId: id, courseId: quiz.courseId, quizTitle: quiz.title, studentName: studentName || "" })).catch(() => {});
       if (tick.current) clearInterval(tick.current);
       setScore(gradeAuto(list, ans));
       setPhase("done");

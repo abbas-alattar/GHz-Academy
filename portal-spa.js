@@ -1,10 +1,10 @@
 const CSS_BY_HREF = [
-  [/admin-reports/, ["./AdminReportsV2.css", "./AdminPdfExport.css"]],
+  [/admin-reports/, ["./AdminReportsV2.css?v=r2", "./AdminPdfExport.css"]],
   [/admin-grades/, ["./AdminPdfExport.css"]],
-  [/admin-announcements/, ["./AdminAnnouncementsV2.css", "./AdminPdfExport.css"]],
-  [/admin-certificates/, ["./AdminCertificatesV2.css", "./AdminPdfExport.css"]],
+  [/admin-announcements/, ["./AdminAnnouncementsV2.css?v=r2", "./AdminPdfExport.css"]],
+  [/admin-certificates/, ["./AdminCertificatesV2.css?v=r2", "./AdminPdfExport.css"]],
   [/admin-messages/, ["./AdminPdfExport.css"]],
-  [/admin\.html/, ["./AdminDashboardV2.css", "./AdminCoursesV2.css", "./CourseFormV2.css", "./AdminRegistrationsV2.css", "./AdminStudentsV2.css", "./AdminTrainersV2.css", "./TrainerFormV2.css", "./AdminPdfExport.css"]]
+  [/admin\.html/, ["./AdminDashboardV2.css?v=r2", "./AdminCoursesV2.css?v=r2", "./CourseFormV2.css", "./AdminRegistrationsV2.css?v=r2", "./AdminStudentsV2.css?v=r2", "./AdminTrainersV2.css?v=r2", "./TrainerFormV2.css?v=r2", "./AdminPdfExport.css"]]
 ];
 
 export function ensureStyles(hrefs) {

@@ -1,7 +1,7 @@
 import { deliveryDaysHtml, formatDuration, formatPrice } from "./DeliveryDays.js";
 import { startsEndsLine } from "./courseDates.js";
-import { statusLabel, statusChipKind, canRegisterForCourse } from "./courseStatusLabel.js";
-import { coverMarkup } from "./coverFor.js?v=stu11";
+import { statusLabel, statusChipKind, canRegisterForCourse } from "./courseStatusLabel.js?v=r2";
+import { coverMarkup } from "./coverFor.js?v=stu11-r2";
 
 export function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (ch) => {
